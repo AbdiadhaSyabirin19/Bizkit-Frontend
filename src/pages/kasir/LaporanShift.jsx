@@ -22,15 +22,37 @@ const formatDuration = (start, end) => {
 const isZeroTime = (t) => !t || t.startsWith('0001')
 
 // Base URL backend — ambil dari env atau fallback ke localhost
-const API_BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080'
+const API_BASE = (import.meta.env.VITE_API_URL || 'https://bizkit-backend.onrender.com/api').replace('/api', '')
 
-// Helper: ubah path relatif server jadi URL lengkap
+// Helper: ubah path relatif server jadi URL lengkap untuk foto
 const getPhotoUrl = (path) => {
   if (!path) return null
   if (path.startsWith('http')) return path       // sudah full URL
-  if (path.startsWith('data:')) return path      // base64
-  return API_BASE + path                         // /uploads/attendance/... → http://localhost:8080/uploads/...
+  if (path.startsWith('data:')) return path       // base64
+  return API_BASE + path                         // Hasilnya: https://bizkit-backend.onrender.com/uploads/...
 }
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
+  }
+)
+
+// Helper: ubah path relatif server jadi URL lengkap
 
 // ── Photo Viewer (fullscreen) ───────────────────────────────────────────────
 function PhotoViewer({ url, label, onClose }) {
