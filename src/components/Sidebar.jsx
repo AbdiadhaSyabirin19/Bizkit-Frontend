@@ -75,22 +75,30 @@ const getActiveMenuLabel = (pathname) => {
 const MenuIcon = ({ label }) => {
   const icons = {
     Penjualan: (
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+      <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7M4 18h3" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 6v0m0 6v0m0 6v0" className="opacity-0" />
+        <circle cx="5" cy="6" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="5" cy="18" r="1.5" fill="currentColor" stroke="none" />
       </svg>
     ),
     Produk: (
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7M4 18h3" />
+        <circle cx="5" cy="6" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="5" cy="12" r="1.5" fill="currentColor" stroke="none" />
+        <circle cx="5" cy="18" r="1.5" fill="currentColor" stroke="none" />
       </svg>
     ),
     Laporan: (
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+      <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3v18h18" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16v-4m4 4V9m4 7v-9m4 9V4" />
       </svg>
     ),
     Pengaturan: (
-      <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
@@ -126,7 +134,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const handleLogout = () => { logout(); navigate('/login') }
   const handleNavClick = () => { if (window.innerWidth < 1024) setIsOpen(false) }
 
-  // Filter visible children berdasarkan permission
   const getVisibleChildren = (children) => {
     return children
       .map(child => {
@@ -147,55 +154,64 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       )}
 
       <aside className={`
-        fixed top-0 left-0 h-full w-48 bg-emerald-800 text-white z-30 flex flex-col
+        fixed top-0 left-0 h-full w-56 bg-[#00a37b] text-white z-30 flex flex-col
         transform transition-transform duration-300 ease-in-out
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:z-auto
       `}>
 
         {/* Logo */}
-        <div className="flex items-center gap-2 px-4 py-4 bg-emerald-900 flex-shrink-0">
-          <div className="w-8 h-8 bg-yellow-400 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-emerald-900 font-bold text-xs">Biz</span>
-          </div>
-          <div>
-            <p className="text-white font-bold text-xs leading-tight">KASIR</p>
-            <p className="text-yellow-400 font-bold text-xs leading-tight">KULINER</p>
+        <div className="flex items-center gap-3 px-6 py-8 flex-shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-white/20 rounded-md flex items-center justify-center p-1.5 backdrop-blur-sm">
+               <svg viewBox="0 0 24 24" className="w-full h-full text-white" fill="currentColor">
+                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+               </svg>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-white text-xl font-medium tracking-tight">KASIR</span>
+              <span className="text-white text-xl font-bold tracking-tight text-white uppercase italic">KULINER</span>
+            </div>
           </div>
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 overflow-y-auto py-2">
+        <nav className="flex-1 overflow-y-auto px-4 py-2 space-y-1">
           {menus.map((menu) => {
             const visibleChildren = getVisibleChildren(menu.children)
-            // Sembunyikan seluruh group jika tidak ada child yang visible
             if (visibleChildren.length === 0) return null
 
             const isMenuOpen = openMenus.includes(menu.label)
+            const isActive = getActiveMenuLabel(location.pathname) === menu.label
 
             return (
               <div key={menu.label}>
                 <button
                   onClick={() => toggleMenu(menu.label)}
-                  className="w-full flex items-center gap-2 px-4 py-2.5 text-emerald-100 hover:bg-emerald-700 transition text-sm font-medium"
+                  className={`
+                    w-full flex items-center gap-4 px-4 py-3.5 transition-all duration-200 rounded-lg group
+                    ${isActive ? 'bg-[#008a68] shadow-sm' : 'hover:bg-[#008a68]/50'}
+                  `}
                 >
                   <MenuIcon label={menu.label} />
-                  <span className="flex-1 text-left text-xs">{menu.label}</span>
+                  <span className={`flex-1 text-left text-lg font-semibold ${isActive ? 'text-white' : 'text-white/90'}`}>
+                    {menu.label}
+                  </span>
                   <svg
-                    className={`w-3 h-3 flex-shrink-0 transition-transform duration-200 ${isMenuOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 flex-shrink-0 transition-transform duration-200 ${isMenuOpen ? 'rotate-90' : ''}`}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
 
-                <div className={`overflow-hidden transition-all duration-200 ${isMenuOpen ? 'max-h-96' : 'max-h-0'}`}>
-                  <div className="bg-emerald-900">
+                <div className={`overflow-hidden transition-all duration-300 ${isMenuOpen ? 'max-h-[500px] opacity-100 mt-1' : 'max-h-0 opacity-0'}`}>
+                  <div className="py-1 ml-4 border-l-2 border-white/20">
                     {visibleChildren.map((child) => {
                       if (child.groupLabel) {
                         return (
-                          <div key={child.groupLabel}>
-                            <p className="px-4 pt-2 pb-1 text-emerald-400 text-xs font-semibold uppercase tracking-wider">
+                          <div key={child.groupLabel} className="mt-2 first:mt-0">
+                            <p className="px-6 py-2 text-white/50 text-xs font-bold uppercase tracking-widest">
                               {child.groupLabel}
                             </p>
                             {child.items.map((item) => (
@@ -204,11 +220,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                                 to={item.path}
                                 onClick={handleNavClick}
                                 className={({ isActive }) =>
-                                  `flex items-center gap-2 pl-6 pr-4 py-2 text-xs transition
-                                  ${isActive ? 'bg-emerald-600 text-white font-medium' : 'text-emerald-200 hover:bg-emerald-700 hover:text-white'}`
+                                  `flex items-center gap-3 pl-6 pr-4 py-2.5 text-sm transition-all
+                                  ${isActive ? 'text-white font-bold' : 'text-white/70 hover:text-white hover:bg-white/5 mx-2 rounded-md'}`
                                 }
                               >
-                                <span className="w-1 h-1 rounded-full bg-current flex-shrink-0"></span>
                                 {item.label}
                               </NavLink>
                             ))}
@@ -222,11 +237,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                           to={child.path}
                           onClick={handleNavClick}
                           className={({ isActive }) =>
-                            `flex items-center gap-2 pl-6 pr-4 py-2 text-xs transition
-                            ${isActive ? 'bg-emerald-600 text-white font-medium' : 'text-emerald-200 hover:bg-emerald-700 hover:text-white'}`
+                            `flex items-center gap-3 pl-6 pr-4 py-2.5 text-sm transition-all
+                            ${isActive ? 'text-white font-bold' : 'text-white/70 hover:text-white hover:bg-white/5 mx-2 rounded-md'}`
                           }
                         >
-                          <span className="w-1 h-1 rounded-full bg-current flex-shrink-0"></span>
                           {child.label}
                         </NavLink>
                       )
@@ -239,24 +253,24 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         </nav>
 
         {/* User info + Logout */}
-        <div className="border-t border-emerald-700 px-4 py-3 bg-emerald-900 flex-shrink-0">
+        <div className="mt-auto border-t border-white/10 px-6 py-6 bg-black/5">
           {user && (
-            <div className="mb-2">
-              <p className="text-white text-xs font-medium truncate">{user.name || user.Name}</p>
-              <p className="text-emerald-400 text-xs truncate">{user.role?.name || user.role?.Name || '-'}</p>
+            <div className="mb-4">
+              <p className="text-white text-sm font-bold truncate">{user.name || user.Name}</p>
+              <p className="text-white/60 text-xs truncate uppercase tracking-wider">{user.role?.name || user.role?.Name || '-'}</p>
             </div>
           )}
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-2 text-emerald-200 hover:text-red-300 transition text-xs"
+            className="w-full flex items-center justify-center gap-2 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white border border-red-500/20 transition-all rounded-lg text-sm font-bold"
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Logout
+            KELUAR
           </button>
         </div>
       </aside>
     </>
   )
-}
+}
