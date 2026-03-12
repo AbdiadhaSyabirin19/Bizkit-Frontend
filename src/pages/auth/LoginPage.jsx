@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import api from '../../api/axios'
@@ -29,6 +29,10 @@ export default function LoginPage() {
       setLoading(false)
     }
   }
+  useEffect(() => {
+    // Ping server saat halaman login dibuka
+    api.get('/ping').catch(() => {}) // silent, tidak perlu handle error
+  }, [])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-orange-100 flex items-center justify-center px-4">
