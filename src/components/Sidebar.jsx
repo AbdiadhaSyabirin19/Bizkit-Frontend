@@ -103,7 +103,6 @@ const MenuIcon = ({ label, size = "w-6 h-6" }) => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
       </svg>
     ),
-    // Submenu Icons
     Cart: (
        <svg className={size} fill="currentColor" viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
     ),
@@ -126,7 +125,7 @@ const MenuIcon = ({ label, size = "w-6 h-6" }) => {
        <svg className={size} fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9-4.03-9-9-9zm0 16c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7zm-3.5-8.5l1.5 1.5 4-4L15.5 9 10 14.5 7 11.5l1.5-1.5z"/></svg>
     ),
     Git: (
-       <svg className={size} fill="currentColor" viewBox="0 0 24 24"><path d="M18.82 15.42L15 11.6V8.4C16.2 7.78 17 6.49 17 5c0-2.21-1.79-4-4-4S9 2.79 9 5c0 1.49.8 2.78 2 3.4v3.2l-3.82 3.82c-.59.59-.59 1.54 0 2.12l.18.18c.59.59 1.54.59 2.12 0l3.52-3.52 3.52 3.52c.59.59 1.54.59 2.12 0l.18-.18c.59-.58.59-1.53 0-2.12zM11 5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
+       <svg className={size} fill="currentColor" viewBox="0 0 24 24"><path d="M18.82 15.42L15 11.6V8.4C16.2 7.78 17 6.49 17 5c0-2.21-1.79-4-4-4S9 2.79 9 5c0 1.49.8 2.78 2 3.4v3.2l-3.82 3.82c-.59.59-.59 1.54 0 2.12l.18.18c.59.59 1.54.59 2.12 0l3.52-3.52 3.52 3.52c.59.59 1.54.59 2.12 0l.18-.18c.59-.58.59-1.53 0-2.12zM11 5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2zM11 5c0-1.1.9-2 2-2s2 .9 2 2-.9 2-2 2-2-.9-2-2z"/></svg>
     ),
     Coin: (
        <svg className={size} fill="currentColor" viewBox="0 0 24 24"><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>
@@ -163,9 +162,7 @@ const MenuIcon = ({ label, size = "w-6 h-6" }) => {
 }
 
 export default function Sidebar({ isOpen, setIsOpen }) {
-  const { user, logout } = useAuth()
   const { canView } = usePermission()
-  const navigate = useNavigate()
   const location = useLocation()
 
   const [openMenus, setOpenMenus] = useState(() => {
@@ -186,7 +183,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     )
   }
 
-  const handleLogout = () => { logout(); navigate('/login') }
   const handleNavClick = () => { if (window.innerWidth < 1024) setIsOpen(false) }
 
   const getVisibleChildren = (children) => {
@@ -211,6 +207,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       <aside className={`
         fixed top-0 left-0 h-full w-60 bg-[#00a37b] text-white z-30 flex flex-col
         transform transition-transform duration-300 ease-in-out
+        border-r border-black/5 shadow-[4px_0_15px_-3px_rgba(0,0,0,0.1)]
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:z-auto
       `}>
@@ -312,25 +309,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             )
           })}
         </nav>
-
-        {/* User info + Logout */}
-        <div className="mt-auto border-t border-white/10 px-6 py-6 bg-black/5">
-          {user && (
-            <div className="mb-4">
-              <p className="text-white text-sm font-bold truncate">{user.name || user.Name}</p>
-              <p className="text-white/60 text-[10px] truncate uppercase tracking-widest">{user.role?.name || user.role?.Name || '-'}</p>
-            </div>
-          )}
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center justify-center gap-2 py-2.5 bg-white/10 hover:bg-red-500 text-white transition-all rounded-lg text-sm font-bold border border-white/10 hover:border-red-500"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            KELUAR
-          </button>
-        </div>
       </aside>
     </>
   )
