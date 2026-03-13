@@ -26,8 +26,11 @@ export default function SalesReportPage() {
   return (
     <Layout title="Riwayat Penjualan">
       <div className="max-w-6xl mx-auto">
-        {/* Title removed, rendered in Navbar instead */}
-        
+        <div className="mb-5">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Riwayat Penjualan</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Rekap data penjualan berdasarkan periode</p>
+        </div>
+
         {/* Filter */}
         <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors duration-200">
           <div className="flex items-end gap-4 flex-wrap">

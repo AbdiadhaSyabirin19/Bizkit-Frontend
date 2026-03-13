@@ -148,6 +148,10 @@ export default function ProductPage() {
   return (
     <Layout title="Produk">
       <div className="max-w-6xl mx-auto">
+        <div className="mb-5">
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Produk</h1>
+          <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola data produk</p>
+        </div>
         <div className="flex justify-between items-center mb-6">
           <input
             type="text"

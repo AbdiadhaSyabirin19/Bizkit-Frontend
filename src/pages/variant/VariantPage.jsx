@@ -45,9 +45,9 @@ export default function VariantPage() {
       key: 'name', label: 'Nama Varian',
       render: (row) => (
         <div>
-          <p className="font-semibold text-gray-800 text-sm">{row.name}</p>
+          <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
           {row.description && (
-            <p className="text-xs text-gray-400 mt-0.5 max-w-xs truncate">{row.description}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 max-w-xs truncate">{row.description}</p>
           )}
         </div>
       )
@@ -66,7 +66,7 @@ export default function VariantPage() {
       key: 'options', label: 'Opsi & Harga',
       render: (row) => {
         const opts = row.options || []
-        if (opts.length === 0) return <span className="text-gray-300 text-xs italic">Belum ada opsi</span>
+        if (opts.length === 0) return <span className="text-gray-400 dark:text-gray-500 text-xs italic">Belum ada opsi</span>
 
         const shown = opts.slice(0, 3)
         const rest = opts.length - 3
@@ -83,12 +83,12 @@ export default function VariantPage() {
                     +Rp {Number(o.additional_price).toLocaleString('id-ID')}
                   </span>
                 ) : (
-                  <span className="text-xs text-gray-300">gratis</span>
+                  <span className="text-xs text-gray-400 dark:text-gray-500">gratis</span>
                 )}
               </div>
             ))}
             {rest > 0 && (
-              <span className="text-xs text-gray-400 italic">+{rest} opsi lainnya</span>
+              <span className="text-xs text-gray-400 dark:text-gray-500 italic">+{rest} opsi lainnya</span>
             )}
           </div>
         )
@@ -111,7 +111,7 @@ export default function VariantPage() {
       render: (row) => (
         <div className="flex gap-1.5">
           <button onClick={() => navigate(`/variants/${getID(row)}`)}
-            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium transition">
+            className="px-3 py-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 rounded-lg text-xs font-medium transition">
             Detail
           </button>
           {can('variants', 'edit') && (
@@ -137,7 +137,7 @@ export default function VariantPage() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">Varian</h1>
-            <p className="text-gray-500 text-sm">Kelola kategori varian produk</p>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola kategori varian produk</p>
           </div>
           {can('variants', 'create') && (
             <button onClick={() => navigate('/variants/add')}
