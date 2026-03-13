@@ -4,13 +4,6 @@ import { usePermission } from '../hooks/usePermission'
 
 const menus = [
   {
-    label: 'Utama',
-    icon: 'Dashboard',
-    children: [
-      { label: 'Dashboard', path: '/dashboard', module: 'dashboard', icon: 'Dashboard' },
-    ]
-  },
-  {
     label: 'Penjualan',
     icon: 'Penjualan',
     children: [
@@ -170,8 +163,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const location = useLocation()
 
   const [openMenus, setOpenMenus] = useState(() => {
-    const activeLabel = getActiveMenuLabel(location.pathname)
-    return activeLabel ? [activeLabel] : []
+    const activeLabel = getActiveMenuLabel(location.pathname) || 'Laporan'
+    return [activeLabel]
   })
 
   useEffect(() => {

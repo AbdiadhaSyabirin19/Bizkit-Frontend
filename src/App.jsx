@@ -99,7 +99,7 @@ const PublicRoute = ({ children }) => {
   if (!token) return children
   return isKasirRole(user)
     ? <Navigate to="/kasir" replace />
-    : <Navigate to="/dashboard" replace />
+    : <Navigate to="/reports/sales" replace />
 }
 
 // Guard untuk halaman public kasir (kasir/login)
@@ -109,7 +109,7 @@ const KasirPublicRoute = ({ children }) => {
   if (!token) return children
   return isKasirRole(user)
     ? <Navigate to="/kasir" replace />
-    : <Navigate to="/dashboard" replace />
+    : <Navigate to="/reports/sales" replace />
 }
 
 // Guard dengan permission check (admin)
@@ -130,7 +130,7 @@ const KasirRoute = ({ children }) => {
   const { token, loading, user } = useAuth()
   if (loading) return <Spinner />
   if (!token) return <Navigate to="/kasir/login" replace />
-  if (!isKasirRole(user)) return <Navigate to="/dashboard" replace />
+  if (!isKasirRole(user)) return <Navigate to="/reports/sales" replace />
   return children
 }
 
@@ -141,7 +141,7 @@ const RootRedirect = () => {
   if (!token) return <Navigate to="/login" replace />
   return isKasirRole(user)
     ? <Navigate to="/kasir" replace />
-    : <Navigate to="/dashboard" replace />
+    : <Navigate to="/reports/sales" replace />
 }
 
 // ── Routes ─────────────────────────────────────────────────────────────────
@@ -204,7 +204,7 @@ function AppRoutes() {
       <Route path="/kasir/riwayat"   element={<KasirRoute><RiwayatTransaksi /></KasirRoute>} />
       <Route path="/kasir/shift"     element={<KasirRoute><LaporanShift /></KasirRoute>} />
 
-      <Route path="*" element={<RootRedirect />} />
+      <Route path="*" element={<Navigate to="/reports/sales" replace />} />
     </Routes>
   )
 }

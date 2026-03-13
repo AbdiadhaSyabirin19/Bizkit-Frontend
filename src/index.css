@@ -3,12 +3,8 @@
 @tailwind utilities;
 
 @layer base {
-  * {
-    @apply transition-colors duration-200;
-  }
-  
   html, body {
-    @apply antialiased scroll-smooth;
+    @apply antialiased scroll-smooth transition-colors duration-300;
   }
 }
 
