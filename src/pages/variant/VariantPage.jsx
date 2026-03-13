@@ -136,7 +136,7 @@ export default function VariantPage() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Varian</h1>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Varian</h1>
             <p className="text-gray-500 text-sm">Kelola kategori varian produk</p>
           </div>
           {can('variants', 'create') && (
@@ -153,7 +153,7 @@ export default function VariantPage() {
         <div className="mb-4">
           <input type="text" placeholder="Cari varian..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            className="w-full max-w-xs px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <Table columns={columns} data={filtered} loading={loading} />

@@ -234,7 +234,7 @@ export default function DailyReportPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Penjualan Harian</h1>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Penjualan Harian</h1>
             <p className="text-gray-500 text-sm">Laporan transaksi per hari</p>
           </div>
           {data && !loading && (
@@ -264,7 +264,7 @@ export default function DailyReportPage() {
         {/* Date Navigator */}
         <div className="bg-white rounded-2xl p-4 shadow-sm mb-5 flex items-center justify-between">
           <button onClick={prevDay} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -272,12 +272,12 @@ export default function DailyReportPage() {
             <input
               type="date" value={date}
               onChange={e => setDate(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+              className="px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             />
             <span className="text-gray-500 text-sm hidden md:block">{formatDate(date)}</span>
           </div>
           <button onClick={nextDay} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -302,7 +302,7 @@ export default function DailyReportPage() {
                     <span className="text-lg">{s.icon}</span>
                   </div>
                   <p className="text-gray-400 text-xs mb-1">{s.label}</p>
-                  <p className="text-lg font-bold text-gray-800">{s.value}</p>
+                  <p className="text-lg font-bold text-gray-800 dark:text-white">{s.value}</p>
                 </div>
               ))}
             </div>
@@ -310,7 +310,7 @@ export default function DailyReportPage() {
             {/* Tabel Transaksi */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-5">
               <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-800">Daftar Transaksi</h2>
+                <h2 className="font-semibold text-gray-800 dark:text-white">Daftar Transaksi</h2>
                 <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
                   {data?.sales?.length || 0} transaksi
                 </span>
@@ -368,7 +368,7 @@ export default function DailyReportPage() {
                       )
                     }) : (
                       <tr>
-                        <td colSpan={9} className="px-4 py-12 text-center text-gray-400">
+                        <td colSpan={9} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500">
                           <p className="text-3xl mb-2">📭</p>
                           <p>Tidak ada transaksi pada tanggal ini</p>
                         </td>
@@ -379,8 +379,8 @@ export default function DailyReportPage() {
                     <tfoot className="bg-gray-50 border-t-2 border-gray-200">
                       <tr>
                         <td colSpan={5} className="px-4 py-3 text-xs font-bold text-gray-600 uppercase">Total</td>
-                        <td className="px-4 py-3 text-xs font-bold text-gray-800">{data?.total_qty || 0}</td>
-                        <td className="px-4 py-3 text-xs font-bold text-gray-600">{formatRp((data?.sales || []).reduce((s, sale) => s + (sale.subtotal || sale.Subtotal || 0), 0))}</td>
+                        <td className="px-4 py-3 text-xs font-bold text-gray-800 dark:text-white">{data?.total_qty || 0}</td>
+                        <td className="px-4 py-3 text-xs font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500">{formatRp((data?.sales || []).reduce((s, sale) => s + (sale.subtotal || sale.Subtotal || 0), 0))}</td>
                         <td className="px-4 py-3 text-xs font-bold text-orange-500">-{formatRp(totalDiskon)}</td>
                         <td className="px-4 py-3 text-sm font-bold text-emerald-600">{formatRp(data?.total_omzet)}</td>
                       </tr>
@@ -394,7 +394,7 @@ export default function DailyReportPage() {
               {/* Metode Pembayaran */}
               <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
-                  <h2 className="font-semibold text-gray-800">Laporan Metode Pembayaran</h2>
+                  <h2 className="font-semibold text-gray-800 dark:text-white">Laporan Metode Pembayaran</h2>
                 </div>
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-100">
@@ -410,8 +410,8 @@ export default function DailyReportPage() {
                         <td className="px-4 py-3">
                           <span className="px-2 py-0.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">{k.method}</span>
                         </td>
-                        <td className="px-4 py-3 text-xs text-gray-600">{k.transaksi}x</td>
-                        <td className="px-4 py-3 text-xs font-semibold text-gray-800">{formatRp(k.masuk)}</td>
+                        <td className="px-4 py-3 text-xs text-gray-600 dark:text-gray-400 dark:text-gray-500">{k.transaksi}x</td>
+                        <td className="px-4 py-3 text-xs font-semibold text-gray-800 dark:text-white">{formatRp(k.masuk)}</td>
                       </tr>
                     )) : (
                       <tr><td colSpan={3} className="px-4 py-6 text-center text-gray-400 text-xs">Tidak ada data</td></tr>
@@ -421,7 +421,7 @@ export default function DailyReportPage() {
                     <tfoot className="bg-gray-50 border-t-2 border-gray-200">
                       <tr>
                         <td className="px-4 py-3 text-xs font-bold text-gray-600 uppercase">Total</td>
-                        <td className="px-4 py-3 text-xs font-bold text-gray-800">{arusKas.reduce((s, k) => s + k.transaksi, 0)}x</td>
+                        <td className="px-4 py-3 text-xs font-bold text-gray-800 dark:text-white">{arusKas.reduce((s, k) => s + k.transaksi, 0)}x</td>
                         <td className="px-4 py-3 text-xs font-bold text-emerald-600">{formatRp(totalKas)}</td>
                       </tr>
                     </tfoot>
@@ -432,15 +432,15 @@ export default function DailyReportPage() {
               {/* Arus Kas */}
               <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-100">
-                  <h2 className="font-semibold text-gray-800">Laporan Arus Kas</h2>
+                  <h2 className="font-semibold text-gray-800 dark:text-white">Laporan Arus Kas</h2>
                 </div>
                 <div className="p-5 space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-sm text-gray-600">💵 Total Pemasukan</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">💵 Total Pemasukan</span>
                     <span className="font-semibold text-emerald-600">{formatRp(data?.total_omzet)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-50">
-                    <span className="text-sm text-gray-600">🏷️ Total Diskon</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">🏷️ Total Diskon</span>
                     <span className="font-semibold text-orange-500">-{formatRp(totalDiskon)}</span>
                   </div>
                   <div className="flex justify-between items-center pt-2">
@@ -455,7 +455,7 @@ export default function DailyReportPage() {
             {topProducts.length > 0 && (
               <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-5">
                 <div className="px-5 py-4 border-b border-gray-100">
-                  <h2 className="font-semibold text-gray-800">Statistik Produk berdasarkan Qty</h2>
+                  <h2 className="font-semibold text-gray-800 dark:text-white">Statistik Produk berdasarkan Qty</h2>
                 </div>
                 <div className="p-5">
                   <div className="space-y-3">
@@ -472,7 +472,7 @@ export default function DailyReportPage() {
                               <span className="text-sm text-gray-700 font-medium">{p.name}</span>
                             </div>
                             <div className="flex items-center gap-4">
-                              <span className="text-xs text-gray-500">{p.qty} qty</span>
+                              <span className="text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{p.qty} qty</span>
                               <span className="text-xs font-semibold text-gray-800 w-28 text-right">{formatRp(p.omzet)}</span>
                             </div>
                           </div>
@@ -505,8 +505,8 @@ export default function DailyReportPage() {
                           <td className="px-4 py-3">
                             <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold">{p.qty}</span>
                           </td>
-                          <td className="px-4 py-3 text-xs font-semibold text-gray-800">{formatRp(p.omzet)}</td>
-                          <td className="px-4 py-3 text-xs text-gray-500">
+                          <td className="px-4 py-3 text-xs font-semibold text-gray-800 dark:text-white">{formatRp(p.omzet)}</td>
+                          <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">
                             {formatRp(p.qty > 0 ? p.omzet / p.qty : 0)}
                           </td>
                         </tr>

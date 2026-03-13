@@ -49,15 +49,15 @@ export default function OutletPage() {
             <span className="text-base">🏪</span>
           </div>
           <div>
-            <p className="font-medium text-gray-800 text-sm">{row.name}</p>
-            {row.address && <p className="text-xs text-gray-400">{row.address}</p>}
+            <p className="font-medium text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
+            {row.address && <p className="text-xs text-gray-400 dark:text-gray-500">{row.address}</p>}
           </div>
         </div>
       )
     },
     {
       key: 'phone', label: 'Telepon',
-      render: (row) => <span className="text-sm text-gray-600">{row.phone || '-'}</span>
+      render: (row) => <span className="text-sm text-gray-600 dark:text-gray-400">{row.phone || '-'}</span>
     },
     {
       key: 'status', label: 'Status',
@@ -97,8 +97,8 @@ export default function OutletPage() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Outlet</h1>
-            <p className="text-gray-500 text-sm">Kelola data outlet</p>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Outlet</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola data outlet</p>
           </div>
           {can('outlets', 'create') && (
             <button
@@ -114,7 +114,7 @@ export default function OutletPage() {
         </div>
         <div className="mb-4">
           <input type="text" placeholder="Cari outlet..." value={search} onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
         </div>
         <Table columns={columns} data={filtered} loading={loading} />
         <ConfirmDialog isOpen={confirm.open} onClose={() => setConfirm({ open: false })} onConfirm={handleDelete} />

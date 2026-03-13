@@ -110,7 +110,7 @@ export default function AttendanceReportPage() {
 
         {/* Header */}
         <div className="mb-5">
-          <h1 className="text-xl font-bold text-gray-800">Laporan Absensi</h1>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Laporan Absensi</h1>
           <p className="text-gray-500 text-sm">Rekap absensi karyawan per hari</p>
         </div>
 
@@ -222,12 +222,12 @@ export default function AttendanceReportPage() {
 
                   <div className="grid grid-cols-2 mt-4 text-sm">
                     <div>
-                      <p className="text-gray-400">Check In</p>
+                      <p className="text-gray-400 dark:text-gray-500">Check In</p>
                       <p className="font-semibold">{formatTime(checkIn)}</p>
                     </div>
 
                     <div>
-                      <p className="text-gray-400">Check Out</p>
+                      <p className="text-gray-400 dark:text-gray-500">Check Out</p>
                       <p className="font-semibold">{formatTime(checkOut)}</p>
                     </div>
                   </div>
@@ -236,7 +236,7 @@ export default function AttendanceReportPage() {
             })}
           </div>
         ) : (
-          <div className="text-center py-10 text-gray-500">
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400 dark:text-gray-500">
             Tidak ada data absensi
           </div>
         )}

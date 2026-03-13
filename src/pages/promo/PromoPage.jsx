@@ -495,8 +495,8 @@ export default function PromoPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Promo & Voucher</h1>
-            <p className="text-gray-500 text-sm">Kelola promo dan voucher</p>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Promo & Voucher</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola promo dan voucher</p>
           </div>
           {can('promos', 'create') && (
             <button onClick={openAdd} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
@@ -509,11 +509,11 @@ export default function PromoPage() {
         </div>
 
         {/* Search + Filter */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm mb-5 space-y-3">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-4 shadow-sm mb-5 space-y-3">
           <input
             type="text" placeholder="🔍 Cari nama promo..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            className="w-full px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
           />
           <div className="flex gap-2 flex-wrap">
             {STATUS_FILTERS.map(f => {
@@ -556,37 +556,37 @@ export default function PromoPage() {
             <p className="text-sm mt-1">Coba ubah filter atau kata kunci pencarian</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm min-w-[800px]">
-                <thead className="bg-gray-50 border-b border-gray-100">
+                <thead className="bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-700">
                   <tr>
                     {['No', 'Nama Promo', 'Jenis & Nilai', 'Berlaku Pada', 'Voucher', 'Periode', 'Status', 'Aksi'].map(h => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                   {filtered.map((promo, idx) => (
-                    <tr key={getID(promo)} className="hover:bg-gray-50 transition">
-                      <td className="px-4 py-3 text-gray-400 text-xs">{idx + 1}</td>
+                    <tr key={getID(promo)} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition">
+                      <td className="px-4 py-3 text-gray-400 dark:text-gray-500 text-xs">{idx + 1}</td>
 
                       {/* Nama */}
                       <td className="px-4 py-3 min-w-[140px]">
-                        <p className="font-semibold text-gray-800 text-sm">{promo.name}</p>
+                        <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{promo.name}</p>
                         {promo.max_usage > 0 && (
-                          <p className="text-xs text-gray-400 mt-0.5">Terpakai: {promo.used_count || 0}/{promo.max_usage}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">Terpakai: {promo.used_count || 0}/{promo.max_usage}</p>
                         )}
                       </td>
 
                       {/* Jenis & Nilai */}
                       <td className="px-4 py-3 min-w-[120px]">
-                        <span className="px-2 py-0.5 bg-blue-50 text-blue-600 rounded-lg text-xs font-medium block w-fit mb-1">
+                        <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-medium block w-fit mb-1">
                           {promoTypeLabel(promo.promo_type)}
                         </span>
-                        <span className="font-semibold text-gray-800 text-sm">{promoValueLabel(promo)}</span>
+                        <span className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{promoValueLabel(promo)}</span>
                         {promo.promo_type === 'discount' && promo.max_discount > 0 && (
-                          <p className="text-xs text-gray-400">maks Rp {Number(promo.max_discount).toLocaleString('id-ID')}</p>
+                          <p className="text-xs text-gray-400 dark:text-gray-500">maks Rp {Number(promo.max_discount).toLocaleString('id-ID')}</p>
                         )}
                       </td>
 
@@ -608,7 +608,7 @@ export default function PromoPage() {
                       </td>
 
                       {/* Periode */}
-                      <td className="px-4 py-3 text-xs text-gray-500 whitespace-nowrap min-w-[160px]">
+                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap min-w-[160px]">
                         <span>{promo.start_date?.split('T')[0]}</span>
                         <span className="text-gray-300 mx-1">–</span>
                         <span>{promo.end_date?.split('T')[0]}</span>

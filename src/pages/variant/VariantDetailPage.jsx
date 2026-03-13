@@ -24,13 +24,13 @@ export default function VariantDetailPage() {
 
   if (loading) return (
     <Layout title="Detail Varian">
-      <div className="flex items-center justify-center py-20 text-gray-400"><p>Memuat data...</p></div>
+      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500"><p>Memuat data...</p></div>
     </Layout>
   )
 
   if (!variant) return (
     <Layout title="Detail Varian">
-      <div className="flex items-center justify-center py-20 text-gray-400"><p>Varian tidak ditemukan</p></div>
+      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500"><p>Varian tidak ditemukan</p></div>
     </Layout>
   )
 
@@ -39,12 +39,12 @@ export default function VariantDetailPage() {
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/variants')} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Detail Varian</h1>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Detail Varian</h1>
             <p className="text-gray-500 text-sm">Informasi lengkap varian</p>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default function VariantDetailPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h2 className="text-lg font-bold text-gray-800">{variant.name}</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">{variant.name}</h2>
                 {variant.description && <p className="text-sm text-gray-500 mt-1">{variant.description}</p>}
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-medium ${variant.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
@@ -63,11 +63,11 @@ export default function VariantDetailPage() {
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xs text-gray-400 mb-1">Min Pilihan</p>
-                <p className="text-2xl font-bold text-gray-800">{variant.min_select}</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-white">{variant.min_select}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-3">
                 <p className="text-xs text-gray-400 mb-1">Maks Pilihan</p>
-                <p className="text-2xl font-bold text-gray-800">{variant.max_select}</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-white">{variant.max_select}</p>
               </div>
             </div>
           </div>
@@ -91,7 +91,7 @@ export default function VariantDetailPage() {
                       {o.additional_price > 0 ? (
                         <span className="text-sm font-semibold text-orange-500">+Rp {Number(o.additional_price).toLocaleString('id-ID')}</span>
                       ) : (
-                        <span className="text-sm text-gray-400">Gratis</span>
+                        <span className="text-sm text-gray-400 dark:text-gray-500">Gratis</span>
                       )}
                     </div>
                   </div>

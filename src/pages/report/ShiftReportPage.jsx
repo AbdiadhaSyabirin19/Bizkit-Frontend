@@ -77,7 +77,7 @@ export default function ShiftReportPage() {
     <Layout title="Pergantian Shift">
       <div className="max-w-6xl mx-auto">
         <div className="mb-5">
-          <h1 className="text-xl font-bold text-gray-800">Pergantian Shift</h1>
+          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Pergantian Shift</h1>
           <p className="text-gray-500 text-sm">Laporan kas masuk & keluar per shift</p>
         </div>
 
@@ -90,7 +90,7 @@ export default function ShiftReportPage() {
                 type="date"
                 value={filter.start_date}
                 onChange={e => setFilter(f => ({ ...f, start_date: e.target.value }))}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -99,7 +99,7 @@ export default function ShiftReportPage() {
                 type="date"
                 value={filter.end_date}
                 onChange={e => setFilter(f => ({ ...f, end_date: e.target.value }))}
-                className="px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                className="px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <button
@@ -123,7 +123,7 @@ export default function ShiftReportPage() {
             <div className="grid grid-cols-4 gap-4 mb-5">
               <div className="bg-white rounded-2xl p-4 shadow-sm">
                 <p className="text-gray-400 text-xs mb-1">Total Shift</p>
-                <p className="text-2xl font-bold text-gray-800">{data.total_shift || data.shifts?.length || 0}</p>
+                <p className="text-2xl font-bold text-gray-800 dark:text-white">{data.total_shift || data.shifts?.length || 0}</p>
                 <p className="text-xs text-gray-400 mt-1">shift tercatat</p>
               </div>
               <div className="bg-white rounded-2xl p-4 shadow-sm">
@@ -148,7 +148,7 @@ export default function ShiftReportPage() {
             {/* Tabel */}
             <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
               <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-                <h2 className="font-semibold text-gray-800">Detail Pergantian Shift</h2>
+                <h2 className="font-semibold text-gray-800 dark:text-white">Detail Pergantian Shift</h2>
                 <span className="text-xs text-gray-400 bg-gray-100 px-3 py-1 rounded-full">
                   {data.shifts?.length || 0} data
                 </span>
@@ -192,7 +192,7 @@ export default function ShiftReportPage() {
                           {/* Waktu */}
                           <td className="px-4 py-3">
                             <p className="text-xs font-medium text-gray-700">{formatDate(startTime)}</p>
-                            <p className="text-xs text-gray-400">
+                            <p className="text-xs text-gray-400 dark:text-gray-500">
                               {formatTime(startTime)}
                               {endTime && !String(endTime).startsWith('0001')
                                 ? ` – ${formatTime(endTime)}`
@@ -204,7 +204,7 @@ export default function ShiftReportPage() {
                           <td className="px-4 py-3">
                             <p className="text-xs text-gray-700">{getUraian(shift)}</p>
                             {endTime && !String(endTime).startsWith('0001') && (
-                              <p className="text-xs text-gray-400">s/d {formatDateTime(endTime)}</p>
+                              <p className="text-xs text-gray-400 dark:text-gray-500">s/d {formatDateTime(endTime)}</p>
                             )}
                           </td>
 
@@ -254,7 +254,7 @@ export default function ShiftReportPage() {
                       )
                     }) : (
                       <tr>
-                        <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
+                        <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500">
                           <p className="text-3xl mb-2">📭</p>
                           <p>Tidak ada data shift pada periode ini</p>
                         </td>
@@ -272,7 +272,7 @@ export default function ShiftReportPage() {
                         <td className="px-4 py-3 text-xs font-bold text-blue-600">
                           {totalSelisih >= 0 ? '+' : ''}{formatRp(totalSelisih)}
                         </td>
-                        <td className="px-4 py-3 text-xs font-bold text-gray-800">{formatRp(totalSelisih)}</td>
+                        <td className="px-4 py-3 text-xs font-bold text-gray-800 dark:text-white">{formatRp(totalSelisih)}</td>
                       </tr>
                     </tfoot>
                   )}

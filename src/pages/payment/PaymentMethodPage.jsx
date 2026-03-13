@@ -99,7 +99,7 @@ export default function PaymentMethodPage() {
     { key: 'no', label: 'No', render: (row) => filtered.indexOf(row) + 1 },
     {
       key: 'name', label: 'Metode Pembayaran',
-      render: (row) => <span className="font-medium text-gray-800">{row.name || row.Name}</span>
+      render: (row) => <span className="font-medium text-gray-800 dark:text-gray-100">{row.name || row.Name}</span>
     },
     {
       key: 'show_in_sale', label: 'Tampil di Penjualan',
@@ -148,8 +148,8 @@ export default function PaymentMethodPage() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Metode Pembayaran</h1>
-            <p className="text-gray-500 text-sm">Kelola metode pembayaran</p>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Metode Pembayaran</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola metode pembayaran</p>
           </div>
           {can('payment_methods', 'create') && (
             <button onClick={openAdd}
@@ -165,7 +165,7 @@ export default function PaymentMethodPage() {
         <div className="mb-4">
           <input type="text" placeholder="Cari metode pembayaran..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
         </div>
 
         <Table columns={columns} data={filtered} loading={loading} />

@@ -48,7 +48,7 @@ export default function UnitPage() {
           <div className="w-9 h-9 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
             <span className="text-base">📏</span>
           </div>
-          <span className="font-medium text-gray-800">{row.name}</span>
+          <span className="font-medium text-gray-800 dark:text-gray-100">{row.name}</span>
         </div>
       )
     },
@@ -78,8 +78,8 @@ export default function UnitPage() {
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Satuan</h1>
-            <p className="text-gray-500 text-sm">Kelola satuan produk</p>
+            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Satuan</h1>
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola satuan produk</p>
           </div>
           {can('units', 'create') && (
             <button
@@ -96,7 +96,7 @@ export default function UnitPage() {
         <div className="mb-4">
           <input type="text" placeholder="Cari satuan..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
+            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
         </div>
         <Table columns={columns} data={filtered} loading={loading} />
         <ConfirmDialog isOpen={confirm.open} onClose={() => setConfirm({ open: false })} onConfirm={handleDelete} />

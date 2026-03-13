@@ -464,7 +464,7 @@ export default function TrendReportPage() {
           <button onClick={() => setYear(y => y - 1)} className="p-1 hover:bg-gray-100 rounded transition">
             <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
-          <span className="font-semibold text-gray-800">{year}</span>
+          <span className="font-semibold text-gray-800 dark:text-white">{year}</span>
           <button onClick={() => setYear(y => y + 1)} className="p-1 hover:bg-gray-100 rounded transition">
             <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
@@ -569,14 +569,14 @@ export default function TrendReportPage() {
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       {['No.', 'Minggu', 'N', 'Q', 'Omzet'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600">{h}</th>
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 dark:text-gray-500">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {weeklyStats.map((w, idx) => (
                       <tr key={idx} className="hover:bg-gray-50">
-                        <td className="px-4 py-2.5 text-xs text-gray-500">{idx + 1}</td>
+                        <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{idx + 1}</td>
                         <td className="px-4 py-2.5 text-xs text-gray-700">{w.label}</td>
                         <td className="px-4 py-2.5 text-xs text-gray-700">{w.nota}</td>
                         <td className="px-4 py-2.5 text-xs text-gray-700">{w.qty}</td>
@@ -586,10 +586,10 @@ export default function TrendReportPage() {
                   </tbody>
                   <tfoot className="bg-gray-50 border-t-2 border-gray-200">
                     <tr>
-                      <td colSpan={2} className="px-4 py-2.5 text-xs font-bold text-gray-600">Total</td>
-                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800">{weeklyStats.reduce((s, w) => s + w.nota, 0)}</td>
-                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800">{weeklyStats.reduce((s, w) => s + w.qty, 0)}</td>
-                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800">{formatRp(weeklyStats.reduce((s, w) => s + w.omzet, 0))}</td>
+                      <td colSpan={2} className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</td>
+                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{weeklyStats.reduce((s, w) => s + w.nota, 0)}</td>
+                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{weeklyStats.reduce((s, w) => s + w.qty, 0)}</td>
+                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{formatRp(weeklyStats.reduce((s, w) => s + w.omzet, 0))}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -613,8 +613,8 @@ export default function TrendReportPage() {
                   { label: 'Rata-rata Omzet/Qty', value: overallAvg ? formatRp(overallAvg.omzetPerQty) : 'Rp 0' },
                 ].map(m => (
                   <div key={m.label} className="flex justify-between items-center px-4 py-2.5">
-                    <span className="text-sm text-gray-600">{m.label}</span>
-                    <span className="text-sm font-semibold text-gray-800">{m.value}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{m.label}</span>
+                    <span className="text-sm font-semibold text-gray-800 dark:text-white">{m.value}</span>
                   </div>
                 ))}
               </div>
