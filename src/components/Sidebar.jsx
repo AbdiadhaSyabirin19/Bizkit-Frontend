@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { usePermission } from '../hooks/usePermission'
+import api from '../api/axios'
 
 const menus = [
   {
@@ -9,7 +10,6 @@ const menus = [
     children: [
       { label: 'Penjualan',       path: '/sales',   module: 'sales', icon: 'Cart' },
       { label: 'Promo & Voucher', path: '/promos',  module: 'promos', icon: 'Percent' },
-      { label: 'Outlet',          path: '/outlets', module: 'outlets', icon: 'Home' },
     ],
   },
   {
@@ -162,6 +162,19 @@ export default function Sidebar({ isOpen, setIsOpen }) {
   const { canView } = usePermission()
   const location = useLocation()
 
+  const [storeLogo, setStoreLogo] = useState(null)
+  const [storeName, setStoreName] = useState('')
+
+  useEffect(() => {
+    api.get('/settings')
+      .then(res => {
+        const d = res.data.data
+        setStoreLogo(d?.Logo || d?.logo || null)
+        setStoreName(d?.StoreName || d?.store_name || '')
+      })
+      .catch(() => {})
+  }, [])
+
   const [openMenus, setOpenMenus] = useState(() => {
     const activeLabel = getActiveMenuLabel(location.pathname) || 'Laporan'
     return [activeLabel]
@@ -204,7 +217,8 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       <aside className={`
         fixed top-0 left-0 h-full w-[260px] bg-[#0fb38e] text-white z-50 flex flex-col
         transform transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]
-        shadow-[8px_0_30px_-5px_rgba(0,0,0,0.15)]
+        border-r border-white/20
+        shadow-[6px_0_32px_-2px_rgba(0,0,0,0.35)]
         ${isOpen ? 'translate-x-0' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:z-auto
       `}>
@@ -212,14 +226,25 @@ export default function Sidebar({ isOpen, setIsOpen }) {
         {/* Logo Section */}
         <div className="px-7 py-8 mb-4">
           <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shadow-lg border border-white/20 group cursor-pointer hover:bg-white/30 transition-all active:scale-95">
-               <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
-                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-               </svg>
+            <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shadow-lg border border-white/20 overflow-hidden flex-shrink-0">
+              {storeLogo ? (
+                <img
+                  src={storeLogo}
+                  alt={storeName}
+                  className="w-full h-full object-contain p-1"
+                  onError={() => setStoreLogo(null)}
+                />
+              ) : (
+                <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                </svg>
+              )}
             </div>
             <div>
-              <p className="text-white text-lg font-bold leading-tight tracking-tight uppercase">Kasir</p>
-              <p className="text-white/70 text-[10px] font-black tracking-[0.2em] italic uppercase">Kuliner</p>
+              <p className="text-white text-lg font-bold leading-tight tracking-tight uppercase">
+                {storeName ? storeName : 'Kasir'}
+              </p>
+              {!storeName && <p className="text-white/70 text-[10px] font-black tracking-[0.2em] italic uppercase">Kuliner</p>}
             </div>
           </div>
         </div>
@@ -311,14 +336,6 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             )
           })}
         </nav>
-        
-        {/* Footer info (Optional) */}
-        <div className="p-6 mt-auto">
-           <div className="bg-white/10 rounded-2xl p-4 backdrop-blur-sm border border-white/10">
-              <p className="text-[10px] text-white/50 uppercase font-bold tracking-widest mb-1">System Version</p>
-              <p className="text-xs text-white font-medium">v2.1.0-Premium</p>
-           </div>
-        </div>
       </aside>
     </>
   )
