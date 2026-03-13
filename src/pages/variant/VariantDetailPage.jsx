@@ -24,13 +24,13 @@ export default function VariantDetailPage() {
 
   if (loading) return (
     <Layout title="Detail Varian">
-      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500"><p>Memuat data...</p></div>
+      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-zinc-500"><p>Memuat data...</p></div>
     </Layout>
   )
 
   if (!variant) return (
     <Layout title="Detail Varian">
-      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500"><p>Varian tidak ditemukan</p></div>
+      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-zinc-500"><p>Varian tidak ditemukan</p></div>
     </Layout>
   )
 
@@ -39,7 +39,7 @@ export default function VariantDetailPage() {
       <div className="max-w-2xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/variants')} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -91,7 +91,7 @@ export default function VariantDetailPage() {
                       {o.additional_price > 0 ? (
                         <span className="text-sm font-semibold text-orange-500">+Rp {Number(o.additional_price).toLocaleString('id-ID')}</span>
                       ) : (
-                        <span className="text-sm text-gray-400 dark:text-gray-500">Gratis</span>
+                        <span className="text-sm text-gray-400 dark:text-zinc-500">Gratis</span>
                       )}
                     </div>
                   </div>

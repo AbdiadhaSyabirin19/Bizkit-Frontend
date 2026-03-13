@@ -149,7 +149,7 @@ export default function PaymentMethodPage() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">Metode Pembayaran</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola metode pembayaran</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola metode pembayaran</p>
           </div>
           {can('payment_methods', 'create') && (
             <button onClick={openAdd}
@@ -165,7 +165,7 @@ export default function PaymentMethodPage() {
         <div className="mb-4">
           <input type="text" placeholder="Cari metode pembayaran..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
+            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
         </div>
 
         <Table columns={columns} data={filtered} loading={loading} />

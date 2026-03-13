@@ -90,7 +90,7 @@ export default function ShiftReportPage() {
                 type="date"
                 value={filter.start_date}
                 onChange={e => setFilter(f => ({ ...f, start_date: e.target.value }))}
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="px-4 py-2 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <div>
@@ -99,7 +99,7 @@ export default function ShiftReportPage() {
                 type="date"
                 value={filter.end_date}
                 onChange={e => setFilter(f => ({ ...f, end_date: e.target.value }))}
-                className="px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="px-4 py-2 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
               />
             </div>
             <button
@@ -192,7 +192,7 @@ export default function ShiftReportPage() {
                           {/* Waktu */}
                           <td className="px-4 py-3">
                             <p className="text-xs font-medium text-gray-700">{formatDate(startTime)}</p>
-                            <p className="text-xs text-gray-400 dark:text-gray-500">
+                            <p className="text-xs text-gray-400 dark:text-zinc-500">
                               {formatTime(startTime)}
                               {endTime && !String(endTime).startsWith('0001')
                                 ? ` – ${formatTime(endTime)}`
@@ -204,7 +204,7 @@ export default function ShiftReportPage() {
                           <td className="px-4 py-3">
                             <p className="text-xs text-gray-700">{getUraian(shift)}</p>
                             {endTime && !String(endTime).startsWith('0001') && (
-                              <p className="text-xs text-gray-400 dark:text-gray-500">s/d {formatDateTime(endTime)}</p>
+                              <p className="text-xs text-gray-400 dark:text-zinc-500">s/d {formatDateTime(endTime)}</p>
                             )}
                           </td>
 
@@ -254,7 +254,7 @@ export default function ShiftReportPage() {
                       )
                     }) : (
                       <tr>
-                        <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-gray-500">
+                        <td colSpan={8} className="px-4 py-12 text-center text-gray-400 dark:text-zinc-500">
                           <p className="text-3xl mb-2">📭</p>
                           <p>Tidak ada data shift pada periode ini</p>
                         </td>

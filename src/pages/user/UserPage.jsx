@@ -122,7 +122,7 @@ export default function UserPage() {
       render: (row) => (
         <div>
           <p className="font-medium text-gray-800 dark:text-gray-100">{row.name}</p>
-          {row.email && <p className="text-xs text-gray-400 dark:text-gray-500">{row.email}</p>}
+          {row.email && <p className="text-xs text-gray-400 dark:text-zinc-500">{row.email}</p>}
         </div>
       )
     },
@@ -171,7 +171,7 @@ export default function UserPage() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">User</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola data pengguna sistem</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola data pengguna sistem</p>
           </div>
           {can('users', 'create') && (
             <button onClick={openAdd}
@@ -187,7 +187,7 @@ export default function UserPage() {
         <div className="mb-4">
           <input type="text" placeholder="Cari user..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
+            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
         </div>
 
         <Table columns={columns} data={filtered} loading={loading} />

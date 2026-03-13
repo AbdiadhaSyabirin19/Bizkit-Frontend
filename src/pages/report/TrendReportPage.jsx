@@ -418,11 +418,11 @@ export default function TrendReportPage() {
       <div className="max-w-5xl mx-auto">
         <div className="mb-5">
           <h1 className="text-xl font-bold text-gray-800 dark:text-white">Trend Penjualan</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Analisis tren penjualan per produk atau kategori</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm">Analisis tren penjualan per produk atau kategori</p>
         </div>
 
         {/* Tab */}
-        <div className="flex gap-0 mb-5 border-b border-gray-200 dark:border-gray-700">
+        <div className="flex gap-0 mb-5 border-b border-gray-200 dark:border-zinc-700">
           {[
             { key: 'product', label: 'Per Produk' },
             { key: 'category', label: 'Per Kategori' },
@@ -443,7 +443,7 @@ export default function TrendReportPage() {
             <select
               value={selectedID}
               onChange={e => setSelectedID(e.target.value)}
-            className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 min-w-48"
+            className="px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 min-w-48"
             >
               {(activeTab === 'product' ? products : categories).map(item => (
                 <option key={item.ID || item.id} value={String(item.ID || item.id)}>
@@ -464,12 +464,12 @@ export default function TrendReportPage() {
         </div>
 
         {/* Navigasi Tahun */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 mb-4 flex items-center justify-between px-4 py-2">
-          <button onClick={() => setYear(y => y - 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
+        <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-4 flex items-center justify-between px-4 py-2">
+          <button onClick={() => setYear(y => y - 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition">
             <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
           </button>
           <span className="font-semibold text-gray-800 dark:text-white">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition">
+          <button onClick={() => setYear(y => y + 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition">
             <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
@@ -502,7 +502,7 @@ export default function TrendReportPage() {
         ) : (
           <>
             {/* Chart Total Per Minggu */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
               <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2.5">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Total {statMode === 'qty' ? 'Qty' : statMode === 'nota' ? 'Nota' : 'Omzet'} Per Minggu
@@ -522,7 +522,7 @@ export default function TrendReportPage() {
             </div>
 
             {/* Chart Analisis Per Hari */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
               <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2.5">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Analisis Perhari - Rata-rata {statMode === 'qty' ? 'Qty' : statMode === 'nota' ? 'Nota' : 'Omzet'}
@@ -543,7 +543,7 @@ export default function TrendReportPage() {
             </div>
 
             {/* Chart Analisis Per Jam */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
               <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2.5">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
                   Analisis Perjam - Rata-rata {statMode === 'qty' ? 'Qty' : statMode === 'nota' ? 'Nota' : 'Omzet'}
@@ -564,8 +564,8 @@ export default function TrendReportPage() {
             </div>
 
             {/* Tabel Detail Per Minggu */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 mb-4 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-700">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Detail</p>
               </div>
               <div className="overflow-x-auto">
@@ -573,14 +573,14 @@ export default function TrendReportPage() {
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
                       {['No.', 'Minggu', 'N', 'Q', 'Omzet'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-gray-400 dark:text-gray-500">{h}</th>
+                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 dark:text-zinc-500">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-50">
                     {weeklyStats.map((w, idx) => (
                       <tr key={idx} className="hover:bg-gray-50">
-                        <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-gray-400 dark:text-gray-500">{idx + 1}</td>
+                        <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-zinc-400 dark:text-zinc-500">{idx + 1}</td>
                         <td className="px-4 py-2.5 text-xs text-gray-700">{w.label}</td>
                         <td className="px-4 py-2.5 text-xs text-gray-700">{w.nota}</td>
                         <td className="px-4 py-2.5 text-xs text-gray-700">{w.qty}</td>
@@ -590,7 +590,7 @@ export default function TrendReportPage() {
                   </tbody>
                   <tfoot className="bg-gray-50 border-t-2 border-gray-200">
                     <tr>
-                      <td colSpan={2} className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-gray-400 dark:text-gray-500">Total</td>
+                      <td colSpan={2} className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-zinc-400 dark:text-zinc-500">Total</td>
                       <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{weeklyStats.reduce((s, w) => s + w.nota, 0)}</td>
                       <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{weeklyStats.reduce((s, w) => s + w.qty, 0)}</td>
                       <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{formatRp(weeklyStats.reduce((s, w) => s + w.omzet, 0))}</td>
@@ -601,8 +601,8 @@ export default function TrendReportPage() {
             </div>
 
             {/* Rata-rata Keseluruhan */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 overflow-hidden">
+              <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-700">
                 <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 text-center">
                   1 Januari {year} - 31 Desember {year}
                 </p>
@@ -617,7 +617,7 @@ export default function TrendReportPage() {
                   { label: 'Rata-rata Omzet/Qty', value: overallAvg ? formatRp(overallAvg.omzetPerQty) : 'Rp 0' },
                 ].map(m => (
                   <div key={m.label} className="flex justify-between items-center px-4 py-2.5">
-                    <span className="text-sm text-gray-600 dark:text-gray-400 dark:text-gray-500">{m.label}</span>
+                    <span className="text-sm text-gray-600 dark:text-zinc-400 dark:text-zinc-500">{m.label}</span>
                     <span className="text-sm font-semibold text-gray-800 dark:text-white">{m.value}</span>
                   </div>
                 ))}

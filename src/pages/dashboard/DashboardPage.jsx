@@ -73,9 +73,9 @@ export default function DashboardPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight">Dashboard</h1>
-            <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Selamat datang kembali! Berikut ringkasan performa hari ini.</p>
+            <p className="text-gray-500 dark:text-zinc-400 font-medium mt-1">Selamat datang kembali! Berikut ringkasan performa hari ini.</p>
           </div>
-          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Live Update</span>
           </div>
@@ -85,11 +85,11 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {loading ? (
             [1,2,3].map(i => (
-              <div key={i} className="h-32 bg-white dark:bg-gray-800 rounded-3xl animate-pulse border border-gray-100 dark:border-gray-700"></div>
+              <div key={i} className="h-32 bg-white dark:bg-zinc-800 rounded-3xl animate-pulse border border-gray-100 dark:border-zinc-700"></div>
             ))
           ) : (
             stats.map((stat) => (
-              <div key={stat.label} className="group bg-white dark:bg-gray-800 p-7 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700/50 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
+              <div key={stat.label} className="group bg-white dark:bg-zinc-800 p-7 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-zinc-700/50 hover:border-emerald-500/30 transition-all duration-300 hover:-translate-y-1">
                 <div className="flex items-center justify-between mb-5">
                   <div className={`p-3 rounded-2xl ${stat.bgLight} ${stat.bgDark} transition-colors group-hover:scale-110 duration-300`}>
                     <div className={`text-transparent bg-clip-text bg-gradient-to-br ${stat.gradient}`}>
@@ -99,7 +99,7 @@ export default function DashboardPage() {
                   <div className="h-1.5 w-8 bg-gray-100 dark:bg-gray-700 rounded-full"></div>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{stat.label}</p>
+                  <p className="text-sm font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest mb-1">{stat.label}</p>
                   <p className="text-3xl font-black text-gray-900 dark:text-white tracking-tight">{stat.value}</p>
                 </div>
               </div>
@@ -111,7 +111,7 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Payment Summary */}
-          <div className="bg-white dark:bg-gray-800 p-8 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-gray-700/50">
+          <div className="bg-white dark:bg-zinc-800 p-8 rounded-[32px] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.05)] border border-gray-100 dark:border-zinc-700/50">
             <div className="flex items-center justify-between mb-8">
               <h2 className="text-xl font-black text-gray-800 dark:text-white tracking-tight">Metode Pembayaran</h2>
               <span className="text-[10px] font-black text-emerald-500 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full uppercase tracking-widest">Real-time</span>
@@ -120,9 +120,9 @@ export default function DashboardPage() {
             {!loading && daily?.payment_summary && Object.keys(daily.payment_summary).length > 0 ? (
               <div className="space-y-4">
                 {Object.entries(daily.payment_summary).map(([method, total]) => (
-                  <div key={method} className="group flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-all">
+                  <div key={method} className="group flex items-center justify-between p-4 rounded-2xl hover:bg-gray-50 dark:hover:bg-zinc-700/30 transition-all">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center font-bold text-gray-500 dark:text-gray-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
+                      <div className="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center font-bold text-gray-500 dark:text-zinc-400 group-hover:bg-emerald-500 group-hover:text-white transition-all">
                         {method.charAt(0)}
                       </div>
                       <span className="font-bold text-gray-700 dark:text-gray-200">{method}</span>
@@ -135,12 +135,12 @@ export default function DashboardPage() {
               </div>
             ) : (
               <div className="py-20 text-center">
-                 <div className="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-gray-800">
+                 <div className="w-16 h-16 bg-gray-50 dark:bg-zinc-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-zinc-800">
                     <svg className="w-8 h-8 text-gray-300 dark:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                  </div>
-                 <p className="text-gray-400 dark:text-gray-500 font-bold uppercase text-[10px] tracking-widest">Belum ada transaksi</p>
+                 <p className="text-gray-400 dark:text-zinc-500 font-bold uppercase text-[10px] tracking-widest">Belum ada transaksi</p>
               </div>
             )}
           </div>
@@ -164,8 +164,8 @@ export default function DashboardPage() {
 
         {/* Empty State / Footer Callout */}
         {!loading && daily?.total_transaksi === 0 && (
-          <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-[32px] p-12 text-center border border-dashed border-gray-300 dark:border-gray-700">
-            <p className="text-gray-400 dark:text-gray-500 font-bold uppercase tracking-[0.3em] text-[11px]">Siap melayani pelanggan hari ini? 🚀</p>
+          <div className="bg-white/50 dark:bg-white/5 backdrop-blur-sm rounded-[32px] p-12 text-center border border-dashed border-gray-300 dark:border-zinc-700">
+            <p className="text-gray-400 dark:text-zinc-500 font-bold uppercase tracking-[0.3em] text-[11px]">Siap melayani pelanggan hari ini? 🚀</p>
           </div>
         )}
 

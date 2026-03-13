@@ -90,7 +90,7 @@ export default function VariantFormPage() {
 
   if (loading) return (
     <Layout title={isEdit ? 'Edit Varian' : 'Tambah Varian'}>
-      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-gray-500">Memuat data...</div>
+      <div className="flex items-center justify-center py-20 text-gray-400 dark:text-zinc-500">Memuat data...</div>
     </Layout>
   )
 
@@ -101,7 +101,7 @@ export default function VariantFormPage() {
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
           <button onClick={() => navigate('/variants')} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600 dark:text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-gray-600 dark:text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -152,7 +152,7 @@ export default function VariantFormPage() {
                   min="0"
                   value={form.min_select}
                   onChange={e => setForm(f => ({ ...f, min_select: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
               </div>
               <div>
@@ -174,7 +174,7 @@ export default function VariantFormPage() {
                 <select
                   value={form.status}
                   onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   <option value="active">Aktif</option>
                   <option value="inactive">Nonaktif</option>
@@ -188,7 +188,7 @@ export default function VariantFormPage() {
             <div className="flex items-center justify-between mb-3">
               <div>
                 <h3 className="font-semibold text-gray-800 dark:text-white">Opsi Varian</h3>
-                <p className="text-xs text-gray-400 dark:text-gray-500">Isi harga tambahan jika ada biaya ekstra</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Isi harga tambahan jika ada biaya ekstra</p>
               </div>
               <button
                 onClick={addOption}
@@ -258,7 +258,7 @@ export default function VariantFormPage() {
                       {Number(o.additional_price) > 0 ? (
                         <span className="text-xs text-orange-500 font-medium">+Rp {Number(o.additional_price).toLocaleString('id-ID')}</span>
                       ) : (
-                        <span className="text-xs text-gray-400 dark:text-gray-500">Gratis</span>
+                        <span className="text-xs text-gray-400 dark:text-zinc-500">Gratis</span>
                       )}
                     </div>
                   ))}

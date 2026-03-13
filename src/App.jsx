@@ -58,7 +58,7 @@ const isKasirRole = (user) => {
 
 // ── UI Components ──────────────────────────────────────────────────────────
 const Spinner = () => (
-  <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-gray-900">
+  <div className="flex items-center justify-center h-screen bg-gray-100 dark:bg-zinc-900">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
   </div>
 )
@@ -71,7 +71,7 @@ const ForbiddenPage = ({ message, showLogout = false }) => {
     else navigate(-1)
   }
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-gray-900 gap-4">
+    <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-zinc-900 gap-4">
       <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
         <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -79,7 +79,7 @@ const ForbiddenPage = ({ message, showLogout = false }) => {
         </svg>
       </div>
       <h1 className="text-xl font-bold text-gray-800 dark:text-gray-100">Akses Ditolak</h1>
-      <p className="text-gray-500 dark:text-gray-400 text-sm text-center max-w-sm">
+      <p className="text-gray-500 dark:text-zinc-400 text-sm text-center max-w-sm">
         {message || 'Anda tidak memiliki izin untuk mengakses halaman ini.'}
       </p>
       <button onClick={handleBack}

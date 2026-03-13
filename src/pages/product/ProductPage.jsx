@@ -69,8 +69,8 @@ export default function ProductPage() {
               {row.image ? (
                 <img src={row.image} alt={row.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
               ) : (
-                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
-                  <span className="text-gray-400 dark:text-gray-500 text-xs">📦</span>
+                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-400 dark:text-zinc-500 text-xs">📦</span>
                 </div>
               )}
               {productPromos.length > 0 && (
@@ -86,7 +86,7 @@ export default function ProductPage() {
                   <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-500/10 text-red-500 rounded text-xs font-semibold">🔥 Promo</span>
                 )}
               </div>
-              {row.code && <p className="text-gray-400 dark:text-gray-500 text-xs font-medium">{row.code}</p>}
+              {row.code && <p className="text-gray-400 dark:text-zinc-500 text-xs font-medium">{row.code}</p>}
             </div>
           </div>
         )
@@ -150,7 +150,7 @@ export default function ProductPage() {
       <div className="max-w-6xl mx-auto">
         <div className="mb-5">
           <h1 className="text-xl font-bold text-gray-800 dark:text-white">Produk</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola data produk</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola data produk</p>
         </div>
         <div className="flex justify-between items-center mb-6">
           <input
@@ -158,7 +158,7 @@ export default function ProductPage() {
             placeholder="Cari produk atau kode..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-sm px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200"
+            className="w-full max-w-sm px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200"
           />
           {/* Tombol Tambah hanya muncul kalau punya akses create */}
           {can('products', 'create') && (

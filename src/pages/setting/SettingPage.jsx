@@ -58,7 +58,7 @@ export default function SettingPage() {
       <div className="max-w-2xl mx-auto">
         <div className="mb-5">
           <h1 className="text-xl font-bold text-gray-800 dark:text-white">Pengaturan Umum</h1>
-          <p className="text-gray-500 dark:text-gray-400 text-sm">Konfigurasi sistem</p>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm">Konfigurasi sistem</p>
         </div>
 
         {success && (

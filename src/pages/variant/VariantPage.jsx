@@ -47,7 +47,7 @@ export default function VariantPage() {
         <div>
           <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
           {row.description && (
-            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5 max-w-xs truncate">{row.description}</p>
+            <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5 max-w-xs truncate">{row.description}</p>
           )}
         </div>
       )
@@ -66,7 +66,7 @@ export default function VariantPage() {
       key: 'options', label: 'Opsi & Harga',
       render: (row) => {
         const opts = row.options || []
-        if (opts.length === 0) return <span className="text-gray-400 dark:text-gray-500 text-xs italic">Belum ada opsi</span>
+        if (opts.length === 0) return <span className="text-gray-400 dark:text-zinc-500 text-xs italic">Belum ada opsi</span>
 
         const shown = opts.slice(0, 3)
         const rest = opts.length - 3
@@ -83,12 +83,12 @@ export default function VariantPage() {
                     +Rp {Number(o.additional_price).toLocaleString('id-ID')}
                   </span>
                 ) : (
-                  <span className="text-xs text-gray-400 dark:text-gray-500">gratis</span>
+                  <span className="text-xs text-gray-400 dark:text-zinc-500">gratis</span>
                 )}
               </div>
             ))}
             {rest > 0 && (
-              <span className="text-xs text-gray-400 dark:text-gray-500 italic">+{rest} opsi lainnya</span>
+              <span className="text-xs text-gray-400 dark:text-zinc-500 italic">+{rest} opsi lainnya</span>
             )}
           </div>
         )
@@ -137,7 +137,7 @@ export default function VariantPage() {
         <div className="flex items-center justify-between mb-5">
           <div>
             <h1 className="text-xl font-bold text-gray-800 dark:text-white">Varian</h1>
-            <p className="text-gray-500 dark:text-gray-400 text-sm">Kelola kategori varian produk</p>
+            <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola kategori varian produk</p>
           </div>
           {can('variants', 'create') && (
             <button onClick={() => navigate('/variants/add')}
@@ -153,7 +153,7 @@ export default function VariantPage() {
         <div className="mb-4">
           <input type="text" placeholder="Cari varian..." value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
+            className="w-full max-w-xs px-4 py-2 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500" />
         </div>
 
         <Table columns={columns} data={filtered} loading={loading} />
