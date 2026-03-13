@@ -81,9 +81,9 @@ export default function ProductPage() {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <p className="font-bold text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
+                <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
                 {productPromos.length > 0 && (
-                  <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-500/10 text-red-500 rounded text-xs font-bold">🔥 Promo</span>
+                  <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-500/10 text-red-500 rounded text-xs font-semibold">🔥 Promo</span>
                 )}
               </div>
               {row.code && <p className="text-gray-400 dark:text-gray-500 text-xs font-medium">{row.code}</p>}
@@ -136,7 +136,7 @@ export default function ProductPage() {
           )}
           {can('products', 'delete') && (
             <button onClick={() => setConfirm({ open: true, id: getID(row) })}
-              className="px-3 py-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-xs font-bold transition-all">
+              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs transition">
               Hapus
             </button>
           )}
@@ -148,16 +148,19 @@ export default function ProductPage() {
   return (
     <Layout title="Produk">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight">Produk</h1>
-            <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Kelola data produk Anda.</p>
-          </div>
+        <div className="flex justify-between items-center mb-6">
+          <input
+            type="text"
+            placeholder="Cari produk atau kode..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full max-w-sm px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200"
+          />
           {/* Tombol Tambah hanya muncul kalau punya akses create */}
           {can('products', 'create') && (
             <button
               onClick={() => navigate('/products/add')}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition"
+              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm active:scale-95"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -165,16 +168,6 @@ export default function ProductPage() {
               Tambah
             </button>
           )}
-        </div>
-
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Cari produk atau kode..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-sm px-5 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all placeholder-gray-400 dark:placeholder-gray-600 font-medium"
-          />
         </div>
 
         <Table columns={columns} data={filtered} loading={loading} />

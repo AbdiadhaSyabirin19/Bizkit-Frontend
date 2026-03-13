@@ -26,23 +26,20 @@ export default function SalesReportPage() {
   return (
     <Layout title="Riwayat Penjualan">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight">Riwayat Penjualan</h1>
-          <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Laporan penjualan berdasarkan periode</p>
-        </div>
-
+        {/* Title removed, rendered in Navbar instead */}
+        
         {/* Filter */}
-        <div className="bg-white dark:bg-black rounded-[32px] p-8 shadow-sm border border-gray-100 dark:border-gray-800 mb-8 transition-colors">
-          <div className="flex items-end gap-6 flex-wrap">
-            <div className="space-y-2">
-              <label className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Tanggal Mulai</label>
-              <input type="date" value={filter.start_date} onChange={e => setFilter(f => ({ ...f, start_date: e.target.value }))} className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-gray-800 dark:text-white" />
+        <div className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 mb-6 transition-colors duration-200">
+          <div className="flex items-end gap-4 flex-wrap">
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Tanggal Mulai</label>
+              <input type="date" value={filter.start_date} onChange={e => setFilter(f => ({ ...f, start_date: e.target.value }))} className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200" />
             </div>
-            <div className="space-y-2">
-              <label className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest ml-1">Tanggal Akhir</label>
-              <input type="date" value={filter.end_date} onChange={e => setFilter(f => ({ ...f, end_date: e.target.value }))} className="w-full px-5 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all font-medium text-gray-800 dark:text-white" />
+            <div className="space-y-1">
+              <label className="text-xs font-semibold text-gray-500 dark:text-gray-400">Tanggal Akhir</label>
+              <input type="date" value={filter.end_date} onChange={e => setFilter(f => ({ ...f, end_date: e.target.value }))} className="px-4 py-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200" />
             </div>
-            <button onClick={fetchData} className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-black transition-all shadow-lg shadow-emerald-500/20 active:scale-95 uppercase tracking-widest">
+            <button onClick={fetchData} className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm active:scale-95">
               Tampilkan
             </button>
           </div>
@@ -63,30 +60,30 @@ export default function SalesReportPage() {
                 { label: 'Total Diskon', value: formatRp(data.total_diskon), icon: '🏷️', color: 'orange' },
                 { label: 'Total Omzet', value: formatRp(data.total_omzet), icon: '💰', color: 'emerald' },
               ].map(s => (
-                <div key={s.label} className="bg-white dark:bg-black rounded-[32px] p-7 shadow-sm border border-gray-100 dark:border-gray-800 transition-all group hover:-translate-y-1">
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-[11px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">{s.label}</p>
-                    <span className="text-xl p-2 bg-gray-50 dark:bg-gray-900 rounded-xl group-hover:scale-110 transition-transform">{s.icon}</span>
+                <div key={s.label} className="bg-white dark:bg-gray-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 transition-transform hover:-translate-y-1">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-sm font-semibold text-gray-500 dark:text-gray-400">{s.label}</p>
+                    <span className="text-xl p-2 bg-gray-50 dark:bg-gray-700 rounded-xl">{s.icon}</span>
                   </div>
-                  <p className="text-2xl font-black text-gray-800 dark:text-white tracking-tight">{s.value}</p>
+                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{s.value}</p>
                 </div>
               ))}
             </div>
 
             {/* Tabel */}
-            <div className="bg-white dark:bg-black rounded-[32px] shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-colors">
-              <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-800">
-                <h2 className="text-lg font-black text-gray-800 dark:text-white tracking-tight">Detail Transaksi</h2>
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700">
+                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Detail Transaksi</h2>
               </div>
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 dark:bg-gray-900/50">
                   <tr>
                     {['No', 'Invoice', 'Tanggal', 'Pembeli', 'Kasir', 'Metode', 'Subtotal', 'Diskon', 'Total', ''].map(h => (
-                      <th key={h} className="px-6 py-4 text-left text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest">{h}</th>
+                      <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">{h}</th>
                     ))}
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                <tbody className="divide-y divide-gray-50 dark:divide-gray-700/50">
                   {data.sales?.length > 0 ? data.sales.map((sale, idx) => {
                     const invoice = sale.InvoiceNumber || sale.invoice_number
                     const tanggal = new Date(sale.CreatedAt || sale.created_at).toLocaleDateString('id-ID')
@@ -101,18 +98,18 @@ export default function SalesReportPage() {
 
                     return (
                       <>
-                        <tr key={`row-${sale.ID || idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors group">
-                          <td className="px-6 py-4 text-gray-400 font-bold">{idx + 1}</td>
-                          <td className="px-6 py-4 font-black text-xs text-gray-800 dark:text-gray-200">{invoice}</td>
-                          <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs font-medium">{tanggal}</td>
-                          <td className="px-6 py-4 text-gray-700 dark:text-gray-300 text-xs font-black uppercase tracking-tight">{pembeli}</td>
-                          <td className="px-6 py-4 text-gray-600 dark:text-gray-400 text-[11px] font-bold">{kasir}</td>
+                        <tr key={`row-${sale.ID || idx}`} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                          <td className="px-6 py-4 text-gray-600 dark:text-gray-400">{idx + 1}</td>
+                          <td className="px-6 py-4 font-mono text-xs text-gray-800 dark:text-gray-200">{invoice}</td>
+                          <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">{tanggal}</td>
+                          <td className="px-6 py-4 text-gray-700 dark:text-gray-300 text-xs font-medium">{pembeli}</td>
+                          <td className="px-6 py-4 text-gray-600 dark:text-gray-400 text-xs">{kasir}</td>
                           <td className="px-6 py-4">
-                            <span className="px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-lg text-[10px] font-black uppercase tracking-wider">{metode}</span>
+                            <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs font-medium">{metode}</span>
                           </td>
-                          <td className="px-6 py-4 text-gray-500 dark:text-gray-500 text-xs font-medium">{formatRp(subtotal)}</td>
-                          <td className="px-6 py-4 text-red-500 text-xs font-bold">{diskon > 0 ? `-${formatRp(diskon)}` : '-'}</td>
-                          <td className="px-6 py-4 font-black text-gray-900 dark:text-white">{formatRp(total)}</td>
+                          <td className="px-6 py-4 text-gray-500 dark:text-gray-400 text-xs">{formatRp(subtotal)}</td>
+                          <td className="px-6 py-4 text-red-500 text-xs">{diskon > 0 ? `-${formatRp(diskon)}` : '-'}</td>
+                          <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{formatRp(total)}</td>
                           <td className="px-4 py-3">
                             {items.length > 0 && (
                               <button
@@ -143,11 +140,11 @@ export default function SalesReportPage() {
                                     const basePrice = item.BasePrice || item.base_price || 0
                                     const itemSubtotal = item.Subtotal || item.subtotal || 0
                                     return (
-                                      <tr key={i} className="border-t border-emerald-100 dark:border-emerald-500/20">
-                                        <td className="py-2 text-gray-700 dark:text-gray-300 font-bold">{prodName}</td>
-                                        <td className="py-2 text-gray-500 dark:text-gray-400 font-bold">{qty}x</td>
-                                        <td className="py-2 text-gray-500 dark:text-gray-400 font-medium">{formatRp(basePrice)}</td>
-                                        <td className="py-2 font-black text-gray-900 dark:text-white">{formatRp(itemSubtotal)}</td>
+                                      <tr key={i} className="border-t border-emerald-100 dark:border-gray-700">
+                                        <td className="py-2 text-gray-700 dark:text-gray-300 font-medium">{prodName}</td>
+                                        <td className="py-2 text-gray-500 dark:text-gray-400">{qty}x</td>
+                                        <td className="py-2 text-gray-500 dark:text-gray-400">{formatRp(basePrice)}</td>
+                                        <td className="py-2 font-bold text-gray-900 dark:text-white">{formatRp(itemSubtotal)}</td>
                                       </tr>
                                     )
                                   })}
