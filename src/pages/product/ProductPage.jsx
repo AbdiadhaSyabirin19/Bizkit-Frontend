@@ -69,8 +69,8 @@ export default function ProductPage() {
               {row.image ? (
                 <img src={row.image} alt={row.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
               ) : (
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <span className="text-gray-400 text-xs">📦</span>
+                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0">
+                  <span className="text-gray-400 dark:text-gray-500 text-xs">📦</span>
                 </div>
               )}
               {productPromos.length > 0 && (
@@ -81,12 +81,12 @@ export default function ProductPage() {
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <p className="font-medium text-gray-800 text-sm">{row.name}</p>
+                <p className="font-bold text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
                 {productPromos.length > 0 && (
-                  <span className="px-1.5 py-0.5 bg-red-100 text-red-500 rounded text-xs font-medium">🔥 Promo</span>
+                  <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-500/10 text-red-500 rounded text-xs font-bold">🔥 Promo</span>
                 )}
               </div>
-              {row.code && <p className="text-gray-400 text-xs">{row.code}</p>}
+              {row.code && <p className="text-gray-400 dark:text-gray-500 text-xs font-medium">{row.code}</p>}
             </div>
           </div>
         )
@@ -136,7 +136,7 @@ export default function ProductPage() {
           )}
           {can('products', 'delete') && (
             <button onClick={() => setConfirm({ open: true, id: getID(row) })}
-              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs transition">
+              className="px-3 py-1.5 bg-red-500/10 dark:bg-red-500/20 text-red-500 hover:bg-red-500 hover:text-white rounded-lg text-xs font-bold transition-all">
               Hapus
             </button>
           )}
@@ -148,10 +148,10 @@ export default function ProductPage() {
   return (
     <Layout title="Produk">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-xl font-bold text-gray-800">Produk</h1>
-            <p className="text-gray-500 text-sm">Kelola data produk</p>
+            <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight">Produk</h1>
+            <p className="text-gray-500 dark:text-gray-400 font-medium mt-1">Kelola data produk Anda.</p>
           </div>
           {/* Tombol Tambah hanya muncul kalau punya akses create */}
           {can('products', 'create') && (
@@ -167,13 +167,13 @@ export default function ProductPage() {
           )}
         </div>
 
-        <div className="mb-4">
+        <div className="mb-6">
           <input
             type="text"
             placeholder="Cari produk atau kode..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            className="w-full max-w-sm px-5 py-3 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all placeholder-gray-400 dark:placeholder-gray-600 font-medium"
           />
         </div>
 

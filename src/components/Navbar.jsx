@@ -26,7 +26,7 @@ export default function Navbar({ title, setIsOpen }) {
   }, [])
 
   return (
-    <header className="bg-white dark:bg-gray-900 text-gray-800 dark:text-white px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-[0_1px_3px_0_rgba(0,0,0,0.05)] border-b border-gray-100 dark:border-gray-800 transition-all duration-300">
+    <header className="bg-white dark:bg-black text-gray-800 dark:text-white px-6 py-4 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-gray-100 dark:border-gray-800 transition-all duration-300">
 
       {/* Hamburger + Title */}
       <div className="flex items-center gap-4">
@@ -64,11 +64,11 @@ export default function Navbar({ title, setIsOpen }) {
 
           {/* Dropdown Menu - Glassmorphism */}
           <div className={`
-            absolute right-0 mt-3 w-64 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/20 dark:border-gray-800/30 overflow-hidden text-gray-700
+            absolute right-0 mt-3 w-64 bg-white dark:bg-gray-950 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden text-gray-700
             transition-all duration-300 origin-top-right z-50
             ${isDropdownOpen ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'}
           `}>
-            <div className="px-5 py-4 bg-gray-50/30 dark:bg-gray-800/30 border-b border-gray-100 dark:border-gray-800/50">
+            <div className="px-5 py-4 bg-gray-50 dark:bg-gray-900/50 border-b border-gray-100 dark:border-gray-800">
               <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] leading-none mb-1.5">Profil Saya</p>
               <p className="text-sm font-bold text-gray-800 dark:text-white truncate">{user?.name || user?.username || 'Admin'}</p>
             </div>
