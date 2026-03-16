@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
-import Table from '../../components/Table'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import api from '../../api/axios'
 import { usePermission } from '../../hooks/usePermission'
@@ -39,33 +38,6 @@ export default function CategoryPage() {
     finally { setConfirm({ open: false, id: null }) }
   }
 
-  const columns = [
-    { key: 'no', label: 'No', render: (row) => filtered.indexOf(row) + 1 },
-    {
-      key: 'category', label: 'Kategori',
-      render: (row) => (
-        <div className="flex items-center gap-3">
-          <span className="font-medium text-gray-800 dark:text-gray-100 text-sm">{row.name}</span>
-        </div>
-      )
-    },
-    {
-      key: 'aksi', label: 'Aksi',
-      render: (row) => (
-        <div className="flex gap-2">
-          {can('categories', 'edit') && (
-            <button onClick={() => navigate(`/categories/${getID(row)}/edit`)}
-              className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs transition">
-              Edit
-            </button>
-          )}
-          {can('categories', 'delete') && (
-            <button onClick={() => setConfirm({ open: true, id: getID(row) })}
-              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs transition">
-              Hapus
-            </button>
-          )}
-        </div>
   return (
     <Layout title="Kategori">
       <div className="max-w-5xl mx-auto p-4">
