@@ -49,7 +49,9 @@ export default function PromoPage() {
     ended: ''
   })
   const [showForm, setShowForm] = useState(false)
+  const [showDetail, setShowDetail] = useState(false)
   const [editItem, setEditItem] = useState(null)
+  const [detailItem, setDetailItem] = useState(null)
   const [confirm, setConfirm] = useState({ open: false, id: null })
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState(defaultForm)
@@ -112,6 +114,7 @@ export default function PromoPage() {
     })
     setEditItem(item); setShowForm(true)
   }
+  const openDetail = (item) => { setDetailItem(item); setShowDetail(true) }
 
   const validatePromo = () => {
     const e = {}
@@ -458,6 +461,177 @@ export default function PromoPage() {
     )
   }
 
+  // ===================== DETAIL VIEW =====================
+  if (showDetail && detailItem) {
+    const d = detailItem
+    const status = getPromoStatus(d)
+    return (
+      <Layout title="Detail Promo">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-10">
+          <div className="bg-[#343A40] p-6 text-white flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-bold">{d.name}</h2>
+              <p className="text-gray-400 text-xs">ID: {getID(d)} | {promoTypeLabel(d.promo_type)}</p>
+            </div>
+            {statusBadge(d)}
+          </div>
+
+          <div className="p-8 space-y-8">
+            <div className="grid grid-cols-2 gap-8">
+              {/* Group 1: Informasi Dasar */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest border-b pb-2">Informasi Dasar</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">Jenis Promo</p>
+                    <p className="text-xs font-medium text-gray-700">{promoTypeLabel(d.promo_type)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">Berlaku Pada</p>
+                    <p className="text-xs font-medium text-gray-700">{appliesToLabel(d.applies_to)} {d.items?.length > 0 && `(${d.items.length} item)`}</p>
+                  </div>
+                  <div className="col-span-2">
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">{promoTypeLabel(d.promo_type)} Value</p>
+                    <p className="text-lg font-bold text-emerald-600">{promoValueLabel(d)}</p>
+                    {d.promo_type === 'discount' && d.max_discount > 0 && (
+                      <p className="text-[10px] text-gray-400">Maks. Rp {Number(d.max_discount).toLocaleString('id-ID')}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Group 2: Syarat & Ketentuan */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest border-b pb-2">Syarat & Ketentuan</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">Ketentuan Pembelian</p>
+                    <p className="text-xs font-medium text-gray-700 leading-relaxed">
+                      {d.condition === 'qty' && `Minimal pembelian quantity sebanyak ${d.min_qty}`}
+                      {d.condition === 'total' && `Minimal total belanja senilai Rp ${Number(d.min_total).toLocaleString('id-ID')}`}
+                      {d.condition === 'qty_or_total' && `Minimal Qty ${d.min_qty} atau Total Belanja Rp ${Number(d.min_total).toLocaleString('id-ID')}`}
+                      {d.condition === 'qty_and_total' && `Minimal Qty ${d.min_qty} dan Total Belanja Rp ${Number(d.min_total).toLocaleString('id-ID')}`}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">Limit Penggunaan</p>
+                    <p className="text-xs font-medium text-gray-700">
+                      {d.max_usage ? `${d.max_usage} kali (Terpakai: ${d.used_count || 0})` : 'Tidak terbatas'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Group 3: Waktu Aktif */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest border-b pb-2">Jadwal Aktif</h3>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase font-bold">Mulai</p>
+                      <p className="text-xs font-medium text-gray-700">{d.start_date?.split('T')[0]} {d.start_time}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase font-bold">Berakhir</p>
+                      <p className="text-xs font-medium text-gray-700">{d.end_date?.split('T')[0]} {d.end_time}</p>
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold mb-1">Hari Aktif</p>
+                    <div className="flex flex-wrap gap-1">
+                      {d.active_days?.split(',').map(dayId => (
+                        <span key={dayId} className="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-bold">
+                          {DAYS.find(day => day.id === dayId)?.label}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Group 4: Voucher */}
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest border-b pb-2">Voucher</h3>
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">Jenis Voucher</p>
+                    <p className="text-xs font-medium text-gray-700 capitalize">{d.voucher_type === 'none' ? '-- Tanpa Voucher --' : d.voucher_type}</p>
+                  </div>
+                  {d.voucher_type !== 'none' && (
+                    <div>
+                      <p className="text-[10px] text-gray-400 uppercase font-bold">Kode Voucher</p>
+                      <p className="text-sm font-mono font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded inline-block">
+                        {d.voucher_code || '(Generated)'}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Applies To List */}
+            {d.applies_to !== 'all' && d.items?.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest border-b pb-2">
+                  Daftar {appliesToLabel(d.applies_to)} Terdaftar
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {d.items.map((item, i) => (
+                    <span key={i} className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-[10px] font-medium border border-emerald-100">
+                      {item.ref_name || item.ref_id}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Special Price Table */}
+            {d.promo_type === 'special_price' && d.special_prices?.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xs font-bold text-gray-800 uppercase tracking-widest border-b pb-2">Produk Harga Spesial</h3>
+                <div className="border border-gray-100 rounded-xl overflow-hidden">
+                  <table className="w-full text-left text-[10px]">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-2 font-bold text-gray-600">Produk</th>
+                        <th className="px-4 py-2 font-bold text-gray-600 text-right">Harga Normal</th>
+                        <th className="px-4 py-2 font-bold text-gray-600 text-right">Harga Spesial</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50">
+                      {d.special_prices.map((sp, idx) => (
+                        <tr key={idx}>
+                          <td className="px-4 py-2 text-gray-700">{sp.product?.name || sp.name || `ID: ${sp.product_id}`}</td>
+                          <td className="px-4 py-2 text-gray-400 text-right italic">Rp {Number(sp.product?.price || 0).toLocaleString('id-ID')}</td>
+                          <td className="px-4 py-2 text-right font-bold text-emerald-600">Rp {Number(sp.buy_price).toLocaleString('id-ID')}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="p-8 pt-0 flex gap-3">
+            <button 
+              onClick={() => { setShowDetail(false); openEdit(d) }}
+              className="flex-1 py-3 bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-emerald-700 transition"
+            >
+              Edit Promo Ini
+            </button>
+            <button 
+              onClick={() => setShowDetail(false)}
+              className="flex-1 py-3 bg-gray-100 text-gray-600 text-[10px] font-bold uppercase tracking-widest rounded-lg hover:bg-gray-200 transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </Layout>
+    )
+  }
+
   // ===================== LIST VIEW =====================
   const renderSection = (title, statusKey) => {
     const list = getFilteredData(statusKey)
@@ -527,6 +701,12 @@ export default function PromoPage() {
                     <td className="px-3 py-2.5">{statusBadge(promo)}</td>
                     <td className="px-3 py-2.5">
                       <div className="flex justify-center gap-1">
+                        <button 
+                          onClick={() => openDetail(promo)}
+                          className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold transition shadow-sm"
+                        >
+                          Detail
+                        </button>
                         <button 
                           onClick={() => openEdit(promo)}
                           className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-bold transition shadow-sm"
