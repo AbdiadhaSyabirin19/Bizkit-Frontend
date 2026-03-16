@@ -20,11 +20,14 @@ export default function SalesFormPage() {
   const [priceCategories, setPriceCategories] = useState([])
   
   const [formData, setFormData] = useState({
+    note_type: 'Kontan',
+    date: new Date().toISOString().slice(0, 16).replace('T', ' '),
     customer_name: 'Umum',
     payment_method_id: '',
     price_category_id: '',
     promo_id: '',
-    items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0 }]
+    voucher_code: '',
+    items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0, discount: false }]
   })
 
   useEffect(() => {
@@ -73,7 +76,7 @@ export default function SalesFormPage() {
   const handleAddItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { product_id: '', quantity: 1, price: 0, subtotal: 0 }]
+      items: [...prev.items, { product_id: '', quantity: 1, price: 0, subtotal: 0, discount: false }]
     }))
   }
 
@@ -90,22 +93,18 @@ export default function SalesFormPage() {
     const item = { ...newItems[idx], [field]: value }
     
     if (field === 'product_id') {
+      const prod = products.find(p => String(p.ID || p.id) === String(value))
+      item.unit_name = prod?.unit?.name || 'Item'
+      
       let price = 0
       if (!formData.price_category_id) {
-        const prod = products.find(p => String(p.ID || p.id) === String(value))
         price = prod?.price || 0
       } else {
         try {
           const res = await api.get(`/products/${value}/prices`)
           const custom = res.data?.data?.find(p => String(p.price_category_id || p.PriceCategoryID) === String(formData.price_category_id))
-          if (custom && custom.price > 0) {
-            price = custom.price
-          } else {
-            const prod = products.find(p => String(p.ID || p.id) === String(value))
-            price = prod?.price || 0
-          }
+          price = (custom && custom.price > 0) ? custom.price : (prod?.price || 0)
         } catch {
-          const prod = products.find(p => String(p.ID || p.id) === String(value))
           price = prod?.price || 0
         }
       }
@@ -265,171 +264,224 @@ export default function SalesFormPage() {
 
   return (
     <Layout title={isEdit ? 'Edit Penjualan' : 'Input Penjualan'}>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Pelanggan</label>
-            <input 
-              type="text" 
-              value={formData.customer_name}
-              onChange={e => setFormData(prev => ({ ...prev, customer_name: e.target.value }))}
-              placeholder="Nama pelanggan..."
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-            />
-          </div>
+      <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-4">
+        {/* Top Header Card */}
+        <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Metode Bayar</label>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Jenis Nota</label>
               <select 
-                value={formData.payment_method_id}
-                onChange={e => setFormData(prev => ({ ...prev, payment_method_id: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+                value={formData.note_type}
+                onChange={e => setFormData(p => ({ ...p, note_type: e.target.value }))}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
               >
-                <option value="">Pilih...</option>
-                {paymentMethods.map(m => (
-                  <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
-                ))}
+                <option value="Kontan">Kontan</option>
+                <option value="Kredit">Kredit</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Tingkat Harga</label>
-              <select 
-                value={formData.price_category_id}
-                onChange={e => handlePriceCategoryChange(e.target.value)}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-medium"
-              >
-                <option value="">Harga Normal</option>
-                {priceCategories.map(pc => (
-                  <option key={pc.ID || pc.id} value={pc.ID || pc.id}>{pc.Name || pc.name}</option>
-                ))}
-              </select>
+              <label className="block text-xs font-bold text-gray-700 mb-1">Tanggal Penjualan</label>
+              <input 
+                type="text"
+                value={formData.date}
+                onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+              />
             </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Promo (Opsional)</label>
-              <select 
-                value={formData.promo_id}
-                onChange={e => setFormData(prev => ({ ...prev, promo_id: e.target.value }))}
-                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-              >
-                <option value="">Tanpa Promo</option>
-                {promos.map(p => (
-                  <option key={p.ID || p.id} value={p.ID || p.id}>{p.name || p.Name}</option>
-                ))}
-              </select>
-            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Pelanggan</label>
+            <select 
+              value={formData.customer_name}
+              onChange={e => setFormData(p => ({ ...p, customer_name: e.target.value }))}
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+            >
+              <option value="Umum">Umum</option>
+              {/* Other customers could be fetched here */}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-bold text-gray-700 mb-1">Bayar ke</label>
+            <select 
+              value={formData.payment_method_id}
+              onChange={e => setFormData(p => ({ ...p, payment_method_id: e.target.value }))}
+              className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+            >
+              <option value="">Pilih...</option>
+              {paymentMethods.map(m => (
+                <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
+              ))}
+            </select>
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-4 border-b border-gray-50 bg-gray-50/50 flex justify-between items-center">
-            <h2 className="font-bold text-gray-700">Detail Produk</h2>
+        {/* Detail Section */}
+        <div className="bg-[#eef2ff] p-6 rounded-lg border border-indigo-100 space-y-4">
+          <h2 className="text-sm font-bold text-gray-700">Detail</h2>
+          {formData.items.map((item, idx) => (
+            <div key={idx} className="bg-white p-4 rounded-lg relative shadow-sm border border-gray-100">
+              <button 
+                type="button"
+                onClick={() => handleRemoveItem(idx)}
+                className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-lg transform transition active:scale-95 z-10"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              
+              <p className="text-[10px] font-bold text-gray-800 mb-2 uppercase tracking-tight">Produk #{idx + 1}</p>
+              
+              <div className="flex gap-2 mb-4">
+                <div className="flex-1 relative">
+                  <select 
+                    value={item.product_id}
+                    onChange={e => handleItemChange(idx, 'product_id', e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  >
+                    <option value="">| Nama Produk...</option>
+                    {products.map(p => (
+                      <option key={p.ID || p.id} value={p.ID || p.id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <button type="button" className="p-2 bg-[#2d3748] text-white rounded hover:bg-gray-700">
+                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-12 gap-3 items-end">
+                <div className="col-span-3">
+                  <label className="block text-[10px] font-bold text-gray-600 mb-1">Qty</label>
+                  <input 
+                    type="number"
+                    value={item.quantity}
+                    onChange={e => handleItemChange(idx, 'quantity', Number(e.target.value))}
+                    className="w-full px-3 py-1.5 border border-gray-300 rounded text-right text-sm"
+                  />
+                </div>
+                <div className="col-span-3">
+                  <label className="block text-[10px] font-bold text-gray-600 mb-1">Satuan</label>
+                  <select className="w-full px-3 py-1.5 border border-gray-300 rounded text-xs bg-gray-50">
+                    <option>{item.unit_name || 'Satuan'}</option>
+                  </select>
+                </div>
+                <div className="col-span-6">
+                  <label className="block text-[10px] font-bold text-gray-600 mb-1">Harga</label>
+                  <div className="flex items-center">
+                    <span className="px-2 py-1.5 bg-gray-100 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-500">Rp</span>
+                    <input 
+                      type="text"
+                      readOnly
+                      value={item.price.toLocaleString('id-ID')}
+                      className="w-full px-3 py-1.5 border border-gray-300 rounded-r text-right text-sm font-medium bg-white"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
+                <label className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    checked={item.discount}
+                    onChange={e => handleItemChange(idx, 'discount', e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                  <span className="text-[10px] font-bold text-gray-600 group-hover:text-gray-800 transition">Diskon</span>
+                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold text-gray-600">Subtotal</span>
+                  <div className="flex items-center">
+                    <span className="px-2 py-1 bg-gray-100 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400 italic">Rp</span>
+                    <input 
+                      type="text"
+                      readOnly
+                      value={item.subtotal.toLocaleString('id-ID')}
+                      className="px-3 py-1 border border-gray-300 rounded-r text-right text-xs font-bold bg-white w-24"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          <div className="flex justify-end">
             <button 
-              type="button" 
+              type="button"
               onClick={handleAddItem}
-              className="text-emerald-600 hover:bg-emerald-50 px-3 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-1"
+              className="p-2 bg-[#004e7c] text-white rounded-md shadow hover:bg-opacity-90 active:scale-95 transition"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Tambah Produk
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
             </button>
           </div>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="bg-gray-50/50 text-gray-500 text-xs font-bold uppercase tracking-wider">
-                  <th className="px-6 py-4">Produk</th>
-                  <th className="px-6 py-4 w-28">Qty</th>
-                  <th className="px-6 py-4">Harga</th>
-                  <th className="px-6 py-4">Subtotal</th>
-                  <th className="px-6 py-4 w-16"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-50">
-                {formData.items.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="px-6 py-4">
-                      <select 
-                        value={item.product_id}
-                        onChange={e => handleItemChange(idx, 'product_id', e.target.value)}
-                        className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-                      >
-                        <option value="">Pilih Produk...</option>
-                        {products.map(p => (
-                          <option key={p.ID || p.id} value={p.ID || p.id}>{p.name}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-6 py-4">
-                      <input 
-                        type="number" 
-                        min="1"
-                        value={item.quantity}
-                        onChange={e => handleItemChange(idx, 'quantity', Number(e.target.value))}
-                        className="w-full px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-medium"
-                      />
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600 font-medium">{formatRp(item.price)}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-800 font-bold">{formatRp(item.subtotal)}</p>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button 
-                         type="button" 
-                         onClick={() => handleRemoveItem(idx)}
-                         className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+        </div>
 
-          <div className="p-6 bg-gray-50/50 border-t border-gray-100">
-            <div className="max-w-xs ml-auto space-y-2">
-              <div className="flex justify-between text-sm text-gray-500">
-                <span>Subtotal</span>
-                <span className="font-bold text-gray-700">{formatRp(calculateSubtotal())}</span>
+        {/* Totals Section */}
+        <div className="bg-[#eef2ff] overflow-hidden rounded-lg">
+          <div className="divide-y divide-gray-200">
+            <div className="px-6 py-3 flex justify-between items-center text-xs">
+              <span className="font-bold text-gray-700">Subtotal</span>
+              <span className="font-bold text-gray-800">{formatRp(calculateSubtotal())}</span>
+            </div>
+
+            <div className="px-6 py-3 flex justify-between items-center gap-4">
+              <span className="text-xs font-bold text-gray-700">Voucher</span>
+              <div className="flex-1 flex justify-end gap-2">
+                <input 
+                  type="text"
+                  placeholder=""
+                  value={formData.voucher_code}
+                  onChange={e => setFormData(p => ({ ...p, voucher_code: e.target.value }))}
+                  className="max-w-[200px] w-full px-3 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:border-blue-400"
+                />
+                <button type="button" className="px-3 py-1 bg-[#004e7c] text-white rounded text-[10px] font-bold hover:bg-opacity-90">Apply</button>
               </div>
-              {calculateDiscount() > 0 && (
-                <div className="flex justify-between text-sm text-red-500">
-                  <span>Diskon</span>
-                  <span className="font-bold">- {formatRp(calculateDiscount())}</span>
-                </div>
-              )}
-              <div className="flex justify-between items-end pt-2 border-t border-gray-200">
-                <p className="text-sm text-gray-700 font-bold">Grand Total</p>
-                <p className="text-2xl font-black text-emerald-600">{formatRp(calculateGrandTotal())}</p>
-              </div>
+            </div>
+
+            <div className="px-6 py-4 bg-[#c7d2fe]/50">
+              <p className="text-[10px] font-bold text-gray-800 mb-1 uppercase">Promo Tersedia</p>
+              <p className="text-[10px] text-gray-500 italic">Tidak ada promo tersedia</p>
+            </div>
+
+            <div className="px-6 py-3 flex justify-between items-center text-xs">
+              <span className="font-bold text-gray-700">Promo Total</span>
+              <span className="font-bold text-gray-800">{formatRp(calculateDiscount())}</span>
+            </div>
+
+            <div className="px-6 py-3 flex justify-between items-center text-xs">
+              <span className="font-bold text-gray-700">Variant Total</span>
+              <span className="font-bold text-gray-800">Rp 0</span>
+            </div>
+
+            <div className="px-6 py-3 flex justify-between items-center text-xs">
+              <label className="flex items-center gap-2 font-bold text-gray-700">
+                <input type="checkbox" className="w-3.5 h-3.5" /> Diskon
+              </label>
+              <span className="font-bold text-gray-800">Rp 0</span>
+            </div>
+
+            <div className="px-6 py-3 flex justify-between items-center text-xs">
+              <label className="flex items-center gap-2 font-bold text-gray-700">
+                <input type="checkbox" className="w-3.5 h-3.5" /> Biaya Lain
+              </label>
+              <span className="font-bold text-gray-800">Rp 0</span>
+            </div>
+
+            <div className="px-6 py-5 bg-[#c7d2fe] flex justify-between items-center">
+              <span className="text-sm font-bold text-[#1e293b]">Grand Total</span>
+              <span className="text-sm font-black text-[#1e293b]">{formatRp(calculateGrandTotal())}</span>
             </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 pt-4">
-          <button 
-            type="button" 
-            onClick={() => navigate(-1)}
-            className="px-6 py-2.5 text-sm font-bold text-gray-600 hover:bg-gray-100 rounded-xl transition"
-          >
-            Batal
-          </button>
-          <button 
-            type="submit" 
-            disabled={saving}
-            className="px-8 py-2.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200 transition-all flex items-center gap-2"
-          >
-            {saving ? <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> : null}
-            {isEdit ? 'Update Penjualan' : 'Simpan Penjualan'}
-          </button>
-        </div>
+        <button 
+          type="submit" 
+          disabled={saving}
+          className="w-full py-3.5 bg-[#005c94] hover:bg-[#004e7c] text-white font-bold rounded-lg shadow-lg active:scale-[0.99] transition-all disabled:opacity-50"
+        >
+          {saving ? 'Menyimpan...' : 'Perbarui'}
+        </button>
       </form>
     </Layout>
   )
