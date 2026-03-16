@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import Layout from '../../components/Layout'
-import Table from '../../components/Table'
 import Modal from '../../components/Modal'
 import ConfirmDialog from '../../components/ConfirmDialog'
 import api from '../../api/axios'
@@ -115,82 +114,83 @@ export default function UserPage() {
   const inputClass = (field) =>
     `w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors[field] ? 'border-red-400 bg-red-50' : 'border-gray-200'}`
 
-  const columns = [
-    { key: 'no', label: 'No', render: (row) => filtered.indexOf(row) + 1 },
-    {
-      key: 'name', label: 'Nama',
-      render: (row) => (
-        <div>
-          <p className="font-medium text-gray-800 dark:text-gray-100">{row.name}</p>
-          {row.email && <p className="text-xs text-gray-400 dark:text-zinc-500">{row.email}</p>}
-        </div>
-      )
-    },
-    { key: 'username', label: 'Username', render: (row) => (
-      <span className="font-mono text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 px-2 py-0.5 rounded">{row.username}</span>
-    )},
-    { key: 'role', label: 'Role', render: (row) => (
-      <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
-        {row.role?.name || row.role?.Name || '-'}
-      </span>
-    )},
-    { key: 'outlet', label: 'Outlet', render: (row) => (
-      row.outlet?.Name || row.outlet?.name
-        ? <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">{row.outlet?.Name || row.outlet?.name}</span>
-        : <span className="text-gray-300 text-xs">-</span>
-    )},
-    { key: 'can_access_center', label: 'Akses Pusat', render: (row) => (
-      row.can_access_center
-        ? <span className="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">✓ Ya</span>
-        : <span className="px-2 py-1 bg-gray-100 text-gray-400 rounded-full text-xs">Tidak</span>
-    )},
-    {
-      key: 'aksi', label: 'Aksi',
-      render: (row) => (
-        <div className="flex gap-2">
-          {can('users', 'edit') && (
-            <button onClick={() => openEdit(row)}
-              className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs transition">
-              Edit
-            </button>
-          )}
-          {can('users', 'delete') && (
-            <button onClick={() => setConfirm({ open: true, id: row.ID })}
-              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs transition">
-              Hapus
-            </button>
-          )}
-        </div>
-      )
-    },
-  ]
-
   return (
     <Layout title="User">
-      <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-5">
+      <div className="max-w-6xl mx-auto p-4">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">User</h1>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola data pengguna sistem</p>
+            <h1 className="text-xl font-bold text-gray-800">User</h1>
           </div>
-          {can('users', 'create') && (
-            <button onClick={openAdd}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
+          <div className="relative w-full max-w-sm">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Tambah
-            </button>
-          )}
+            </span>
+            <input
+              type="text"
+              placeholder="Cari..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400"
+            />
+          </div>
         </div>
 
-        <div className="mb-4">
-          <input type="text" placeholder="Cari user..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-xs px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors" />
+        {/* Table Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#E9ECEF] border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 font-bold text-gray-700 w-16">No</th>
+                <th className="px-6 py-3 font-bold text-gray-700">Nama</th>
+                <th className="px-6 py-3 font-bold text-gray-700">Outlet</th>
+                <th className="px-6 py-3 font-bold text-gray-700">Peran</th>
+                <th className="px-6 py-3 font-bold text-gray-700 w-36">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {loading ? (
+                <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">Memuat data...</td></tr>
+              ) : filtered.length === 0 ? (
+                <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">Tidak ada data user</td></tr>
+              ) : (
+                filtered.map((row, idx) => (
+                  <tr key={row.ID} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 text-gray-600 font-medium">{idx + 1}</td>
+                    <td className="px-6 py-4 text-gray-700 font-medium">{row.username || row.name}</td>
+                    <td className="px-6 py-4 text-gray-600">{row.outlet?.Name || row.outlet?.name || '-'}</td>
+                    <td className="px-6 py-4 text-gray-600">{row.role?.name || row.role?.Name || '-'}</td>
+                    <td className="px-6 py-4">
+                      <div className="flex gap-4">
+                        <button className="text-gray-400 hover:text-blue-500 transition" title="Login sebagai user ini">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                          </svg>
+                        </button>
+                        {can('users', 'edit') && (
+                          <button onClick={() => openEdit(row)} className="text-gray-600 hover:text-blue-500 transition">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                          </button>
+                        )}
+                        {can('users', 'delete') && (
+                          <button onClick={() => setConfirm({ open: true, id: row.ID })} className="text-gray-400 hover:text-red-500 transition">
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
-
-        <Table columns={columns} data={filtered} loading={loading} />
 
         <Modal isOpen={modal.open} onClose={() => setModal({ open: false })}
           title={modal.mode === 'add' ? 'Tambah User' : 'Edit User'}>
@@ -264,6 +264,18 @@ export default function UserPage() {
             </div>
           </div>
         </Modal>
+
+        {/* FAB */}
+        {can('users', 'create') && (
+          <button 
+            onClick={openAdd}
+            className="fixed bottom-10 right-10 w-14 h-14 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-emerald-700 transition-all hover:scale-110 z-30"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        )}
 
         <ConfirmDialog isOpen={confirm.open} onClose={() => setConfirm({ open: false })} onConfirm={handleDelete} />
       </div>
