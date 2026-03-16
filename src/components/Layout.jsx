@@ -13,9 +13,11 @@ export default function Layout({ children, title }) {
       <div className="flex-1 flex flex-col overflow-hidden relative">
         <Navbar title={title} setIsOpen={setIsOpen} />
         
-        <main className="flex-1 overflow-y-auto p-4 sm:p-8 scroll-smooth custom-scrollbar">
-          <div className="max-w-[1600px] mx-auto min-h-[calc(100vh-160px)]">
-            {children}
+        <main className="flex-1 overflow-y-auto flex flex-col scroll-smooth custom-scrollbar">
+          <div className="flex-1 p-4 sm:p-8">
+            <div className="max-w-[1600px] mx-auto">
+              {children}
+            </div>
           </div>
           <Footer />
         </main>

@@ -160,11 +160,11 @@ export default function KasirLayout({ children, title }) {
         </aside>
 
         {/* ── Main Content ── */}
-        <main className="flex-1 md:ml-16 pb-20 md:pb-6 overflow-x-hidden flex flex-col min-h-[calc(100vh-56px)]">
+        <main className="flex-1 md:ml-16 pb-20 md:pb-0 overflow-x-hidden flex flex-col min-h-[calc(100vh-56px)]">
           <div className="p-4 md:p-6 flex-1">
             {children}
           </div>
-          <div className="hidden md:block px-6">
+          <div className="hidden md:block">
             <Footer />
           </div>
         </main>
