@@ -14,7 +14,7 @@ const MODULE_LIST = [
   { key: 'multi_harga',        label: 'Multi Harga',                actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'promos',             label: 'Promo & Voucher',            actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'outlets',            label: 'Outlet',                     actions: ['view', 'create', 'edit', 'delete'] },
-  { key: 'sales',              label: 'Penjualan',                  actions: ['view', 'create'] },
+  { key: 'sales',              label: 'Penjualan',                  actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'reports_attendance', label: 'Laporan Absensi',            actions: ['view'] },
   { key: 'reports_shift',      label: 'Laporan Pergantian Shift',   actions: ['view'] },
   { key: 'reports_daily',      label: 'Laporan Penjualan Harian',   actions: ['view'] },
