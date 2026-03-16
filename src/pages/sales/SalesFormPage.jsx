@@ -27,7 +27,11 @@ export default function SalesFormPage() {
     price_category_id: '',
     promo_id: '',
     voucher_code: '',
-    items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0, discount: false }]
+    manual_discount_enabled: false,
+    manual_discount: 0,
+    additional_fee_enabled: false,
+    additional_fee: 0,
+    items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0, discount_enabled: false, discount: 0 }]
   })
 
   useEffect(() => {
@@ -76,7 +80,7 @@ export default function SalesFormPage() {
   const handleAddItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { product_id: '', quantity: 1, price: 0, subtotal: 0, discount: false }]
+      items: [...prev.items, { product_id: '', quantity: 1, price: 0, subtotal: 0, discount_enabled: false, discount: 0 }]
     }))
   }
 
@@ -111,7 +115,7 @@ export default function SalesFormPage() {
       item.price = price
     }
     
-    item.subtotal = item.price * item.quantity
+    item.subtotal = (item.price * item.quantity) - (item.discount_enabled ? Number(item.discount || 0) : 0)
     newItems[idx] = item
     setFormData(prev => ({ ...prev, items: newItems }))
   }
@@ -219,7 +223,9 @@ export default function SalesFormPage() {
   }
 
   const calculateGrandTotal = () => {
-    return calculateSubtotal() - calculateDiscount()
+    const manualDiscount = formData.manual_discount_enabled ? Number(formData.manual_discount || 0) : 0
+    const additionalFee = formData.additional_fee_enabled ? Number(formData.additional_fee || 0) : 0
+    return calculateSubtotal() - calculateDiscount() - manualDiscount + additionalFee
   }
 
   const handleSubmit = async (e) => {
@@ -237,9 +243,12 @@ export default function SalesFormPage() {
         payment_method_id: Number(formData.payment_method_id),
         price_category_id: formData.price_category_id ? Number(formData.price_category_id) : null,
         promo_id: formData.promo_id ? Number(formData.promo_id) : null,
+        manual_discount: formData.manual_discount_enabled ? Number(formData.manual_discount) : 0,
+        additional_fee: formData.additional_fee_enabled ? Number(formData.additional_fee) : 0,
         items: formData.items.map(i => ({
           product_id: Number(i.product_id),
-          quantity: Number(i.quantity)
+          quantity: Number(i.quantity),
+          discount: i.discount_enabled ? Number(i.discount) : 0
         }))
       }
       
@@ -345,9 +354,6 @@ export default function SalesFormPage() {
                     ))}
                   </select>
                 </div>
-                <button type="button" className="p-2 bg-[#2d3748] text-white rounded hover:bg-gray-700">
-                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                </button>
               </div>
 
               <div className="grid grid-cols-12 gap-3 items-end">
@@ -380,28 +386,45 @@ export default function SalesFormPage() {
                 </div>
               </div>
 
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-gray-50">
-                <label className="flex items-center gap-2 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    checked={item.discount}
-                    onChange={e => handleItemChange(idx, 'discount', e.target.checked)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span className="text-[10px] font-bold text-gray-600 group-hover:text-gray-800 transition">Diskon</span>
-                </label>
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold text-gray-600">Subtotal</span>
-                  <div className="flex items-center">
-                    <span className="px-2 py-1 bg-gray-100 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400 italic">Rp</span>
+              <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-gray-50">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 cursor-pointer group">
                     <input 
-                      type="text"
-                      readOnly
-                      value={item.subtotal.toLocaleString('id-ID')}
-                      className="px-3 py-1 border border-gray-300 rounded-r text-right text-xs font-bold bg-white w-24"
+                      type="checkbox" 
+                      checked={item.discount_enabled}
+                      onChange={e => handleItemChange(idx, 'discount_enabled', e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
+                    <span className="text-[10px] font-bold text-gray-600 group-hover:text-gray-800 transition">Diskon</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-bold text-gray-600">Subtotal</span>
+                    <div className="flex items-center">
+                      <span className="px-2 py-1 bg-gray-100 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400 italic">Rp</span>
+                      <input 
+                        type="text"
+                        readOnly
+                        value={item.subtotal.toLocaleString('id-ID')}
+                        className="px-3 py-1 border border-gray-300 rounded-r text-right text-xs font-bold bg-white w-24"
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {item.discount_enabled && (
+                  <div className="flex items-center gap-2 ml-6">
+                    <div className="flex items-center flex-1 max-w-[150px]">
+                      <span className="px-2 py-1.5 bg-gray-50 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400">Rp</span>
+                      <input 
+                        type="number"
+                        value={item.discount}
+                        onChange={e => handleItemChange(idx, 'discount', e.target.value)}
+                        placeholder="0"
+                        className="w-full px-3 py-1.5 border border-gray-300 rounded-r text-right text-xs focus:outline-none focus:border-blue-400"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}
@@ -454,18 +477,58 @@ export default function SalesFormPage() {
               <span className="font-bold text-gray-800">Rp 0</span>
             </div>
 
-            <div className="px-6 py-3 flex justify-between items-center text-xs">
-              <label className="flex items-center gap-2 font-bold text-gray-700">
-                <input type="checkbox" className="w-3.5 h-3.5" /> Diskon
-              </label>
-              <span className="font-bold text-gray-800">Rp 0</span>
+            <div className="px-6 py-3 flex flex-col gap-2">
+              <div className="flex justify-between items-center text-xs">
+                <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={formData.manual_discount_enabled}
+                    onChange={e => setFormData(p => ({ ...p, manual_discount_enabled: e.target.checked }))}
+                    className="w-3.5 h-3.5" 
+                  /> Diskon
+                </label>
+                <span className="font-bold text-gray-800">{formatRp(formData.manual_discount_enabled ? formData.manual_discount : 0)}</span>
+              </div>
+              {formData.manual_discount_enabled && (
+                <div className="flex justify-end gap-2 pr-2">
+                  <div className="flex items-center max-w-[150px]">
+                    <span className="px-2 py-1 bg-gray-50 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400">Rp</span>
+                    <input 
+                      type="number"
+                      value={formData.manual_discount}
+                      onChange={e => setFormData(p => ({ ...p, manual_discount: e.target.value }))}
+                      className="w-full px-3 py-1 border border-gray-300 rounded-r text-right text-xs"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
-            <div className="px-6 py-3 flex justify-between items-center text-xs">
-              <label className="flex items-center gap-2 font-bold text-gray-700">
-                <input type="checkbox" className="w-3.5 h-3.5" /> Biaya Lain
-              </label>
-              <span className="font-bold text-gray-800">Rp 0</span>
+            <div className="px-6 py-3 flex flex-col gap-2">
+              <div className="flex justify-between items-center text-xs">
+                <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    checked={formData.additional_fee_enabled}
+                    onChange={e => setFormData(p => ({ ...p, additional_fee_enabled: e.target.checked }))}
+                    className="w-3.5 h-3.5" 
+                  /> Biaya Lain
+                </label>
+                <span className="font-bold text-gray-800">{formatRp(formData.additional_fee_enabled ? formData.additional_fee : 0)}</span>
+              </div>
+              {formData.additional_fee_enabled && (
+                <div className="flex justify-end gap-2 pr-2">
+                   <div className="flex items-center max-w-[150px]">
+                    <span className="px-2 py-1 bg-gray-50 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400">Rp</span>
+                    <input 
+                      type="number"
+                      value={formData.additional_fee}
+                      onChange={e => setFormData(p => ({ ...p, additional_fee: e.target.value }))}
+                      className="w-full px-3 py-1 border border-gray-300 rounded-r text-right text-xs"
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="px-6 py-5 bg-[#c7d2fe] flex justify-between items-center">
