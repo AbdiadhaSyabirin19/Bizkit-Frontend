@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import Table from '../../components/Table'
@@ -37,17 +37,13 @@ export default function ProductPage() {
     d.code?.toLowerCase().includes(search.toLowerCase())
   )
 
-  const getProductPromos = (product) => {
-    const pid = getID(product)
-    return promos.filter(promo => {
-      if (promo.status !== 'active') return false
-      if (promo.applies_to === 'all') return true
-      if (promo.applies_to === 'product') return promo.items?.some(i => i.ref_id === pid)
-      if (promo.applies_to === 'category') return promo.items?.some(i => i.ref_id === product.category_id)
-      if (promo.applies_to === 'brand') return promo.items?.some(i => i.ref_id === product.brand_id)
-      return false
-    })
-  }
+  // Group by category
+  const groups = filtered.reduce((acc, p) => {
+    const catName = p.category?.name || 'Tanpa Kategori'
+    if (!acc[catName]) acc[catName] = []
+    acc[catName].push(p)
+    return acc
+  }, {})
 
   const handleDelete = async () => {
     try {
@@ -57,124 +53,130 @@ export default function ProductPage() {
     finally { setConfirm({ open: false, id: null }) }
   }
 
-  const columns = [
-    { key: 'no', label: 'No', render: (row) => filtered.indexOf(row) + 1 },
-    {
-      key: 'product', label: 'Produk',
-      render: (row) => {
-        const productPromos = getProductPromos(row)
-        return (
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              {row.image ? (
-                <img src={row.image} alt={row.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
-              ) : (
-                <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-zinc-800 flex items-center justify-center flex-shrink-0">
-                  <span className="text-gray-400 dark:text-zinc-500 text-xs">📦</span>
-                </div>
-              )}
-              {productPromos.length > 0 && (
-                <div className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold" style={{ fontSize: '9px' }}>{productPromos.length}</span>
-                </div>
-              )}
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{row.name}</p>
-                {productPromos.length > 0 && (
-                  <span className="px-1.5 py-0.5 bg-red-100 dark:bg-red-500/10 text-red-500 rounded text-xs font-semibold">🔥 Promo</span>
-                )}
-              </div>
-              {row.code && <p className="text-gray-400 dark:text-zinc-500 text-xs font-medium">{row.code}</p>}
-            </div>
-          </div>
-        )
-      }
-    },
-    { key: 'category', label: 'Kategori', render: (row) => row.category?.name || '-' },
-    {
-      key: 'price', label: 'Harga',
-      render: (row) => <p className="text-sm font-medium">Rp {Number(row.price).toLocaleString('id-ID')}</p>
-    },
-    {
-      key: 'variants', label: 'Varian',
-      render: (row) => (
-        <div className="flex flex-wrap gap-1">
-          {row.variants?.length > 0
-            ? row.variants.slice(0, 2).map((v, i) => (
-                <span key={i} className="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-xs">{v.name}</span>
-              ))
-            : <span className="text-gray-400 text-xs">-</span>
-          }
-          {row.variants?.length > 2 && <span className="text-xs text-gray-400">+{row.variants.length - 2}</span>}
-        </div>
-      )
-    },
-    {
-      key: 'status', label: 'Status',
-      render: (row) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${row.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-          {row.status === 'active' ? 'Aktif' : 'Nonaktif'}
-        </span>
-      )
-    },
-    {
-      key: 'aksi', label: 'Aksi',
-      render: (row) => (
-        <div className="flex gap-2">
-          {/* Detail selalu tampil kalau bisa view */}
-          <button onClick={() => navigate(`/products/${getID(row)}`)}
-            className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-xs transition">
-            Detail
-          </button>
-          {can('products', 'edit') && (
-            <button onClick={() => navigate(`/products/${getID(row)}/edit`)}
-              className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs transition">
-              Edit
-            </button>
-          )}
-          {can('products', 'delete') && (
-            <button onClick={() => setConfirm({ open: true, id: getID(row) })}
-              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs transition">
-              Hapus
-            </button>
-          )}
-        </div>
-      )
-    },
-  ]
-
   return (
     <Layout title="Produk">
-      <div className="max-w-6xl mx-auto">
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Produk</h1>
-          <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola data produk</p>
-        </div>
-        <div className="flex justify-between items-center mb-6">
-          <input
-            type="text"
-            placeholder="Cari produk atau kode..."
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full max-w-sm px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200"
-          />
-          {/* Tombol Tambah hanya muncul kalau punya akses create */}
-          {can('products', 'create') && (
-            <button
-              onClick={() => navigate('/products/add')}
-              className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm active:scale-95"
-            >
+      <div className="max-w-[1400px] mx-auto p-4">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">Produk</h1>
+          </div>
+          <div className="relative w-full max-w-sm">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              Tambah
-            </button>
-          )}
+            </span>
+            <input
+              type="text"
+              placeholder="Cari..."
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400"
+            />
+          </div>
         </div>
 
-        <Table columns={columns} data={filtered} loading={loading} />
+        {/* Table Section */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-[#E9ECEF] border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 font-bold text-gray-700 w-16">No</th>
+                <th className="px-6 py-3 font-bold text-gray-700">Produk</th>
+                <th className="px-6 py-3 font-bold text-gray-700">Kategori</th>
+                <th className="px-6 py-3 font-bold text-gray-700">Harga Jual</th>
+                <th className="px-6 py-3 font-bold text-gray-700 w-32">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {loading ? (
+                <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">Memuat data...</td></tr>
+              ) : Object.keys(groups).length === 0 ? (
+                <tr><td colSpan="5" className="px-6 py-10 text-center text-gray-400">Tidak ada data produk</td></tr>
+              ) : (() => {
+                let globalIndex = 0
+                const sortedCategories = Object.keys(groups).sort()
+                return sortedCategories.map((catName) => {
+                  const items = groups[catName]
+                  return (
+                    <Fragment key={catName}>
+                    {/* Category Header Row */}
+                    <tr className="bg-[#F8F9FA] border-y border-gray-100">
+                      <td colSpan="5" className="px-4 py-2">
+                        <div className="flex items-center gap-3">
+                          <div className="w-1.5 h-6 bg-orange-500 rounded-sm"></div>
+                          <span className="font-bold text-gray-700 text-xs">Kategori : {catName}</span>
+                        </div>
+                      </td>
+                    </tr>
+                    {/* Item Rows */}
+                    {items.map((row) => {
+                      globalIndex++
+                      return (
+                        <tr key={getID(row)} className="hover:bg-gray-50 transition-colors group">
+                          <td className="px-6 py-3 text-gray-600">{globalIndex}</td>
+                          <td className="px-6 py-3 text-gray-600">{row.name}</td>
+                          <td className="px-6 py-3 text-gray-600">{row.category?.name || '-'}</td>
+                          <td className="px-6 py-3 text-gray-600">
+                            {Number(row.price).toLocaleString('id-ID')}
+                          </td>
+                          <td className="px-6 py-3">
+                            <div className="flex gap-4">
+                              {can('products', 'edit') && (
+                                <button onClick={() => navigate(`/products/${getID(row)}/edit`)} className="text-gray-600 hover:text-blue-500 transition">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                  </svg>
+                                </button>
+                              )}
+                              {can('products', 'delete') && (
+                                <button onClick={() => setConfirm({ open: true, id: getID(row) })} className="text-gray-400 hover:text-red-500 transition">
+                                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                  </svg>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                    </Fragment>
+                  )
+                })
+              })()}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Pagination Section */}
+        <div className="flex justify-end mt-4">
+          <div className="flex items-center gap-1">
+            <button className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-400 hover:bg-gray-50 transition">
+              ←
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center bg-blue-600 text-white rounded font-bold text-xs">
+              1
+            </button>
+            <button className="w-8 h-8 flex items-center justify-center border border-gray-200 rounded text-gray-400 hover:bg-gray-50 transition">
+              →
+            </button>
+          </div>
+        </div>
+
+        {/* FAB */}
+        {can('products', 'create') && (
+          <button 
+            onClick={() => navigate('/products/add')}
+            className="fixed bottom-10 right-10 w-14 h-14 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-emerald-700 transition-all hover:scale-110 z-30"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
+        )}
+
         <ConfirmDialog isOpen={confirm.open} onClose={() => setConfirm({ open: false })} onConfirm={handleDelete} />
       </div>
     </Layout>
