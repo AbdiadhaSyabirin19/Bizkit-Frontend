@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { usePermission } from '../hooks/usePermission'
 
 const NAV_ITEMS = [
   {
     path: '/kasir',
     exact: true,
     label: 'Kasir',
+    module: 'kasir_pos',
     icon: (active) => (
       <svg className="w-5 h-5" fill={active ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 0 : 2}
@@ -21,6 +23,7 @@ const NAV_ITEMS = [
   {
     path: '/kasir/dashboard',
     label: 'Dashboard',
+    module: 'kasir_dashboard',
     icon: (active) => (
       <svg className="w-5 h-5" fill={active ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 0 : 2}
@@ -35,6 +38,7 @@ const NAV_ITEMS = [
   {
     path: '/kasir/riwayat',
     label: 'Riwayat',
+    module: 'kasir_riwayat',
     icon: (active) => (
       <svg className="w-5 h-5" fill={active ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 0 : 2}
@@ -49,6 +53,7 @@ const NAV_ITEMS = [
   {
     path: '/kasir/shift',
     label: 'Shift',
+    module: 'kasir_shift',
     icon: (active) => (
       <svg className="w-5 h-5" fill={active ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 0 : 2}
@@ -64,8 +69,11 @@ const NAV_ITEMS = [
 
 export default function KasirLayout({ children, title }) {
   const { user, logout } = useAuth()
+  const { canView } = usePermission()
   const navigate = useNavigate()
   const location = useLocation()
+  
+  const visibleNav = NAV_ITEMS.filter(item => canView(item.module))
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
   const handleLogout = () => {
@@ -129,7 +137,7 @@ export default function KasirLayout({ children, title }) {
 
         {/* ── Sidebar Mini (desktop only) ── */}
         <aside className="hidden md:flex fixed left-0 top-14 bottom-0 w-16 bg-white border-r border-gray-100 flex-col items-center py-3 gap-1 z-20">
-          {NAV_ITEMS.map(item => {
+          {visibleNav.map(item => {
             const active = isActive(item)
             return (
               <Link key={item.path} to={item.path}
@@ -160,7 +168,7 @@ export default function KasirLayout({ children, title }) {
 
       {/* ── Bottom Navigation (mobile only) ── */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-gray-100 flex shadow-lg">
-        {NAV_ITEMS.map(item => {
+        {visibleNav.map(item => {
           const active = isActive(item)
           return (
             <Link key={item.path} to={item.path}

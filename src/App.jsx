@@ -129,11 +129,13 @@ const PermissionRoute = ({ children, module, action = 'view', checkPermission = 
 }
 
 // Guard untuk halaman kasir
-const KasirRoute = ({ children }) => {
+const KasirRoute = ({ children, module }) => {
   const { token, loading, user } = useAuth()
+  const { can } = usePermission()
   if (loading) return <Spinner />
   if (!token) return <Navigate to="/kasir/login" replace />
   if (!isKasirRole(user)) return <Navigate to="/reports/sales" replace />
+  if (module && !can(module, 'view')) return <ForbiddenPage />
   return children
 }
 
@@ -207,10 +209,10 @@ function AppRoutes() {
       <Route path="/payment-methods" element={<PermissionRoute module="payment_methods"><PaymentMethodPage /></PermissionRoute>} />
       <Route path="/settings"        element={<PermissionRoute module="settings"><SettingPage /></PermissionRoute>} />
 
-      <Route path="/kasir"           element={<KasirRoute><KasirPage /></KasirRoute>} />
-      <Route path="/kasir/dashboard" element={<KasirRoute><DashboardKasir /></KasirRoute>} />
-      <Route path="/kasir/riwayat"   element={<KasirRoute><RiwayatTransaksi /></KasirRoute>} />
-      <Route path="/kasir/shift"     element={<KasirRoute><LaporanShift /></KasirRoute>} />
+      <Route path="/kasir"           element={<KasirRoute module="kasir_pos"><KasirPage /></KasirRoute>} />
+      <Route path="/kasir/dashboard" element={<KasirRoute module="kasir_dashboard"><DashboardKasir /></KasirRoute>} />
+      <Route path="/kasir/riwayat"   element={<KasirRoute module="kasir_riwayat"><RiwayatTransaksi /></KasirRoute>} />
+      <Route path="/kasir/shift"     element={<KasirRoute module="kasir_shift"><LaporanShift /></KasirRoute>} />
 
       <Route path="*" element={<Navigate to="/reports/sales" replace />} />
     </Routes>
