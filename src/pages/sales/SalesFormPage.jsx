@@ -466,7 +466,7 @@ export default function SalesFormPage() {
                                 }`}
                               >
                                 {opt.name || opt.Name} 
-                                {(opt.additional_price || opt.AdditionalPrice) > 0 && ` (+Rp ${formatRp(opt.additional_price || opt.AdditionalPrice)})`}
+                                {(opt.additional_price || opt.AdditionalPrice) > 0 && ` (+${formatRp(opt.additional_price || opt.AdditionalPrice)})`}
                               </button>
                             )
                           })}
