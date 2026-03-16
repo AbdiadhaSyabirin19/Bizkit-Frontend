@@ -31,8 +31,11 @@ export default function SalesFormPage() {
     manual_discount: 0,
     additional_fee_enabled: false,
     additional_fee: 0,
-    items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0, discount_enabled: false, discount: 0 }]
+    items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0, discount_enabled: false, discount: 0, variants: [] }]
   })
+
+  const [appliedVoucher, setAppliedVoucher] = useState(null)
+  const [voucherError, setVoucherError] = useState('')
 
   useEffect(() => {
     fetchData()
@@ -64,7 +67,10 @@ export default function SalesFormPage() {
             product_id: item.product_id || item.ProductID,
             quantity: item.quantity || item.Quantity,
             price: item.base_price || item.BasePrice,
-            subtotal: item.subtotal || item.Subtotal
+            discount_enabled: (item.discount || item.Discount) > 0,
+            discount: item.discount || item.Discount || 0,
+            subtotal: item.subtotal || item.Subtotal,
+            variants: (item.variants || item.Variants || []).map(v => v.variant_option_id || v.VariantOptionID)
           }))
         })
       } else if (pmRes.data?.data?.length > 0) {
@@ -80,7 +86,7 @@ export default function SalesFormPage() {
   const handleAddItem = () => {
     setFormData(prev => ({
       ...prev,
-      items: [...prev.items, { product_id: '', quantity: 1, price: 0, subtotal: 0, discount_enabled: false, discount: 0 }]
+      items: [...prev.items, { product_id: '', quantity: 1, price: 0, subtotal: 0, discount_enabled: false, discount: 0, variants: [] }]
     }))
   }
 
@@ -92,6 +98,20 @@ export default function SalesFormPage() {
     }))
   }
 
+  const getItemSubtotal = (price, quantity, discountEnabled, discount, selectedVariantIds, product) => {
+    let variantExtra = 0
+    const variants = product?.variants || product?.Variants || []
+    variants.forEach(cat => {
+      const options = cat.options || cat.Options || []
+      options.forEach(opt => {
+        if (selectedVariantIds?.includes(opt.ID || opt.id)) {
+          variantExtra += opt.additional_price || opt.AdditionalPrice || 0
+        }
+      })
+    })
+    return ((price + variantExtra) * quantity) - (discountEnabled ? Number(discount || 0) : 0)
+  }
+
   const handleItemChange = async (idx, field, value) => {
     const newItems = [...formData.items]
     const item = { ...newItems[idx], [field]: value }
@@ -99,6 +119,7 @@ export default function SalesFormPage() {
     if (field === 'product_id') {
       const prod = products.find(p => String(p.ID || p.id) === String(value))
       item.unit_name = prod?.unit?.name || 'Item'
+      item.variants = [] // Reset variants on product change
       
       let price = 0
       if (!formData.price_category_id) {
@@ -115,9 +136,38 @@ export default function SalesFormPage() {
       item.price = price
     }
     
-    item.subtotal = (item.price * item.quantity) - (item.discount_enabled ? Number(item.discount || 0) : 0)
+    const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+    item.subtotal = getItemSubtotal(item.price, item.quantity, item.discount_enabled, item.discount, item.variants, prod)
     newItems[idx] = item
     setFormData(prev => ({ ...prev, items: newItems }))
+  }
+
+  const handleApplyVoucher = async () => {
+    if (!formData.voucher_code) return
+    setVoucherError('')
+    try {
+      const res = await api.post('/promos/check-voucher', {
+        code: formData.voucher_code,
+        subtotal: calculateSubtotal(),
+        items: formData.items.map(i => {
+          const prod = products.find(p => String(p.ID || p.id) === String(i.product_id))
+          return {
+            product_id: Number(i.product_id),
+            category_id: prod?.category_id || prod?.CategoryID,
+            brand_id: prod?.brand_id || prod?.BrandID,
+            quantity: Number(i.quantity),
+            price: i.price
+          }
+        })
+      })
+      if (res.data?.data) {
+        setAppliedVoucher(res.data.data)
+        setFormData(p => ({ ...p, promo_id: res.data.data.promo_id }))
+      }
+    } catch (err) {
+      setVoucherError(err.response?.data?.message || 'Voucher tidak valid')
+      setAppliedVoucher(null)
+    }
   }
 
   const handlePriceCategoryChange = async (catId) => {
@@ -149,7 +199,9 @@ export default function SalesFormPage() {
         }
       }
       
-      return { ...item, price, subtotal: price * item.quantity }
+      const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+      const subtotal = getItemSubtotal(price, item.quantity, item.discount_enabled, item.discount, item.variants, prod)
+      return { ...item, price, subtotal }
     }))
     
     setFormData(prev => ({ ...prev, items: newItems }))
@@ -160,6 +212,7 @@ export default function SalesFormPage() {
   }
 
   const calculateDiscount = () => {
+    if (appliedVoucher) return appliedVoucher.discount_amount || appliedVoucher.DiscountAmount || 0
     if (!formData.promo_id) return 0
     const promo = promos.find(p => String(p.ID || p.id) === String(formData.promo_id))
     if (!promo) return 0
@@ -222,6 +275,23 @@ export default function SalesFormPage() {
     return discount
   }
 
+  const calculateVariantTotal = () => {
+    let total = 0
+    formData.items.forEach(item => {
+      const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+      const variants = prod?.variants || prod?.Variants || []
+      variants.forEach(cat => {
+        const options = cat.options || cat.Options || []
+        options.forEach(opt => {
+          if (item.variants?.includes(opt.ID || opt.id)) {
+            total += (opt.additional_price || opt.AdditionalPrice || 0) * item.quantity
+          }
+        })
+      })
+    })
+    return total
+  }
+
   const calculateGrandTotal = () => {
     const manualDiscount = formData.manual_discount_enabled ? Number(formData.manual_discount || 0) : 0
     const additionalFee = formData.additional_fee_enabled ? Number(formData.additional_fee || 0) : 0
@@ -248,7 +318,8 @@ export default function SalesFormPage() {
         items: formData.items.map(i => ({
           product_id: Number(i.product_id),
           quantity: Number(i.quantity),
-          discount: i.discount_enabled ? Number(i.discount) : 0
+          discount: i.discount_enabled ? Number(i.discount) : 0,
+          variants: i.variants.map(v => ({ variant_option_id: Number(v) }))
         }))
       }
       
@@ -356,6 +427,56 @@ export default function SalesFormPage() {
                 </div>
               </div>
 
+              {/* Variant Selection */}
+              {(() => {
+                const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+                const variants = prod?.variants || prod?.Variants || []
+                if (variants.length === 0) return null
+                
+                return (
+                  <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-3">
+                    {variants.map(cat => (
+                      <div key={cat.ID || cat.id}>
+                        <p className="text-[10px] font-bold text-gray-500 mb-1.5 uppercase tracking-wide">{cat.name || cat.Name}</p>
+                        <div className="flex flex-wrap gap-2">
+                          {(cat.options || cat.Options || []).map(opt => {
+                            const optId = opt.ID || opt.id
+                            const isSelected = item.variants?.includes(optId)
+                            return (
+                              <button
+                                key={optId}
+                                type="button"
+                                onClick={() => {
+                                  let newVariants = [...(item.variants || [])]
+                                  const catsOptions = (cat.options || cat.Options || []).map(o => o.ID || o.id)
+                                  if (isSelected) {
+                                    newVariants = newVariants.filter(v => v !== optId)
+                                  } else {
+                                    if ((cat.max_select || cat.MaxSelect) === 1) {
+                                      newVariants = newVariants.filter(v => !catsOptions.includes(v))
+                                    }
+                                    newVariants.push(optId)
+                                  }
+                                  handleItemChange(idx, 'variants', newVariants)
+                                }}
+                                className={`px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all duration-200 ${
+                                  isSelected 
+                                    ? 'bg-blue-600 border-blue-600 text-white shadow-sm' 
+                                    : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400 hover:bg-blue-50'
+                                }`}
+                              >
+                                {opt.name || opt.Name} 
+                                {(opt.additional_price || opt.AdditionalPrice) > 0 && ` (+Rp ${formatRp(opt.additional_price || opt.AdditionalPrice)})`}
+                              </button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              })()}
+
               <div className="grid grid-cols-12 gap-3 items-end">
                 <div className="col-span-3">
                   <label className="block text-[10px] font-bold text-gray-600 mb-1">Qty</label>
@@ -448,18 +569,42 @@ export default function SalesFormPage() {
               <span className="font-bold text-gray-800">{formatRp(calculateSubtotal())}</span>
             </div>
 
-            <div className="px-6 py-3 flex justify-between items-center gap-4">
-              <span className="text-xs font-bold text-gray-700">Voucher</span>
-              <div className="flex-1 flex justify-end gap-2">
-                <input 
-                  type="text"
-                  placeholder=""
-                  value={formData.voucher_code}
-                  onChange={e => setFormData(p => ({ ...p, voucher_code: e.target.value }))}
-                  className="max-w-[200px] w-full px-3 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:border-blue-400"
-                />
-                <button type="button" className="px-3 py-1 bg-[#004e7c] text-white rounded text-[10px] font-bold hover:bg-opacity-90">Apply</button>
+            <div className="px-6 py-3 flex flex-col gap-2">
+              <div className="flex justify-between items-center gap-4">
+                <span className="text-xs font-bold text-gray-700">Voucher</span>
+                <div className="flex-1 flex justify-end gap-2">
+                  <input 
+                    type="text"
+                    placeholder="Kode voucher..."
+                    value={formData.voucher_code}
+                    onChange={e => setFormData(p => ({ ...p, voucher_code: e.target.value }))}
+                    className="max-w-[200px] w-full px-3 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:border-blue-400"
+                  />
+                  <button 
+                    type="button" 
+                    onClick={handleApplyVoucher}
+                    className="px-3 py-1 bg-[#004e7c] text-white rounded text-[10px] font-bold hover:bg-opacity-90"
+                  >
+                    Apply
+                  </button>
+                </div>
               </div>
+              {voucherError && <p className="text-right text-[10px] text-red-500 font-medium">{voucherError}</p>}
+              {appliedVoucher && (
+                <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded flex justify-between items-center">
+                  <span className="text-[10px] font-bold text-green-700">{appliedVoucher.name || appliedVoucher.Name} Berhasil Diterapkan!</span>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      setAppliedVoucher(null)
+                      setFormData(p => ({ ...p, promo_id: '' }))
+                    }} 
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"/></svg>
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="px-6 py-4 bg-[#c7d2fe]/50">
@@ -474,18 +619,19 @@ export default function SalesFormPage() {
 
             <div className="px-6 py-3 flex justify-between items-center text-xs">
               <span className="font-bold text-gray-700">Variant Total</span>
-              <span className="font-bold text-gray-800">Rp 0</span>
+              <span className="font-bold text-gray-800">{formatRp(calculateVariantTotal())}</span>
             </div>
 
             <div className="px-6 py-3 flex flex-col gap-2">
               <div className="flex justify-between items-center text-xs">
-                <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer group">
                   <input 
                     type="checkbox" 
                     checked={formData.manual_discount_enabled}
                     onChange={e => setFormData(p => ({ ...p, manual_discount_enabled: e.target.checked }))}
                     className="w-3.5 h-3.5" 
-                  /> Diskon
+                  /> Diskon Manual
+                  <span className="opacity-0 group-hover:opacity-100 transition text-[9px] text-gray-400 font-normal ml-1">(Penyesuaian di luar promo)</span>
                 </label>
                 <span className="font-bold text-gray-800">{formatRp(formData.manual_discount_enabled ? formData.manual_discount : 0)}</span>
               </div>
@@ -506,13 +652,14 @@ export default function SalesFormPage() {
 
             <div className="px-6 py-3 flex flex-col gap-2">
               <div className="flex justify-between items-center text-xs">
-                <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer">
+                <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer group">
                   <input 
                     type="checkbox" 
                     checked={formData.additional_fee_enabled}
                     onChange={e => setFormData(p => ({ ...p, additional_fee_enabled: e.target.checked }))}
                     className="w-3.5 h-3.5" 
                   /> Biaya Lain
+                  <span className="opacity-0 group-hover:opacity-100 transition text-[9px] text-gray-400 font-normal ml-1">(Ongkir, packing, dll)</span>
                 </label>
                 <span className="font-bold text-gray-800">{formatRp(formData.additional_fee_enabled ? formData.additional_fee : 0)}</span>
               </div>
