@@ -70,8 +70,14 @@ const ForbiddenPage = ({ message, showLogout = false }) => {
   const { logout } = useAuth()
   const navigate = useNavigate()
   const handleBack = () => {
-    if (showLogout) { logout(); navigate('/login') }
-    else navigate(-1)
+    if (showLogout) {
+      logout()
+      navigate('/login')
+    } else {
+      // Selalu redirect ke root jika ini adalah forbidden page agar kena guard PublicRoute/RootRedirect
+      // Jika masih kena forbidden di root, maka tombol Logout di bawah adalah jalan keluarnya.
+      navigate('/')
+    }
   }
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-gray-50 dark:bg-zinc-900 gap-4">
@@ -85,10 +91,20 @@ const ForbiddenPage = ({ message, showLogout = false }) => {
       <p className="text-gray-500 dark:text-zinc-400 text-sm text-center max-w-sm">
         {message || 'Anda tidak memiliki izin untuk mengakses halaman ini.'}
       </p>
-      <button onClick={handleBack}
-        className="px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm hover:bg-emerald-700 transition">
-        {showLogout ? 'Kembali ke Login' : 'Kembali'}
-      </button>
+      <div className="flex flex-col items-center gap-2 mt-2">
+        <button onClick={handleBack}
+          className="px-6 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition active:scale-95">
+          {showLogout ? 'Kembali ke Login' : 'Kembali'}
+        </button>
+        {!showLogout && (
+          <button 
+            onClick={() => { logout(); navigate(isKasirRole(user) ? '/kasir/login' : '/login') }}
+            className="text-gray-400 hover:text-red-500 text-xs font-semibold transition mt-2 p-2"
+          >
+            Logout & Keluar
+          </button>
+        )}
+      </div>
     </div>
   )
 }

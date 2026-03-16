@@ -61,6 +61,12 @@ function DetailModal({ sale, onClose }) {
                 {sale.PaymentMethod?.Name || sale.payment_method?.name || '-'}
               </span>
             </div>
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-500">Operator</span>
+              <span className="font-medium text-gray-700">
+                {sale.user?.name || sale.User?.Name || '-'}
+              </span>
+            </div>
             {(sale.PromoID || sale.promo_id) && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Promo</span>
@@ -146,7 +152,7 @@ export default function RiwayatTransaksi() {
     try {
         // Gunakan endpoint daily yang sudah ada di backend
         const res = await api.get('/sales/daily', {
-        params: { date: filterDate }
+          params: { date: filterDate, source: 'pos' }
         })
         // Response daily: { data: { sales: [...], ... } }
         const data = res.data?.data?.sales || res.data?.sales || []

@@ -96,6 +96,7 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
         payment_method_id: Number(selectedPayments[0].method_id),
         promo_id: selectedPromo?.promo_id || undefined,
         customer_name: customerName,
+        source: 'pos',
         items: cart.map(i => ({
           product_id: getID(i),
           quantity: i.qty,

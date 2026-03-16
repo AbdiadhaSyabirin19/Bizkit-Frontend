@@ -132,7 +132,8 @@ export default function SalesFormPage() {
     setSaving(true)
     try {
       const payload = {
-        ...formData,
+        customer_name: formData.customer_name,
+        source: 'dashboard',
         payment_method_id: Number(formData.payment_method_id),
         promo_id: formData.promo_id ? Number(formData.promo_id) : null,
         items: formData.items.map(i => ({
