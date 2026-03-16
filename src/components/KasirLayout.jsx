@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePermission } from '../hooks/usePermission'
+import Footer from './Footer'
 
 const NAV_ITEMS = [
   {
@@ -159,9 +160,12 @@ export default function KasirLayout({ children, title }) {
         </aside>
 
         {/* ── Main Content ── */}
-        <main className="flex-1 md:ml-16 pb-20 md:pb-6 overflow-x-hidden">
-          <div className="p-4 md:p-6">
+        <main className="flex-1 md:ml-16 pb-20 md:pb-6 overflow-x-hidden flex flex-col min-h-[calc(100vh-56px)]">
+          <div className="p-4 md:p-6 flex-1">
             {children}
+          </div>
+          <div className="hidden md:block px-6">
+            <Footer />
           </div>
         </main>
       </div>
