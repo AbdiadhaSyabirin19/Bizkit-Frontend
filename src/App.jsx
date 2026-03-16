@@ -38,6 +38,9 @@ import KasirPage from './pages/kasir/KasirPage'
 import RiwayatTransaksi from './pages/kasir/RiwayatTransaksi'
 import LaporanShift from './pages/kasir/LaporanShift'
 import ChangePasswordPage from './pages/auth/ChangePasswordPage'
+import SalesPage from './pages/sales/SalesPage'
+import SalesFormPage from './pages/sales/SalesFormPage'
+import SalesDetailPage from './pages/sales/SalesDetailPage'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const getRoleName = (user) =>
@@ -154,6 +157,11 @@ function AppRoutes() {
       <Route path="/change-password" element={<PermissionRoute checkPermission={false}><ChangePasswordPage /></PermissionRoute>} />
 
       <Route path="/dashboard" element={<PermissionRoute module="dashboard"><DashboardPage /></PermissionRoute>} />
+
+      <Route path="/sales"          element={<PermissionRoute module="sales"><SalesPage /></PermissionRoute>} />
+      <Route path="/sales/add"      element={<PermissionRoute module="sales" action="create"><SalesFormPage /></PermissionRoute>} />
+      <Route path="/sales/:id"      element={<PermissionRoute module="sales"><SalesDetailPage /></PermissionRoute>} />
+      <Route path="/sales/:id/edit" element={<PermissionRoute module="sales" action="edit"><SalesFormPage /></PermissionRoute>} />
 
       <Route path="/products"          element={<PermissionRoute module="products"><ProductPage /></PermissionRoute>} />
       <Route path="/products/add"      element={<PermissionRoute module="products" action="create"><ProductFormPage /></PermissionRoute>} />
