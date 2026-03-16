@@ -42,8 +42,12 @@ const getPromoStatus = (promo) => {
 export default function PromoPage() {
   const [data, setData] = useState([])
   const [loading, setLoading] = useState(true)
-  const [search, setSearch] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
+  const [search, setSearch] = useState({
+    active: '',
+    upcoming: '',
+    inactive: '',
+    ended: ''
+  })
   const [showForm, setShowForm] = useState(false)
   const [editItem, setEditItem] = useState(null)
   const [confirm, setConfirm] = useState({ open: false, id: null })
@@ -76,11 +80,13 @@ export default function PromoPage() {
     } catch (err) { console.error(err) }
   }
 
-  const filtered = data.filter(d => {
-    const matchSearch = d.name?.toLowerCase().includes(search.toLowerCase())
-    const matchStatus = filterStatus === 'all' || getPromoStatus(d) === filterStatus
-    return matchSearch && matchStatus
-  })
+  const getFilteredData = (status) => {
+    return data.filter(d => {
+      const matchStatus = getPromoStatus(d) === status
+      const matchSearch = d.name?.toLowerCase().includes((search[status] || '').toLowerCase())
+      return matchStatus && matchSearch
+    })
+  }
 
   const counts = STATUS_FILTERS.reduce((acc, f) => {
     acc[f.key] = f.key === 'all' ? data.length : data.filter(d => getPromoStatus(d) === f.key).length
@@ -178,13 +184,13 @@ export default function PromoPage() {
   const statusBadge = (promo) => {
     const s = getPromoStatus(promo)
     const cfg = {
-      active:   { cls: 'bg-green-100 text-green-700',  label: '● Aktif' },
-      inactive: { cls: 'bg-gray-100 text-gray-500',    label: '● Nonaktif' },
-      upcoming: { cls: 'bg-blue-100 text-blue-600',    label: '⏳ Akan Datang' },
-      ended:    { cls: 'bg-red-100 text-red-500',      label: '✓ Selesai' },
+      active:   { cls: 'bg-emerald-100 text-emerald-700',  label: 'Aktif' },
+      inactive: { cls: 'bg-gray-100 text-gray-500',    label: 'Tidak Aktif' },
+      upcoming: { cls: 'bg-blue-100 text-blue-600',    label: 'Akan Datang' },
+      ended:    { cls: 'bg-red-100 text-red-500',      label: 'Sudah Selesai' },
     }
     const { cls, label } = cfg[s] || cfg.inactive
-    return <span className={`px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${cls}`}>{label}</span>
+    return <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold whitespace-nowrap ${cls}`}>{label}</span>
   }
 
   // ===================== FORM VIEW =====================
@@ -488,162 +494,117 @@ export default function PromoPage() {
   }
 
   // ===================== LIST VIEW =====================
+  const renderSection = (title, statusKey) => {
+    const list = getFilteredData(statusKey)
+    return (
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-bold text-gray-700">{title}</h2>
+          <div className="relative w-48">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[10px]">🔍</span>
+            <input 
+              type="text" 
+              placeholder="Cari..." 
+              value={search[statusKey]}
+              onChange={e => setSearch(prev => ({ ...prev, [statusKey]: e.target.value }))}
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-gray-200 rounded-lg text-[10px] focus:outline-none focus:ring-1 focus:ring-emerald-400"
+            />
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="overflow-x-auto min-h-[100px]">
+            <table className="w-full text-[10px] text-left">
+              <thead className="bg-[#E9ECEF] border-b border-gray-200">
+                <tr>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Tanggal Mulai</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Tanggal Berakhir</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Nama Promo</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Jenis Promo</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Promo Berlaku Pada</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Batas Penukaran Promo</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Sisa Promo</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Hari Promo</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Detail Ketentuan</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Detail Promo</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap">Promo Status</th>
+                  <th className="px-3 py-2 font-bold text-gray-600 uppercase tracking-tight whitespace-nowrap text-center">Aksi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {loading ? (
+                  <tr>
+                    <td colSpan="12" className="px-4 py-8 text-center text-gray-400">Loading...</td>
+                  </tr>
+                ) : list.length === 0 ? (
+                  <tr>
+                    <td colSpan="12" className="px-4 py-8 text-center text-gray-400">Tidak ada data</td>
+                  </tr>
+                ) : list.map(promo => (
+                  <tr key={getID(promo)} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{promo.start_date?.split('T')[0]}</td>
+                    <td className="px-3 py-2.5 text-gray-600 whitespace-nowrap">{promo.end_date?.split('T')[0]}</td>
+                    <td className="px-3 py-2.5 font-bold text-gray-700">{promo.name}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{promoTypeLabel(promo.promo_type)}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{appliesToLabel(promo.applies_to)}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{promo.max_usage || '-'}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{(promo.max_usage || 0) - (promo.used_count || 0)}</td>
+                    <td className="px-3 py-2.5 text-gray-500 max-w-[120px] truncate">
+                      {promo.active_days?.split(',').map(d => DAYS.find(day => day.id === d)?.label).join(', ')}
+                    </td>
+                    <td className="px-3 py-2.5 text-gray-500 max-w-[150px] truncate">
+                      {promo.condition === 'qty' && `Min Qty ${promo.min_qty}`}
+                      {promo.condition === 'total' && `Min Total Rp ${Number(promo.min_total).toLocaleString('id-ID')}`}
+                      {promo.condition === 'qty_or_total' && `Min Qty ${promo.min_qty} / Total Rp ${Number(promo.min_total).toLocaleString('id-ID')}`}
+                      {promo.condition === 'qty_and_total' && `Min Qty ${promo.min_qty} & Total Rp ${Number(promo.min_total).toLocaleString('id-ID')}`}
+                    </td>
+                    <td className="px-3 py-2.5 font-bold text-emerald-600">{promoValueLabel(promo)}</td>
+                    <td className="px-3 py-2.5">{statusBadge(promo)}</td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex justify-center gap-1">
+                        <button 
+                          onClick={() => openEdit(promo)}
+                          className="bg-emerald-500 hover:bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-bold transition shadow-sm"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => setConfirm({ open: true, id: getID(promo) })}
+                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-[10px] font-bold transition shadow-sm"
+                        >
+                          Hapus
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Layout title="Promo & Voucher">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-[1600px] mx-auto p-4 space-y-10">
+        
+        {renderSection('Promo & Voucher - Aktif', 'active')}
+        {renderSection('Promo & Voucher - Akan Datang', 'upcoming')}
+        {renderSection('Promo & Voucher - Tidak Aktif', 'inactive')}
+        {renderSection('Promo & Voucher - Sudah Selesai', 'ended')}
 
-        {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Promo & Voucher</h1>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola promo dan voucher</p>
-          </div>
-          {can('promos', 'create') && (
-            <button onClick={openAdd} className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-sm font-medium transition">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-              Tambah Promo
-            </button>
-          )}
-        </div>
-
-        {/* Search + Filter */}
-        <div className="bg-white dark:bg-zinc-800 rounded-2xl p-4 shadow-sm mb-5 space-y-3">
-          <input
-            type="text" placeholder="🔍 Cari nama promo..." value={search}
-            onChange={e => setSearch(e.target.value)}
-            className="w-full px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors"
-          />
-          <div className="flex gap-2 flex-wrap">
-            {STATUS_FILTERS.map(f => {
-              const colorMap = {
-                all:      filterStatus === f.key ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400',
-                active:   filterStatus === f.key ? 'bg-green-600 text-white border-green-600' : 'bg-white text-gray-600 border-gray-200 hover:border-green-400',
-                inactive: filterStatus === f.key ? 'bg-gray-500 text-white border-gray-500' : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400',
-                upcoming: filterStatus === f.key ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400',
-                ended:    filterStatus === f.key ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-600 border-gray-200 hover:border-red-300',
-              }
-              const badgeMap = {
-                all:      filterStatus === f.key ? 'bg-white text-gray-800' : 'bg-gray-100 text-gray-500',
-                active:   filterStatus === f.key ? 'bg-white text-green-700' : 'bg-gray-100 text-gray-500',
-                inactive: filterStatus === f.key ? 'bg-white text-gray-600' : 'bg-gray-100 text-gray-500',
-                upcoming: filterStatus === f.key ? 'bg-white text-blue-700' : 'bg-gray-100 text-gray-500',
-                ended:    filterStatus === f.key ? 'bg-white text-red-600' : 'bg-gray-100 text-gray-500',
-              }
-              return (
-                <button key={f.key} onClick={() => setFilterStatus(f.key)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-medium border transition flex items-center gap-1.5 ${colorMap[f.key]}`}>
-                  {f.label}
-                  <span className={`px-1.5 py-0.5 rounded-full text-xs font-bold ${badgeMap[f.key]}`}>
-                    {counts[f.key]}
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
-        {/* Table */}
-        {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            <p className="text-4xl mb-3">🎉</p>
-            <p className="font-medium">Tidak ada promo ditemukan</p>
-            <p className="text-sm mt-1">Coba ubah filter atau kata kunci pencarian</p>
-          </div>
-        ) : (
-          <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm min-w-[800px]">
-                <thead className="bg-gray-50 dark:bg-zinc-900/50 border-b border-gray-100 dark:border-zinc-700">
-                  <tr>
-                    {['No', 'Nama Promo', 'Jenis & Nilai', 'Berlaku Pada', 'Voucher', 'Periode', 'Status', 'Aksi'].map(h => (
-                      <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-zinc-700/50">
-                  {filtered.map((promo, idx) => (
-                    <tr key={getID(promo)} className="hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition">
-                      <td className="px-4 py-3 text-gray-400 dark:text-zinc-500 text-xs">{idx + 1}</td>
-
-                      {/* Nama */}
-                      <td className="px-4 py-3 min-w-[140px]">
-                        <p className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{promo.name}</p>
-                        {promo.max_usage > 0 && (
-                          <p className="text-xs text-gray-400 dark:text-zinc-500 mt-0.5">Terpakai: {promo.used_count || 0}/{promo.max_usage}</p>
-                        )}
-                      </td>
-
-                      {/* Jenis & Nilai */}
-                      <td className="px-4 py-3 min-w-[120px]">
-                        <span className="px-2 py-0.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-xs font-medium block w-fit mb-1">
-                          {promoTypeLabel(promo.promo_type)}
-                        </span>
-                        <span className="font-semibold text-gray-800 dark:text-gray-100 text-sm">{promoValueLabel(promo)}</span>
-                        {promo.promo_type === 'discount' && promo.max_discount > 0 && (
-                          <p className="text-xs text-gray-400 dark:text-zinc-500">maks Rp {Number(promo.max_discount).toLocaleString('id-ID')}</p>
-                        )}
-                      </td>
-
-                      {/* Berlaku Pada */}
-                      <td className="px-4 py-3">
-                        <span className="px-2 py-1 bg-purple-50 text-purple-600 rounded-lg text-xs font-medium">
-                          {appliesToLabel(promo.applies_to)}
-                        </span>
-                      </td>
-
-                      {/* Voucher */}
-                      <td className="px-4 py-3 min-w-[100px]">
-                        {promo.voucher_type === 'none'
-                          ? <span className="text-gray-300 text-xs">-</span>
-                          : promo.voucher_type === 'custom'
-                            ? <span className="font-mono text-xs bg-orange-50 text-orange-600 px-2 py-0.5 rounded">{promo.voucher_code}</span>
-                            : <span className="text-xs bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded">Auto</span>
-                        }
-                      </td>
-
-                      {/* Periode */}
-                      <td className="px-4 py-3 text-xs text-gray-500 dark:text-zinc-400 whitespace-nowrap min-w-[160px]">
-                        <span>{promo.start_date?.split('T')[0]}</span>
-                        <span className="text-gray-300 mx-1">–</span>
-                        <span>{promo.end_date?.split('T')[0]}</span>
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-4 py-3">{statusBadge(promo)}</td>
-
-                      {/* Aksi */}
-                      <td className="px-4 py-3 min-w-[120px]">
-                        <div className="flex gap-1.5">
-                          <button onClick={() => navigate(`/promos/${getID(promo)}`)}
-                            className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium transition whitespace-nowrap">
-                            Detail
-                          </button>
-                          {can('promos', 'edit') && (
-                            <button onClick={() => openEdit(promo)}
-                              className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-xs font-medium transition">
-                              Edit
-                            </button>
-                          )}
-                          {can('promos', 'delete') && (
-                            <button onClick={() => setConfirm({ open: true, id: getID(promo) })}
-                              className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-medium transition">
-                              Hapus
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+        {/* FAB */}
+        {can('promos', 'create') && (
+          <button 
+            onClick={openAdd}
+            className="fixed bottom-10 right-10 w-14 h-14 bg-emerald-600 text-white rounded-full flex items-center justify-center shadow-2xl hover:bg-emerald-700 transition-all hover:scale-110 z-40 group"
+          >
+            <svg className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 4v16m8-8H4" />
+            </svg>
+          </button>
         )}
 
         <ConfirmDialog isOpen={confirm.open} onClose={() => setConfirm({ open: false })} onConfirm={handleDelete} />
