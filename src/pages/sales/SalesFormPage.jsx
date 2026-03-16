@@ -339,7 +339,7 @@ export default function SalesFormPage() {
                     onChange={e => handleItemChange(idx, 'product_id', e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
                   >
-                    <option value="">| Nama Produk...</option>
+                    <option value=""> Nama Produk...</option>
                     {products.map(p => (
                       <option key={p.ID || p.id} value={p.ID || p.id}>{p.name}</option>
                     ))}
