@@ -8,8 +8,8 @@ import { usePermission } from '../../hooks/usePermission'
 const getID = (row) => row.ID || row.id
 
 const DAYS = [
-  { id: '1', label: 'Sen' }, { id: '2', label: 'Sel' }, { id: '3', label: 'Rab' },
-  { id: '4', label: 'Kam' }, { id: '5', label: 'Jum' }, { id: '6', label: 'Sab' }, { id: '7', label: 'Min' },
+  { id: '7', label: 'Minggu' }, { id: '1', label: 'Senin' }, { id: '2', label: 'Selasa' },
+  { id: '3', label: 'Rabu' }, { id: '4', label: 'Kamis' }, { id: '5', label: 'Jumat' }, { id: '6', label: 'Sabtu' },
 ]
 
 const defaultForm = {
@@ -197,298 +197,263 @@ export default function PromoPage() {
   if (showForm) {
     return (
       <Layout title="Promo & Voucher">
-        <div className="max-w-3xl mx-auto">
-          <div className="flex items-center gap-3 mb-6">
-            <button onClick={() => setShowForm(false)} className="p-2 hover:bg-gray-100 rounded-lg transition">
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">{editItem ? 'Edit Promo' : 'Tambah Promo'}</h1>
-              <p className="text-gray-500 text-sm">Isi detail promo & voucher</p>
-            </div>
-          </div>
-
-          <div className="space-y-5">
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-4">Informasi Dasar</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama Promo <span className="text-red-400">*</span></label>
-                  <input type="text" value={form.name}
-                    onChange={e => { setForm(f => ({ ...f, name: e.target.value })); if (errors.name) setErrors(er => ({ ...er, name: '' })) }}
-                    placeholder="Contoh: Promo Gojek 20%"
-                    className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                  {errors.name && <p className="text-xs text-red-400 mt-1">⚠ {errors.name}</p>}
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
-                      <option value="active">Aktif</option>
-                      <option value="inactive">Nonaktif</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Berlaku Pada</label>
-                    <select value={form.applies_to} onChange={e => setForm(f => ({ ...f, applies_to: e.target.value, items: [] }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
-                      <option value="all">Semua Produk</option>
-                      <option value="category">Kategori</option>
-                      <option value="brand">Merek</option>
-                      <option value="product">Produk Tertentu</option>
-                    </select>
-                  </div>
-                </div>
-                {form.applies_to !== 'all' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Pilih {appliesToLabel(form.applies_to)}</label>
-                    <div className="border border-gray-200 rounded-xl p-3 max-h-40 overflow-y-auto space-y-1">
-                      {(form.applies_to === 'category' ? categories : form.applies_to === 'brand' ? brands : products).map(item => {
-                        const itemId = getID(item)
-                        const selected = form.items.some(i => i.ref_id === itemId && i.ref_type === form.applies_to)
-                        return (
-                          <div key={itemId} onClick={() => toggleItem(form.applies_to, itemId, item.name)}
-                            className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${selected ? 'bg-emerald-50 border border-emerald-300' : 'hover:bg-gray-50 border border-transparent'}`}>
-                            <span className="text-sm text-gray-700">{item.name}</span>
-                            <div className={`w-5 h-5 rounded border-2 flex items-center justify-center ${selected ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'}`}>
-                              {selected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                            </div>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-4">Jenis Promo</h3>
-              <div className="grid grid-cols-3 gap-2 mb-4">
-                {[{ value: 'special_price', label: 'Harga Spesial', icon: '🏷️' }, { value: 'discount', label: 'Diskon %', icon: '💸' }, { value: 'cut_price', label: 'Potongan Harga', icon: '✂️' }].map(t => (
-                  <button key={t.value} onClick={() => { setForm(f => ({ ...f, promo_type: t.value, special_prices: [] })); setErrors(er => ({ ...er, discount_pct: '', cut_price: '', special_prices: '' })) }}
-                    className={`p-3 rounded-xl border-2 text-center transition ${form.promo_type === t.value ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                    <p className="text-xl mb-1">{t.icon}</p>
-                    <p className="text-xs font-medium text-gray-700">{t.label}</p>
-                  </button>
-                ))}
+        <div className="max-w-6xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-10">
+          <div className="p-8 space-y-8">
+            <div className="grid grid-cols-2 gap-x-10 gap-y-6">
+              {/* Row 1: Nama & Jenis */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Nama Promo</label>
+                <input type="text" value={form.name}
+                  onChange={e => { setForm(f => ({ ...f, name: e.target.value })); if (errors.name) setErrors(er => ({ ...er, name: '' })) }}
+                  className={`w-full px-4 py-2 border rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400 ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
+                {errors.name && <p className="text-[10px] text-red-400 mt-1">{errors.name}</p>}
               </div>
 
-              {form.promo_type === 'special_price' && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Produk & Harga Spesial
-                    {form.applies_to !== 'all' && form.items.length === 0 && <span className="ml-2 text-xs text-orange-400 font-normal">⚠ Pilih {appliesToLabel(form.applies_to)} dulu di atas</span>}
-                  </label>
-                  {errors.special_prices && <p className="text-xs text-red-400 mb-2">⚠ {errors.special_prices}</p>}
-                  <div className={`border rounded-xl p-3 max-h-40 overflow-y-auto mb-2 space-y-1 ${errors.special_prices ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}>
-                    {(() => {
-                      let fp = products
-                      if (form.applies_to === 'category' && form.items.length > 0) { const ids = form.items.map(i => i.ref_id); fp = products.filter(p => ids.includes(p.category_id)) }
-                      else if (form.applies_to === 'brand' && form.items.length > 0) { const ids = form.items.map(i => i.ref_id); fp = products.filter(p => ids.includes(p.brand_id)) }
-                      else if (form.applies_to === 'product' && form.items.length > 0) { const ids = form.items.map(i => i.ref_id); fp = products.filter(p => ids.includes(getID(p))) }
-                      if (fp.length === 0) return <p className="text-center text-gray-400 text-sm py-4">{form.applies_to !== 'all' && form.items.length === 0 ? `Pilih ${appliesToLabel(form.applies_to)} terlebih dahulu` : 'Tidak ada produk tersedia'}</p>
-                      return fp.map(p => {
-                        const pid = getID(p); const added = form.special_prices.find(s => s.product_id === pid)
-                        return (
-                          <div key={pid} onClick={() => !added && addSpecialPrice(pid, p.name)}
-                            className={`flex items-center justify-between p-2 rounded-lg cursor-pointer transition ${added ? 'bg-emerald-50 border border-emerald-200' : 'hover:bg-gray-50 border border-transparent'}`}>
-                            <div>
-                              <span className="text-sm text-gray-700">{p.name}</span>
-                              {form.applies_to === 'all' && p.category?.name && <span className="ml-2 text-xs text-gray-400">{p.category.name}</span>}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs text-gray-400">Rp {Number(p.price).toLocaleString('id-ID')}</span>
-                              {!added ? <span className="text-xs text-emerald-600">+ Tambah</span> : <span className="text-xs text-emerald-600">✓ Ditambahkan</span>}
-                            </div>
-                          </div>
-                        )
-                      })
-                    })()}
-                  </div>
-                  {form.special_prices.length > 0 && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-gray-400">{form.special_prices.length} produk dipilih:</p>
-                      {form.special_prices.map((sp, idx) => {
-                        const prod = products.find(p => getID(p) === sp.product_id)
-                        return (
-                          <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-xl p-2">
-                            <span className="flex-1 text-sm text-gray-700">{prod?.name || sp.name}</span>
-                            <span className="text-xs text-gray-400">Normal: Rp {Number(prod?.price || 0).toLocaleString('id-ID')}</span>
-                            <div className="relative w-36">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
-                              <input type="number" value={sp.buy_price} onChange={e => updateSpecialPrice(idx, Number(e.target.value))} className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400" placeholder="0" />
-                            </div>
-                            <button onClick={() => removeSpecialPrice(idx)} className="text-red-400 hover:text-red-600">
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                            </button>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  )}
-                </div>
-              )}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Jenis Promo</label>
+                <select value={form.promo_type} 
+                  onChange={e => { setForm(f => ({ ...f, promo_type: e.target.value, special_prices: [] })); setErrors(er => ({ ...er, discount_pct: '', cut_price: '', special_prices: '' })) }}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                >
+                  <option value="discount">Diskon (%)</option>
+                  <option value="cut_price">Potongan Harga (Rp)</option>
+                  <option value="special_price">Harga Spesial</option>
+                </select>
+              </div>
 
+              {/* Detail Promo based on type */}
               {form.promo_type === 'discount' && (
-                <div className="grid grid-cols-2 gap-3">
+                <>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Diskon (%) <span className="text-red-400">*</span></label>
+                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Diskon (%)</label>
                     <input type="number" value={form.discount_pct}
-                      onChange={e => { setForm(f => ({ ...f, discount_pct: Number(e.target.value) })); if (errors.discount_pct) setErrors(er => ({ ...er, discount_pct: '' })) }}
-                      placeholder="0" min="0" max="100"
-                      className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.discount_pct ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                    {errors.discount_pct && <p className="text-xs text-red-400 mt-1">⚠ {errors.discount_pct}</p>}
+                      onChange={e => setForm(f => ({ ...f, discount_pct: Number(e.target.value) }))}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" 
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Maksimal Diskon (Rp)</label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
-                      <input type="number" value={form.max_discount} onChange={e => setForm(f => ({ ...f, max_discount: Number(e.target.value) }))} placeholder="0" className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                    </div>
-                    <p className="text-xs text-gray-400 mt-1">Kosongkan jika tidak ada batas maksimal</p>
+                    <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Maksimal Diskon (Rp)</label>
+                    <input type="number" value={form.max_discount}
+                      onChange={e => setForm(f => ({ ...f, max_discount: Number(e.target.value) }))}
+                      className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" 
+                    />
                   </div>
-                </div>
+                </>
               )}
-
               {form.promo_type === 'cut_price' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Potongan Harga (Rp) <span className="text-red-400">*</span></label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
-                    <input type="number" value={form.cut_price}
-                      onChange={e => { setForm(f => ({ ...f, cut_price: Number(e.target.value) })); if (errors.cut_price) setErrors(er => ({ ...er, cut_price: '' })) }}
-                      placeholder="0"
-                      className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.cut_price ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                  </div>
-                  {errors.cut_price && <p className="text-xs text-red-400 mt-1">⚠ {errors.cut_price}</p>}
+                  <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Potongan Harga (Rp)</label>
+                  <input type="number" value={form.cut_price}
+                    onChange={e => setForm(f => ({ ...f, cut_price: Number(e.target.value) }))}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" 
+                  />
                 </div>
               )}
-            </div>
 
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-4">Syarat Promo</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ketentuan</label>
-                  <select value={form.condition} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
-                    <option value="qty">Min Qty Pembelian</option>
-                    <option value="total">Min Total Pembelian</option>
-                    <option value="qty_or_total">Min Qty atau Total Pembelian</option>
-                    <option value="qty_and_total">Min Qty dan Total Pembelian</option>
+              {/* Row 2: Berlaku Pada */}
+              <div className="col-span-1">
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Promo Berlaku Pada</label>
+                <select value={form.applies_to} onChange={e => setForm(f => ({ ...f, applies_to: e.target.value, items: [] }))} 
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                  <option value="all">Semua Produk</option>
+                  <option value="category">Kategori</option>
+                  <option value="brand">Merek</option>
+                  <option value="product">Produk Tertentu</option>
+                </select>
+              </div>
+
+              {form.applies_to !== 'all' && (
+                <div className="col-span-2">
+                  <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Pilih {appliesToLabel(form.applies_to)}</label>
+                  <div className="grid grid-cols-4 gap-2 border border-gray-100 rounded-xl p-3 max-h-40 overflow-y-auto">
+                    {(form.applies_to === 'category' ? categories : form.applies_to === 'brand' ? brands : products).map(item => {
+                      const itemId = getID(item)
+                      const selected = form.items.some(i => i.ref_id === itemId && i.ref_type === form.applies_to)
+                      return (
+                        <div key={itemId} onClick={() => toggleItem(form.applies_to, itemId, item.name)}
+                          className={`flex items-center gap-2 p-2 rounded cursor-pointer transition ${selected ? 'bg-emerald-50 text-emerald-700' : 'hover:bg-gray-50 text-gray-600'}`}>
+                          <div className={`w-3 h-3 rounded border flex items-center justify-center ${selected ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'}`}>
+                            {selected && <svg className="w-2 h-2 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>}
+                          </div>
+                          <span className="text-[10px] truncate">{item.name}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 3: Syarat & Min Qty */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Syarat Promo</label>
+                <select value={form.condition} onChange={e => setForm(f => ({ ...f, condition: e.target.value }))} 
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                  <option value="qty">Qty Pembelian</option>
+                  <option value="total">Total Pembelian</option>
+                  <option value="qty_or_total">Qty atau Total Pembelian</option>
+                  <option value="qty_and_total">Qty dan Total Pembelian</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">
+                  {form.condition.includes('total') ? 'Min Total Pembelian' : 'Min Qty Produk'}
+                </label>
+                <input type="number" 
+                  value={form.condition.includes('total') ? form.min_total : form.min_qty} 
+                  onChange={e => setForm(f => ({ ...f, [form.condition.includes('total') ? 'min_total' : 'min_qty']: Number(e.target.value) }))}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" />
+                <p className="text-[8px] text-gray-400 mt-1 leading-tight">
+                  Jumlah yang dihitung adalah satuan utama, berlaku pada ketentuan yang dipilih saja
+                </p>
+              </div>
+
+              {/* Row 4: Hari Aktif */}
+              <div className="col-span-2">
+                <label className="block text-[10px] font-bold text-gray-700 mb-3 uppercase tracking-tight">Hari Aktif</label>
+                <div className="flex gap-6">
+                  {DAYS.map(d => (
+                    <label key={d.id} className="flex items-center gap-2 cursor-pointer group">
+                      <div onClick={() => toggleDay(d.id)} className={`w-4 h-4 rounded border flex items-center justify-center transition ${activeDays.includes(d.id) ? 'bg-blue-600 border-blue-600' : 'border-gray-300 group-hover:border-blue-400'}`}>
+                        {activeDays.includes(d.id) && <svg className="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" /></svg>}
+                      </div>
+                      <span className="text-[10px] font-bold text-gray-700">{d.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Row 5: Waktu */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Waktu Mulai</label>
+                <input type="datetime-local" 
+                  value={form.start_date ? `${form.start_date.split('T')[0]}T${form.start_time || '00:00'}` : ''} 
+                  onChange={e => {
+                    const [d, t] = e.target.value.split('T')
+                    setForm(f => ({ ...f, start_date: d, start_time: t }))
+                  }}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" />
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Waktu Berakhir</label>
+                <input type="datetime-local" 
+                  value={form.end_date ? `${form.end_date.split('T')[0]}T${form.end_time || '23:59'}` : ''}
+                  onChange={e => {
+                    const [d, t] = e.target.value.split('T')
+                    setForm(f => ({ ...f, end_date: d, end_time: t }))
+                  }}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" />
+              </div>
+
+              {/* Special Price Table if applicable */}
+              {form.promo_type === 'special_price' && (
+                <div className="col-span-2 space-y-4">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[10px] font-bold text-gray-700 uppercase">Produk & Harga Spesial</label>
+                  </div>
+                  <div className="border border-gray-100 rounded-xl overflow-hidden">
+                    <table className="w-full text-left text-[10px]">
+                      <thead className="bg-gray-50 border-b border-gray-100">
+                        <tr>
+                          <th className="px-4 py-2 font-bold text-gray-600">Nama Produk</th>
+                          <th className="px-4 py-2 font-bold text-gray-600">Harga Normal</th>
+                          <th className="px-4 py-2 font-bold text-gray-600">Harga Spesial</th>
+                          <th className="px-4 py-2 font-bold text-gray-600 text-center">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {form.special_prices.map((sp, idx) => (
+                          <tr key={idx}>
+                            <td className="px-4 py-2 text-gray-700">{sp.name}</td>
+                            <td className="px-4 py-2 text-gray-400">Rp {Number(products.find(p => getID(p) === sp.product_id)?.price || 0).toLocaleString('id-ID')}</td>
+                            <td className="px-4 py-2">
+                              <input type="number" value={sp.buy_price} 
+                                onChange={e => updateSpecialPrice(idx, Number(e.target.value))} 
+                                className="w-24 px-2 py-1 border border-gray-200 rounded" />
+                            </td>
+                            <td className="px-4 py-2 text-center">
+                              <button onClick={() => removeSpecialPrice(idx)} className="text-red-400 hover:text-red-600 font-bold">Hapus</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="flex gap-2">
+                    <select className="flex-1 px-4 py-2 border border-gray-200 rounded-lg text-xs" onChange={e => {
+                      const p = products.find(prod => getID(prod) === Number(e.target.value))
+                      if (p) addSpecialPrice(getID(p), p.name)
+                      e.target.value = ""
+                    }}>
+                      <option value="">+ Tambah Produk</option>
+                      {products.filter(p => !form.special_prices.find(s => s.product_id === getID(p))).map(p => (
+                        <option key={getID(p)} value={getID(p)}>{p.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* Row 6: Tambah Voucher (Header) */}
+              <div className="col-span-2 pt-4 border-t border-gray-100">
+                <h3 className="text-xs font-bold text-gray-800">Tambah Voucher</h3>
+              </div>
+
+              {/* Row 7: Jenis Voucher & Limit */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Jenis Voucher</label>
+                <select value={form.voucher_type} onChange={e => setForm(f => ({ ...f, voucher_type: e.target.value }))}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                  <option value="none">-- Tanpa Voucher --</option>
+                  <option value="custom">Kode Custom</option>
+                  <option value="generate">Generate Otomatis</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Maks Promo Diambil/Qty Voucher</label>
+                <input type="number" value={form.max_usage} onChange={e => setForm(f => ({ ...f, max_usage: Number(e.target.value) }))}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs" />
+                <p className="text-[8px] text-gray-400 mt-1 leading-tight">Biarkan kosong apabila tidak ada limit.</p>
+              </div>
+
+              {form.voucher_type === 'custom' && (
+                <div className="col-span-1">
+                  <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Kode Voucher</label>
+                  <input type="text" value={form.voucher_code} onChange={e => setForm(f => ({ ...f, voucher_code: e.target.value.toUpperCase() }))}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs font-mono" />
+                </div>
+              )}
+
+              {/* Row 8: Status */}
+              <div className="col-span-2 flex justify-end">
+                <div className="w-48">
+                  <label className="block text-[10px] font-bold text-gray-700 mb-2 uppercase tracking-tight">Promo Status</label>
+                  <select value={form.status} onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-emerald-400">
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
                   </select>
                 </div>
-                <div className="grid grid-cols-2 gap-3">
-                  {(form.condition === 'qty' || form.condition === 'qty_or_total' || form.condition === 'qty_and_total') && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Min Qty</label>
-                      <input type="number" value={form.min_qty} onChange={e => setForm(f => ({ ...f, min_qty: Number(e.target.value) }))} min="1" className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                    </div>
-                  )}
-                  {(form.condition === 'total' || form.condition === 'qty_or_total' || form.condition === 'qty_and_total') && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Min Total (Rp)</label>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
-                        <input type="number" value={form.min_total} onChange={e => setForm(f => ({ ...f, min_total: Number(e.target.value) }))} className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                      </div>
-                    </div>
-                  )}
-                </div>
               </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-4">Waktu Aktif</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Hari Aktif</label>
-                  <div className="flex gap-2">
-                    {DAYS.map(d => (
-                      <button key={d.id} onClick={() => toggleDay(d.id)}
-                        className={`flex-1 py-2 rounded-lg text-xs font-medium border transition ${activeDays.includes(d.id) ? 'bg-emerald-500 text-white border-emerald-500' : 'border-gray-200 text-gray-600 hover:border-emerald-300'}`}>
-                        {d.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Waktu Mulai</label>
-                    <input type="time" value={form.start_time} onChange={e => setForm(f => ({ ...f, start_time: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Waktu Berakhir</label>
-                    <input type="time" value={form.end_time} onChange={e => setForm(f => ({ ...f, end_time: e.target.value }))} className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai <span className="text-red-400">*</span></label>
-                    <input type="date" value={form.start_date}
-                      onChange={e => { setForm(f => ({ ...f, start_date: e.target.value })); if (errors.start_date) setErrors(er => ({ ...er, start_date: '' })) }}
-                      className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.start_date ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                    {errors.start_date && <p className="text-xs text-red-400 mt-1">⚠ {errors.start_date}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Tanggal Berakhir <span className="text-red-400">*</span></label>
-                    <input type="date" value={form.end_date}
-                      onChange={e => { setForm(f => ({ ...f, end_date: e.target.value })); if (errors.end_date) setErrors(er => ({ ...er, end_date: '' })) }}
-                      className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.end_date ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                    {errors.end_date && <p className="text-xs text-red-400 mt-1">⚠ {errors.end_date}</p>}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-4">Pengaturan Voucher</h3>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Jenis Voucher</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    {[{ value: 'none', label: 'Tanpa Voucher', icon: '🚫' }, { value: 'custom', label: 'Kode Custom', icon: '🎟️' }, { value: 'generate', label: 'Generate Otomatis', icon: '⚡' }].map(v => (
-                      <button key={v.value} onClick={() => { setForm(f => ({ ...f, voucher_type: v.value })); setErrors(er => ({ ...er, voucher_code: '', max_usage: '' })) }}
-                        className={`p-3 rounded-xl border-2 text-center transition ${form.voucher_type === v.value ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
-                        <p className="text-xl mb-1">{v.icon}</p>
-                        <p className="text-xs font-medium text-gray-700">{v.label}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                {form.voucher_type === 'custom' && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Kode Voucher <span className="text-red-400">*</span></label>
-                    <input type="text" value={form.voucher_code}
-                      onChange={e => { setForm(f => ({ ...f, voucher_code: e.target.value.toUpperCase() })); if (errors.voucher_code) setErrors(er => ({ ...er, voucher_code: '' })) }}
-                      placeholder="Contoh: DISKON20"
-                      className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono ${errors.voucher_code ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                    {errors.voucher_code && <p className="text-xs text-red-400 mt-1">⚠ {errors.voucher_code}</p>}
-                  </div>
-                )}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {form.voucher_type === 'generate' ? <>Jumlah Voucher <span className="text-red-400">*</span></> : 'Maks Penggunaan Promo'}
-                  </label>
-                  <input type="number" value={form.max_usage}
-                    onChange={e => { setForm(f => ({ ...f, max_usage: Number(e.target.value) })); if (errors.max_usage) setErrors(er => ({ ...er, max_usage: '' })) }}
-                    placeholder={form.voucher_type === 'generate' ? 'Jumlah voucher' : '0 = tidak terbatas'} min="0"
-                    className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.max_usage ? 'border-red-400 bg-red-50' : 'border-gray-200'}`} />
-                  {errors.max_usage && <p className="text-xs text-red-400 mt-1">⚠ {errors.max_usage}</p>}
-                  {form.voucher_type !== 'generate' && <p className="text-xs text-gray-400 mt-1">Isi 0 jika tidak ada batas penggunaan</p>}
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pb-6">
-              <button onClick={() => setShowForm(false)} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 text-sm font-medium transition">Batal</button>
-              <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-xl text-sm font-medium transition">
-                {saving ? 'Menyimpan...' : editItem ? 'Simpan Perubahan' : 'Simpan Promo'}
-              </button>
             </div>
           </div>
+
+          <button 
+            disabled={saving}
+            onClick={handleSave}
+            className="w-full py-4 bg-[#343A40] text-white text-xs font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors disabled:bg-gray-400"
+          >
+            {saving ? 'Sedang Menyimpan...' : 'Simpan'}
+          </button>
         </div>
+
+        <button 
+          onClick={() => setShowForm(false)}
+          className="mx-auto block text-[10px] font-bold text-gray-500 hover:text-gray-700 transition-colors mb-20"
+        >
+          KEMBALI KE DAFTAR
+        </button>
       </Layout>
     )
   }
