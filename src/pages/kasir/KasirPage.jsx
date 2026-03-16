@@ -14,6 +14,8 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
   const [nameError, setNameError]       = useState('')
   const [autoPromos, setAutoPromos]     = useState([])
   const [selectedPromo, setSelectedPromo] = useState(null)
+  const [priceCategories, setPriceCategories] = useState([])
+  const [selectedLevelId, setSelectedLevelId] = useState('')
   const [loadingPromos, setLoadingPromos] = useState(false)
   const [voucherCode, setVoucherCode]   = useState('')
   const [voucherError, setVoucherError] = useState('')
@@ -52,6 +54,42 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
     }
     fetchPromos()
   }, [JSON.stringify(cart), subtotal])
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      try {
+        const res = await api.get('/price-categories')
+        setPriceCategories(res.data?.data || [])
+      } catch {}
+    }
+    fetchCats()
+  }, [])
+
+  const handleLevelChange = async (levelId) => {
+    setSelectedLevelId(levelId)
+    // Update all items in cart with new prices from this level
+    for (let i = 0; i < cart.length; i++) {
+      const item = cart[i]
+      let newBasePrice = 0
+      if (!levelId) {
+        // Fallback to original product price (need to find it from products or store it)
+        // For simplicity, let's assume we can fetch it or it's in the item
+        newBasePrice = item.originalPrice || item.price 
+      } else {
+        try {
+          const res = await api.get(`/products/${getID(item)}/prices`)
+          const custom = res.data?.data?.find(p => String(p.price_category_id || p.PriceCategoryID) === String(levelId))
+          newBasePrice = (custom && custom.price > 0) ? custom.price : (item.originalPrice || item.price)
+        } catch {
+          newBasePrice = item.originalPrice || item.price
+        }
+      }
+      
+      // Re-calculate with variants extra
+      const extra = (item.variantOptions || []).reduce((s, v) => s + (v.additionalPrice || 0), 0)
+      onUpdateQty(i, item.qty, newBasePrice + extra)
+    }
+  }
 
   const checkVoucher = async () => {
     if (!voucherCode.trim()) return
@@ -94,6 +132,7 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
     try {
       const payload = {
         payment_method_id: Number(selectedPayments[0].method_id),
+        price_category_id: selectedLevelId ? Number(selectedLevelId) : undefined,
         promo_id: selectedPromo?.promo_id || undefined,
         customer_name: customerName,
         source: 'pos',
@@ -229,6 +268,21 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
                   </div>
                 </div>
               ))}
+
+              {/* Pilih Level Harga */}
+              <div className="border border-gray-100 rounded-2xl p-3 bg-white">
+                <label className="block text-xs font-semibold text-gray-600 mb-2">💰 Tingkat Harga</label>
+                <select 
+                  value={selectedLevelId}
+                  onChange={e => handleLevelChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-gray-50 font-medium"
+                >
+                  <option value="">Harga Normal / Retail</option>
+                  {priceCategories.map(pc => (
+                    <option key={getID(pc)} value={getID(pc)}>{pc.name}</option>
+                  ))}
+                </select>
+              </div>
 
               {/* Promo Otomatis */}
               <div className="border border-gray-100 rounded-2xl overflow-hidden">
@@ -597,13 +651,13 @@ export default function KasirPage() {
         updated[idx] = { ...updated[idx], qty: updated[idx].qty + (item.qty || 1) }
         return updated
       }
-      return [...c, { ...item, qty: item.qty || 1 }]
+      return [...c, { ...item, qty: item.qty || 1, originalPrice: item.price }]
     })
   }
 
-  const updateQty = (idx, qty) => {
+  const updateQty = (idx, qty, newPrice) => {
     if (qty <= 0) setCart(c => c.filter((_, i) => i !== idx))
-    else setCart(c => c.map((item, i) => i === idx ? { ...item, qty } : item))
+    else setCart(c => c.map((item, i) => i === idx ? { ...item, qty, price: newPrice !== undefined ? newPrice : item.price } : item))
   }
 
   const removeFromCart = (idx) => setCart(c => c.filter((_, i) => i !== idx))

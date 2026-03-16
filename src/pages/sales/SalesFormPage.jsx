@@ -17,10 +17,12 @@ export default function SalesFormPage() {
   const [products, setProducts] = useState([])
   const [paymentMethods, setPaymentMethods] = useState([])
   const [promos, setPromos] = useState([])
+  const [priceCategories, setPriceCategories] = useState([])
   
   const [formData, setFormData] = useState({
     customer_name: 'Umum',
     payment_method_id: '',
+    price_category_id: '',
     promo_id: '',
     items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0 }]
   })
@@ -32,14 +34,16 @@ export default function SalesFormPage() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [pRes, pmRes, promoRes] = await Promise.all([
+      const [pRes, pmRes, promoRes, pcRes] = await Promise.all([
         api.get('/products'),
         api.get('/payment-methods'),
-        api.get('/promos')
+        api.get('/promos'),
+        api.get('/price-categories')
       ])
       setProducts(pRes.data?.data || [])
       setPaymentMethods(pmRes.data?.data || [])
       setPromos((promoRes.data?.data || []).filter(p => p.status === 'active'))
+      setPriceCategories(pcRes.data?.data || [])
       
       if (isEdit) {
         const sRes = await api.get(`/sales/${id}`)
@@ -47,6 +51,7 @@ export default function SalesFormPage() {
         setFormData({
           customer_name: s.customer_name || s.CustomerName,
           payment_method_id: s.payment_method_id || s.PaymentMethodID,
+          price_category_id: s.price_category_id || s.PriceCategoryID || '',
           promo_id: s.promo_id || s.PromoID || '',
           items: (s.items || s.Items).map(item => ({
             product_id: item.product_id || item.ProductID,
@@ -80,17 +85,70 @@ export default function SalesFormPage() {
     }))
   }
 
-  const handleItemChange = (idx, field, value) => {
+  const handleItemChange = async (idx, field, value) => {
     const newItems = [...formData.items]
     const item = { ...newItems[idx], [field]: value }
     
     if (field === 'product_id') {
-      const prod = products.find(p => String(p.ID || p.id) === String(value))
-      item.price = prod?.price || 0
+      let price = 0
+      if (!formData.price_category_id) {
+        const prod = products.find(p => String(p.ID || p.id) === String(value))
+        price = prod?.price || 0
+      } else {
+        try {
+          const res = await api.get(`/products/${value}/prices`)
+          const custom = res.data?.data?.find(p => String(p.price_category_id || p.PriceCategoryID) === String(formData.price_category_id))
+          if (custom && custom.price > 0) {
+            price = custom.price
+          } else {
+            const prod = products.find(p => String(p.ID || p.id) === String(value))
+            price = prod?.price || 0
+          }
+        } catch {
+          const prod = products.find(p => String(p.ID || p.id) === String(value))
+          price = prod?.price || 0
+        }
+      }
+      item.price = price
     }
     
     item.subtotal = item.price * item.quantity
     newItems[idx] = item
+    setFormData(prev => ({ ...prev, items: newItems }))
+  }
+
+  const handlePriceCategoryChange = async (catId) => {
+    setFormData(prev => ({ ...prev, price_category_id: catId }))
+    
+    // Update all item prices
+    const newItems = await Promise.all(formData.items.map(async item => {
+      if (!item.product_id) return item
+      
+      let price = 0
+      if (!catId) {
+        // Balik ke harga default
+        const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+        price = prod?.price || 0
+      } else {
+        try {
+          // Cek harga khusus dari API
+          const res = await api.get(`/products/${item.product_id}/prices`)
+          const custom = res.data?.data?.find(p => String(p.price_category_id || p.PriceCategoryID) === String(catId))
+          if (custom && custom.price > 0) {
+            price = custom.price
+          } else {
+            const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+            price = prod?.price || 0
+          }
+        } catch {
+          const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+          price = prod?.price || 0
+        }
+      }
+      
+      return { ...item, price, subtotal: price * item.quantity }
+    }))
+    
     setFormData(prev => ({ ...prev, items: newItems }))
   }
 
@@ -178,6 +236,7 @@ export default function SalesFormPage() {
         customer_name: formData.customer_name,
         source: 'dashboard',
         payment_method_id: Number(formData.payment_method_id),
+        price_category_id: formData.price_category_id ? Number(formData.price_category_id) : null,
         promo_id: formData.promo_id ? Number(formData.promo_id) : null,
         items: formData.items.map(i => ({
           product_id: Number(i.product_id),
@@ -229,6 +288,19 @@ export default function SalesFormPage() {
                 <option value="">Pilih...</option>
                 {paymentMethods.map(m => (
                   <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Tingkat Harga</label>
+              <select 
+                value={formData.price_category_id}
+                onChange={e => handlePriceCategoryChange(e.target.value)}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-medium"
+              >
+                <option value="">Harga Normal</option>
+                {priceCategories.map(pc => (
+                  <option key={pc.ID || pc.id} value={pc.ID || pc.id}>{pc.Name || pc.name}</option>
                 ))}
               </select>
             </div>
