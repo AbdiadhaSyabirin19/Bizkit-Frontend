@@ -103,16 +103,59 @@ export default function SalesFormPage() {
     const promo = promos.find(p => String(p.ID || p.id) === String(formData.promo_id))
     if (!promo) return 0
 
+    // Cek syarat minimum
     const subtotal = calculateSubtotal()
-    let discount = 0
+    const totalQty = formData.items.reduce((s, i) => s + Number(i.quantity), 0)
+    
+    const minTotal = promo.min_total || promo.MinTotal || 0
+    const minQty = promo.min_qty || promo.MinQty || 0
+    
+    if (minTotal > 0 && subtotal < minTotal) return 0
+    if (minQty > 0 && totalQty < minQty) return 0
 
-    if (promo.promo_type === 'discount' || promo.PromoType === 'discount') {
-        const pct = promo.discount_pct || promo.DiscountPct || 0
-        discount = subtotal * (pct / 100)
-        const max = promo.max_discount || promo.MaxDiscount || 0
-        if (max > 0 && discount > max) discount = max
-    } else if (promo.promo_type === 'cut_price' || promo.PromoType === 'cut_price') {
-        discount = promo.cut_price || promo.CutPrice || 0
+    // Cek cakupan produk (applies_to)
+    const appliesTo = promo.applies_to || promo.AppliesTo || 'all'
+    let applicableSubtotal = 0
+
+    if (appliesTo === 'all') {
+      applicableSubtotal = subtotal
+    } else {
+      const promoItems = promo.items || promo.Items || []
+      formData.items.forEach(item => {
+        const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
+        if (!prod) return
+
+        const isMatch = promoItems.some(pi => {
+          if (pi.ref_type === 'product' || pi.RefType === 'product') {
+            return String(pi.ref_id || pi.RefID) === String(item.product_id)
+          }
+          if (pi.ref_type === 'category' || pi.RefType === 'category') {
+            return String(pi.ref_id || pi.RefID) === String(prod.category_id || prod.CategoryID)
+          }
+          if (pi.ref_type === 'brand' || pi.RefType === 'brand') {
+            return String(pi.ref_id || pi.RefID) === String(prod.brand_id || prod.BrandID)
+          }
+          return false
+        })
+
+        if (isMatch) {
+          applicableSubtotal += item.subtotal
+        }
+      })
+    }
+
+    if (applicableSubtotal <= 0) return 0
+
+    let discount = 0
+    const type = promo.promo_type || promo.PromoType
+    if (type === 'discount') {
+      const pct = promo.discount_pct || promo.DiscountPct || 0
+      discount = applicableSubtotal * (pct / 100)
+      const max = promo.max_discount || promo.MaxDiscount || 0
+      if (max > 0 && discount > max) discount = max
+    } else if (type === 'cut_price') {
+      discount = promo.cut_price || promo.CutPrice || 0
+      if (discount > applicableSubtotal) discount = applicableSubtotal
     }
 
     return discount
