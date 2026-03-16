@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import api from '../../api/axios'
+import Layout from '../../components/Layout'
 
 const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID')
 
@@ -14,10 +15,12 @@ export default function SalesFormPage() {
   
   const [products, setProducts] = useState([])
   const [paymentMethods, setPaymentMethods] = useState([])
+  const [promos, setPromos] = useState([])
   
   const [formData, setFormData] = useState({
     customer_name: 'Umum',
     payment_method_id: '',
+    promo_id: '',
     items: [{ product_id: '', quantity: 1, price: 0, subtotal: 0 }]
   })
 
@@ -28,12 +31,14 @@ export default function SalesFormPage() {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const [pRes, pmRes] = await Promise.all([
+      const [pRes, pmRes, promoRes] = await Promise.all([
         api.get('/products'),
-        api.get('/payment-methods')
+        api.get('/payment-methods'),
+        api.get('/promos')
       ])
       setProducts(pRes.data?.data || [])
       setPaymentMethods(pmRes.data?.data || [])
+      setPromos((promoRes.data?.data || []).filter(p => p.status === 'active'))
       
       if (isEdit) {
         const sRes = await api.get(`/sales/${id}`)
@@ -41,6 +46,7 @@ export default function SalesFormPage() {
         setFormData({
           customer_name: s.customer_name || s.CustomerName,
           payment_method_id: s.payment_method_id || s.PaymentMethodID,
+          promo_id: s.promo_id || s.PromoID || '',
           items: (s.items || s.Items).map(item => ({
             product_id: item.product_id || item.ProductID,
             quantity: item.quantity || item.Quantity,
@@ -87,8 +93,32 @@ export default function SalesFormPage() {
     setFormData(prev => ({ ...prev, items: newItems }))
   }
 
-  const calculateTotal = () => {
+  const calculateSubtotal = () => {
     return formData.items.reduce((sum, item) => sum + item.subtotal, 0)
+  }
+
+  const calculateDiscount = () => {
+    if (!formData.promo_id) return 0
+    const promo = promos.find(p => String(p.ID || p.id) === String(formData.promo_id))
+    if (!promo) return 0
+
+    const subtotal = calculateSubtotal()
+    let discount = 0
+
+    if (promo.promo_type === 'discount' || promo.PromoType === 'discount') {
+        const pct = promo.discount_pct || promo.DiscountPct || 0
+        discount = subtotal * (pct / 100)
+        const max = promo.max_discount || promo.MaxDiscount || 0
+        if (max > 0 && discount > max) discount = max
+    } else if (promo.promo_type === 'cut_price' || promo.PromoType === 'cut_price') {
+        discount = promo.cut_price || promo.CutPrice || 0
+    }
+
+    return discount
+  }
+
+  const calculateGrandTotal = () => {
+    return calculateSubtotal() - calculateDiscount()
   }
 
   const handleSubmit = async (e) => {
@@ -103,6 +133,7 @@ export default function SalesFormPage() {
       const payload = {
         ...formData,
         payment_method_id: Number(formData.payment_method_id),
+        promo_id: formData.promo_id ? Number(formData.promo_id) : null,
         items: formData.items.map(i => ({
           product_id: Number(i.product_id),
           quantity: Number(i.quantity)
@@ -129,16 +160,7 @@ export default function SalesFormPage() {
   )
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-gray-100 rounded-xl transition">
-          <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-        <h1 className="text-2xl font-bold text-gray-800">{isEdit ? 'Edit Penjualan' : 'Input Penjualan'}</h1>
-      </div>
-
+    <Layout title={isEdit ? 'Edit Penjualan' : 'Input Penjualan'}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
           <div>
@@ -151,18 +173,33 @@ export default function SalesFormPage() {
               className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
             />
           </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Metode Pembayaran</label>
-            <select 
-              value={formData.payment_method_id}
-              onChange={e => setFormData(prev => ({ ...prev, payment_method_id: e.target.value }))}
-              className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
-            >
-              <option value="">Pilih Metode...</option>
-              {paymentMethods.map(m => (
-                <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
-              ))}
-            </select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Metode Bayar</label>
+              <select 
+                value={formData.payment_method_id}
+                onChange={e => setFormData(prev => ({ ...prev, payment_method_id: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              >
+                <option value="">Pilih...</option>
+                {paymentMethods.map(m => (
+                  <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Promo (Opsional)</label>
+              <select 
+                value={formData.promo_id}
+                onChange={e => setFormData(prev => ({ ...prev, promo_id: e.target.value }))}
+                className="w-full px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 transition"
+              >
+                <option value="">Tanpa Promo</option>
+                {promos.map(p => (
+                  <option key={p.ID || p.id} value={p.ID || p.id}>{p.name || p.Name}</option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -239,10 +276,22 @@ export default function SalesFormPage() {
             </table>
           </div>
 
-          <div className="p-6 bg-gray-50/50 flex justify-end">
-            <div className="text-right">
-              <p className="text-sm text-gray-500 font-medium">Grand Total</p>
-              <p className="text-2xl font-black text-emerald-600">{formatRp(calculateTotal())}</p>
+          <div className="p-6 bg-gray-50/50 border-t border-gray-100">
+            <div className="max-w-xs ml-auto space-y-2">
+              <div className="flex justify-between text-sm text-gray-500">
+                <span>Subtotal</span>
+                <span className="font-bold text-gray-700">{formatRp(calculateSubtotal())}</span>
+              </div>
+              {calculateDiscount() > 0 && (
+                <div className="flex justify-between text-sm text-red-500">
+                  <span>Diskon</span>
+                  <span className="font-bold">- {formatRp(calculateDiscount())}</span>
+                </div>
+              )}
+              <div className="flex justify-between items-end pt-2 border-t border-gray-200">
+                <p className="text-sm text-gray-700 font-bold">Grand Total</p>
+                <p className="text-2xl font-black text-emerald-600">{formatRp(calculateGrandTotal())}</p>
+              </div>
             </div>
           </div>
         </div>
@@ -265,6 +314,6 @@ export default function SalesFormPage() {
           </button>
         </div>
       </form>
-    </div>
+    </Layout>
   )
 }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
+import Layout from '../../components/Layout'
 
 const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID')
 const formatDate = (str) => {
@@ -56,7 +57,7 @@ export default function SalesDetailPage() {
   if (!sale) return null
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <Layout title="Detail Penjualan">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <button onClick={() => navigate('/sales')} className="p-2 hover:bg-gray-100 rounded-xl transition text-gray-600">
@@ -65,7 +66,6 @@ export default function SalesDetailPage() {
             </svg>
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Detail Penjualan</h1>
             <p className="text-emerald-600 font-mono text-sm font-bold uppercase tracking-wider">{sale.invoice_number || sale.InvoiceNumber}</p>
           </div>
         </div>
@@ -167,6 +167,6 @@ export default function SalesDetailPage() {
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   )
 }
