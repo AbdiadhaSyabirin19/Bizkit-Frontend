@@ -366,16 +366,6 @@ export default function ProductFormPage() {
               />
               <label htmlFor="showOutlets" className="text-sm text-gray-800 font-medium">Semua Outlet</label>
             </div>
-            
-            <div className="flex items-center gap-3">
-              <input 
-                type="checkbox" 
-                id="tampilPenjualan"
-                defaultChecked={true}
-                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
-              />
-              <label htmlFor="tampilPenjualan" className="text-sm text-gray-800 font-medium italic">Tampil Penjualan di Dagashi</label>
-            </div>
           </div>
 
           <div className="bg-[#C7D2FE] rounded-lg overflow-hidden border border-gray-200">

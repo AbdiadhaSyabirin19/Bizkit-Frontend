@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import api from '../../api/axios'
 
-const getID = (row) => row.ID || row.id
+
 
 export default function VariantFormPage() {
   const navigate = useNavigate()
@@ -96,184 +96,160 @@ export default function VariantFormPage() {
 
   return (
     <Layout title={isEdit ? 'Edit Varian' : 'Tambah Varian'}>
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
+        <div className="space-y-6">
+          {/* Main Info Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Kategori Varian</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => {
+                    setForm(f => ({ ...f, name: e.target.value }))
+                    if (errors.name) setErrors(er => ({ ...er, name: '' }))
+                  }}
+                  placeholder="Enter Name"
+                  className={`w-full px-4 py-3 bg-white border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${
+                    errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200 focus:border-emerald-500'
+                  }`}
+                  autoFocus
+                />
+                {errors.name && <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                  {errors.name}
+                </p>}
+              </div>
 
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate('/variants')} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600 dark:text-zinc-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">{isEdit ? 'Edit Varian' : 'Tambah Varian'}</h1>
-            <p className="text-gray-500 text-sm">{isEdit ? 'Perbarui data varian' : 'Tambah varian baru'}</p>
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Deskripsi Kategori Varian</label>
+                <input
+                  type="text"
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Enter Description"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Dipilih Minimal</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={form.min_select}
+                    onChange={e => setForm(f => ({ ...f, min_select: e.target.value }))}
+                    className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Dipilih Maksimal</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={form.max_select}
+                    onChange={e => {
+                      setForm(f => ({ ...f, max_select: e.target.value }))
+                      if (errors.max_select) setErrors(er => ({ ...er, max_select: '' }))
+                    }}
+                    className={`w-full px-4 py-3 bg-white border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${
+                      errors.max_select ? 'border-red-300 bg-red-50' : 'border-gray-200 focus:border-emerald-500'
+                    }`}
+                  />
+                  {errors.max_select && <p className="text-xs text-red-500 mt-2">{errors.max_select}</p>}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <input 
+                  type="checkbox" 
+                  id="statusAktif"
+                  checked={form.status === 'active'}
+                  onChange={e => setForm(f => ({ ...f, status: e.target.checked ? 'active' : 'inactive' }))}
+                  className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                />
+                <label htmlFor="statusAktif" className="text-sm text-gray-800 font-medium">Aktif</label>
+              </div>
+            </div>
+          </div>
+
+          {/* Variants Section */}
+          <div className="bg-[#EDF2FF] rounded-xl border border-indigo-100 overflow-hidden min-h-[200px] relative">
+            <div className="p-6">
+              <h2 className="text-2xl font-semibold text-indigo-900 mb-6">Varian</h2>
+              
+              <div className="space-y-4">
+                {form.options.map((opt, idx) => (
+                  <div key={idx} className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 relative group animate-in fade-in slide-in-from-top-2 duration-300">
+                    <button 
+                      onClick={() => removeOption(idx)}
+                      className="absolute -top-2 -right-2 w-7 h-7 bg-red-500 text-white rounded-full flex items-center justify-center shadow-md hover:bg-red-600 transition active:scale-95 opacity-0 group-hover:opacity-100"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Varian #{idx + 1}</label>
+                        <input
+                          type="text"
+                          value={opt.name}
+                          onChange={e => updateOption(idx, 'name', e.target.value)}
+                          placeholder="Nama Varian"
+                          className="w-full px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-lg text-sm focus:bg-white focus:border-emerald-500 transition-all font-medium"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Harga Varian</label>
+                        <div className="flex items-center bg-gray-50 border border-gray-100 rounded-lg overflow-hidden focus-within:bg-white focus-within:border-emerald-500 transition-all">
+                          <span className="px-3 text-[10px] text-gray-400 font-bold border-r border-gray-100">Rp</span>
+                          <input
+                            type="number"
+                            value={opt.additional_price}
+                            onChange={e => updateOption(idx, 'additional_price', e.target.value)}
+                            className="w-full px-4 py-2.5 bg-transparent text-sm focus:outline-none font-medium"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 mt-4">
+                      <input 
+                        type="checkbox" 
+                        id={`optAktif-${idx}`}
+                        defaultChecked={true}
+                        className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                      />
+                      <label htmlFor={`optAktif-${idx}`} className="text-sm text-gray-800 font-medium tracking-tight">Aktif</label>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Float Add Button */}
+              <div className="flex justify-end mt-6">
+                <button 
+                  onClick={addOption}
+                  className="w-10 h-10 bg-[#0c4a6e] hover:bg-[#075985] text-white rounded-lg flex items-center justify-center shadow-lg transition active:scale-95"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 6v12m6-6H6" /></svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-4">
-
-          {/* Info Dasar */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 space-y-3">
-            <h3 className="font-semibold text-gray-800 dark:text-white">Informasi Varian</h3>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Varian <span className="text-red-400">*</span></label>
-              <input
-                type="text"
-                value={form.name}
-                onChange={e => {
-                  setForm(f => ({ ...f, name: e.target.value }))
-                  if (errors.name) setErrors(er => ({ ...er, name: '' }))
-                }}
-                placeholder="Contoh: Level Pedas, Topping, Ukuran"
-                className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                autoFocus
-              />
-              {errors.name && <p className="text-xs text-red-400 mt-1">⚠ {errors.name}</p>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-              <textarea
-                value={form.description}
-                onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Deskripsi varian (opsional)"
-                rows={2}
-                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
-              />
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Min Pilihan</label>
-                <input
-                  type="number"
-                  min="0"
-                  value={form.min_select}
-                  onChange={e => setForm(f => ({ ...f, min_select: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Maks Pilihan</label>
-                <input
-                  type="number"
-                  min="1"
-                  value={form.max_select}
-                  onChange={e => {
-                    setForm(f => ({ ...f, max_select: e.target.value }))
-                    if (errors.max_select) setErrors(er => ({ ...er, max_select: '' }))
-                  }}
-                  className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.max_select ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                />
-                {errors.max_select && <p className="text-xs text-red-400 mt-1">⚠ {errors.max_select}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                <select
-                  value={form.status}
-                  onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                  className="w-full px-4 py-2.5 border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 rounded-xl text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-                >
-                  <option value="active">Aktif</option>
-                  <option value="inactive">Nonaktif</option>
-                </select>
-              </div>
-            </div>
-          </div>
-
-          {/* Opsi Varian */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <div className="flex items-center justify-between mb-3">
-              <div>
-                <h3 className="font-semibold text-gray-800 dark:text-white">Opsi Varian</h3>
-                <p className="text-xs text-gray-400 dark:text-zinc-500">Isi harga tambahan jika ada biaya ekstra</p>
-              </div>
-              <button
-                onClick={addOption}
-                className="flex items-center gap-1 text-emerald-600 hover:text-emerald-700 text-xs font-medium bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-lg transition"
-              >
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Opsi
-              </button>
-            </div>
-            {errors.options && <p className="text-xs text-red-400 mb-2">⚠ {errors.options}</p>}
-
-            {/* Header kolom */}
-            <div className="grid grid-cols-12 gap-2 mb-1 px-1">
-              <div className="col-span-6"><span className="text-xs text-gray-400 font-medium">Nama Opsi</span></div>
-              <div className="col-span-5"><span className="text-xs text-gray-400 font-medium">Harga Tambahan</span></div>
-            </div>
-
-            <div className="space-y-2">
-              {form.options.map((opt, idx) => (
-                <div key={idx} className="grid grid-cols-12 gap-2 items-center bg-gray-50 rounded-xl p-2">
-                  <div className="col-span-6">
-                    <input
-                      type="text"
-                      value={opt.name}
-                      onChange={e => updateOption(idx, 'name', e.target.value)}
-                      placeholder="Contoh: Level 1, Keju, Panas"
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
-                    />
-                  </div>
-                  <div className="col-span-5 relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
-                    <input
-                      type="number"
-                      value={opt.additional_price}
-                      onChange={e => updateOption(idx, 'additional_price', e.target.value)}
-                      placeholder="0"
-                      min="0"
-                      className="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 bg-white"
-                    />
-                  </div>
-                  <div className="col-span-1 flex justify-center">
-                    {form.options.length > 1 ? (
-                      <button
-                        onClick={() => removeOption(idx)}
-                        className="w-7 h-7 flex items-center justify-center text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    ) : <div className="w-7 h-7" />}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Preview */}
-            {form.options.some(o => o.name.trim()) && (
-              <div className="mt-3 p-3 bg-emerald-50 rounded-xl">
-                <p className="text-xs font-medium text-emerald-700 mb-2">Preview Opsi:</p>
-                <div className="flex flex-wrap gap-2">
-                  {form.options.filter(o => o.name.trim()).map((o, i) => (
-                    <div key={i} className="flex items-center gap-1.5 bg-white border border-emerald-200 rounded-lg px-2.5 py-1">
-                      <span className="text-sm text-gray-700">{o.name}</span>
-                      {Number(o.additional_price) > 0 ? (
-                        <span className="text-xs text-orange-500 font-medium">+Rp {Number(o.additional_price).toLocaleString('id-ID')}</span>
-                      ) : (
-                        <span className="text-xs text-gray-400 dark:text-zinc-500">Gratis</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Tombol */}
-          <div className="flex gap-3 pb-6">
-            <button onClick={() => navigate('/variants')} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 text-sm font-medium transition">Batal</button>
-            <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-xl text-sm font-medium transition">
-              {saving ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Tambah Varian'}
-            </button>
-          </div>
+        {/* Fixed Save Button */}
+        <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 z-10">
+          <button 
+            onClick={handleSave} 
+            disabled={saving}
+            className="w-full py-4 bg-[#374151] hover:bg-[#1f2937] text-white rounded-xl font-bold text-sm shadow-lg transition-all active:scale-[0.99] disabled:opacity-50"
+          >
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
         </div>
       </div>
     </Layout>
