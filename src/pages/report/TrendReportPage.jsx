@@ -416,10 +416,6 @@ export default function TrendReportPage() {
   return (
     <Layout title="Trend Penjualan">
       <div className="max-w-5xl mx-auto">
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Trend Penjualan</h1>
-          <p className="text-gray-500 dark:text-zinc-400 text-sm">Analisis tren penjualan per produk atau kategori</p>
-        </div>
 
         {/* Tab */}
         <div className="flex gap-0 mb-5 border-b border-gray-200 dark:border-zinc-700">

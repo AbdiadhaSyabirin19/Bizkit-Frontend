@@ -128,10 +128,6 @@ export default function RoleFormPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">{isEdit ? 'Edit Role' : 'Tambah Role'}</h1>
-            <p className="text-gray-500 text-sm mt-0.5">Kelola nama dan hak akses per modul</p>
-          </div>
         </div>
 
         <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 space-y-8">
@@ -150,8 +146,7 @@ export default function RoleFormPage() {
 
           {/* Permissions Table */}
           <div>
-            <div className="flex items-center justify-between mb-4 px-2">
-              <h3 className="text-base font-bold text-gray-800">Hak Akses Modul</h3>
+            <div className="flex items-center justify-between mb-4">
               <button 
                 type="button"
                 onClick={() => toggleAll(!isAllChecked)}

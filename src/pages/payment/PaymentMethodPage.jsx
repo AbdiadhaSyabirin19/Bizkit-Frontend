@@ -41,10 +41,6 @@ export default function PaymentMethodPage() {
     <Layout title="Metode Pembayaran">
       <div className="max-w-7xl mx-auto px-4 py-8">
         
-        {/* Header Label */}
-        <div className="mb-6">
-           <h1 className="text-xl font-bold text-gray-800">Metode Pembayaran</h1>
-        </div>
 
         <div className="bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-8 space-y-6">
           
@@ -61,10 +57,10 @@ export default function PaymentMethodPage() {
 
           {/* Table Section */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/30">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-24 tracking-wider">
+                <tr className="bg-gray-50/30">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-24 border border-gray-100">
                     <div className="flex items-center gap-2">
                        No
                        <div className="flex flex-col text-[8px] opacity-30">
@@ -73,7 +69,7 @@ export default function PaymentMethodPage() {
                        </div>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider border border-gray-100">
                      <div className="flex items-center gap-2">
                        Payment Method Name
                        <div className="flex flex-col text-[8px] opacity-30">
@@ -82,7 +78,7 @@ export default function PaymentMethodPage() {
                        </div>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-32">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-32 border border-gray-100">
                      <div className="flex items-center gap-2">
                        Aksi
                        <div className="flex flex-col text-[8px] opacity-30">
@@ -93,17 +89,17 @@ export default function PaymentMethodPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody>
                 {loading ? (
-                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic">Memuat data...</td></tr>
+                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic border border-gray-100">Memuat data...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic">Tidak ada data metode pembayaran</td></tr>
+                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic border border-gray-100">Tidak ada data metode pembayaran</td></tr>
                 ) : (
                   filtered.map((row, idx) => (
                     <tr key={row.ID} className="hover:bg-gray-50/50 transition-colors group">
-                      <td className="px-6 py-4 text-sm text-gray-600 font-medium group-hover:text-emerald-600 transition-colors">{idx + 1}</td>
-                      <td className="px-6 py-4 text-sm text-gray-800 font-semibold">{row.name || row.Name}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-sm text-gray-600 font-medium group-hover:text-emerald-600 transition-colors border border-gray-100">{idx + 1}</td>
+                      <td className="px-6 py-4 text-sm text-gray-800 font-semibold border border-gray-100">{row.name || row.Name}</td>
+                      <td className="px-6 py-4 border border-gray-100">
                         <div className="flex gap-4">
                           {can('payment_methods', 'edit') && (
                             <button 

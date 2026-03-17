@@ -190,10 +190,6 @@ export default function ProductFormPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">{isEdit ? 'Edit Produk' : 'Tambah Produk'}</h1>
-            <p className="text-gray-500 text-sm">{isEdit ? 'Perbarui data produk' : 'Tambah produk baru'}</p>
-          </div>
         </div>
 
         <div className="space-y-5">

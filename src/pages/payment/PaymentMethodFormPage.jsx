@@ -101,9 +101,6 @@ export default function PaymentMethodFormPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">{isEdit ? 'Edit Metode Pembayaran' : 'Tambah Metode Pembayaran'}</h1>
-          </div>
         </div>
 
         <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 space-y-8">

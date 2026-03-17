@@ -41,16 +41,10 @@ export default function RolePage() {
     <Layout title="BizKit">
       <div className="max-w-7xl mx-auto px-4 py-8">
         
-        {/* Top Header Label - BizKit equivalent */}
-        <div className="mb-6">
-           <h1 className="text-xl font-bold text-gray-800">BizKit</h1>
-        </div>
 
-        <div className="bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-8 space-y-6">
-          
-          {/* Add Button - Centered */}
-          <div className="flex justify-center">
-            {can('roles', 'create') && (
+          {/* Search Section - Right Aligned */}
+          <div className="flex justify-between items-center bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-6 mb-4">
+             {can('roles', 'create') && (
               <button 
                 onClick={() => navigate('/roles/add')}
                 className="bg-[#00A389] hover:bg-[#008F78] text-white px-6 py-2 rounded-2xl text-sm font-bold shadow-md shadow-emerald-100 transition-all flex items-center gap-2"
@@ -58,25 +52,26 @@ export default function RolePage() {
                 <span className="text-lg leading-none">+</span> Role
               </button>
             )}
+            <div className="flex items-center gap-3">
+              <label className="text-sm font-semibold text-gray-700">Search:</label>
+              <input 
+                type="text" 
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 w-64 transition-all"
+              />
+            </div>
           </div>
 
-          {/* Search Section - Right Aligned */}
-          <div className="flex justify-end items-center gap-3">
-            <label className="text-sm font-semibold text-gray-700">Search:</label>
-            <input 
-              type="text" 
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 w-64 transition-all"
-            />
-          </div>
+          <div className="bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-8 space-y-6">
+
 
           {/* Table Section */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-gray-100 bg-gray-50/30">
-                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-24">
+                <tr className="bg-gray-50/30">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-24 border border-gray-100">
                     <div className="flex items-center gap-2">
                        No
                        <div className="flex flex-col text-[8px] opacity-30">
@@ -85,7 +80,7 @@ export default function RolePage() {
                        </div>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider border border-gray-100">
                      <div className="flex items-center gap-2">
                        Role
                        <div className="flex flex-col text-[8px] opacity-30">
@@ -94,7 +89,7 @@ export default function RolePage() {
                        </div>
                     </div>
                   </th>
-                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-32">
+                  <th className="px-6 py-4 text-xs font-bold text-gray-700 uppercase tracking-wider w-32 border border-gray-100">
                      <div className="flex items-center gap-2">
                        Aksi
                        <div className="flex flex-col text-[8px] opacity-30">
@@ -105,17 +100,17 @@ export default function RolePage() {
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody>
                 {loading ? (
-                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic">Memuat data...</td></tr>
+                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic border border-gray-100">Memuat data...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic">Tidak ada data role</td></tr>
+                  <tr><td colSpan="3" className="px-6 py-10 text-center text-gray-400 text-sm italic border border-gray-100">Tidak ada data role</td></tr>
                 ) : (
                   filtered.map((row, idx) => (
                     <tr key={row.ID} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4 text-sm text-gray-600 font-medium">{idx + 1}</td>
-                      <td className="px-6 py-4 text-sm text-gray-800 font-semibold">{row.name || row.Name}</td>
-                      <td className="px-6 py-4">
+                      <td className="px-6 py-4 text-sm text-gray-600 font-medium border border-gray-100">{idx + 1}</td>
+                      <td className="px-6 py-4 text-sm text-gray-800 font-semibold border border-gray-100">{row.name || row.Name}</td>
+                      <td className="px-6 py-4 border border-gray-100">
                         <div className="flex gap-2">
                           {can('roles', 'edit') && (
                             <button 

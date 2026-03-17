@@ -76,10 +76,6 @@ export default function ShiftReportPage() {
   return (
     <Layout title="Pergantian Shift">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Pergantian Shift</h1>
-          <p className="text-gray-500 text-sm">Laporan kas masuk & keluar per shift</p>
-        </div>
 
         {/* Filter */}
         <div className="bg-white rounded-2xl p-5 shadow-sm mb-5">

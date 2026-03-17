@@ -233,10 +233,6 @@ export default function DailyReportPage() {
 
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Penjualan Harian</h1>
-            <p className="text-gray-500 text-sm">Laporan transaksi per hari</p>
-          </div>
           {data && !loading && (
             <div className="flex gap-2">
               <button

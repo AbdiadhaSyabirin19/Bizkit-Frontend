@@ -47,9 +47,6 @@ export default function SettingPage() {
   return (
     <Layout title="BizKit">
       <div className="max-w-7xl mx-auto px-4 py-12">
-        <div className="mb-6">
-           <h1 className="text-xl font-bold text-gray-800">BizKit</h1>
-        </div>
 
         <div className="bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-12">
           <div className="flex items-center gap-12 mb-10">

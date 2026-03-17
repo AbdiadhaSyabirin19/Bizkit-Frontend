@@ -70,11 +70,7 @@ export default function DashboardPage() {
       <div className="space-y-8">
         
         {/* Header Section */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-black text-gray-800 dark:text-white tracking-tight">Dashboard</h1>
-            <p className="text-gray-500 dark:text-zinc-400 font-medium mt-1">Selamat datang kembali! Berikut ringkasan performa hari ini.</p>
-          </div>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-end gap-4">
           <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700">
              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
              <span className="text-sm font-bold text-gray-700 dark:text-gray-300">Live Update</span>

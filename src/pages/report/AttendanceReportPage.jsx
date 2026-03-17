@@ -109,10 +109,6 @@ export default function AttendanceReportPage() {
       <div className="max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="mb-5">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-white">Laporan Absensi</h1>
-          <p className="text-gray-500 text-sm">Rekap absensi karyawan per hari</p>
-        </div>
 
         {/* Date Navigator */}
         <div className="bg-white rounded-2xl p-4 shadow-sm mb-5 flex items-center justify-between">

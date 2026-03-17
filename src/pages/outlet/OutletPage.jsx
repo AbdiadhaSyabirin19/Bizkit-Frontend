@@ -95,11 +95,7 @@ export default function OutletPage() {
   return (
     <Layout title="Outlet">
       <div className="max-w-5xl mx-auto">
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <h1 className="text-xl font-bold text-gray-800 dark:text-white">Outlet</h1>
-            <p className="text-gray-500 dark:text-zinc-400 text-sm">Kelola data outlet</p>
-          </div>
+        <div className="flex items-center justify-end mb-5">
           {can('outlets', 'create') && (
             <button
               onClick={() => navigate('/outlets/add')}
