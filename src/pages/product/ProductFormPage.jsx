@@ -431,7 +431,7 @@ export default function ProductFormPage() {
         </div>
 
         {/* Footer actions */}
-        <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 z-10 flex gap-4 pr-12">
+        <div className="mt-8 flex gap-4">
             <button 
               onClick={() => navigate('/products')}
               className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition min-w-[140px]"

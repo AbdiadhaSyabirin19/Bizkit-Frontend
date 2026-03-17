@@ -124,7 +124,7 @@ export default function RoleFormPage() {
 
   return (
     <Layout title={isEdit ? 'Edit Hak Akses' : 'Tambah Hak Akses'}>
-      <div className="max-w-44xl mx-auto px-4 py-8 pb-32">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="space-y-6">
           {/* Header Info Card */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
@@ -221,8 +221,8 @@ export default function RoleFormPage() {
           </div>
         </div>
 
-        {/* Global Action Footer */}
-        <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 z-10">
+        {/* Save Button */}
+        <div className="mt-8">
           <button 
             onClick={handleSave}
             disabled={saving}
