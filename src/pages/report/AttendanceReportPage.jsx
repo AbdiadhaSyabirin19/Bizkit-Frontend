@@ -40,51 +40,30 @@ export default function AttendanceReportPage() {
     setDate(d.toISOString().split('T')[0])
   }
 
-  const formatTime = (val) => {
-    if (!val || val === '0001-01-01T00:00:00Z') return '-'
-    return new Date(val).toLocaleTimeString('id-ID', {
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
-  const formatDateTime = (val) => {
-    if (!val || val === '0001-01-01T00:00:00Z') return '-'
-    return new Date(val).toLocaleString('id-ID', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    })
-  }
-
   const formatDate = (val) => {
     if (!val) return '-'
-    return new Date(val).toLocaleDateString('id-ID', {
-      weekday: 'long',
+    const d = new Date(val)
+    return d.toLocaleDateString('id-ID', {
+      weekday: 'short',
       year: 'numeric',
-      month: 'long',
+      month: 'short',
       day: 'numeric',
     })
   }
 
-  const getDuration = (checkIn, checkOut) => {
-    if (!checkIn || !checkOut) return null
-    if (
-      checkIn === '0001-01-01T00:00:00Z' ||
-      checkOut === '0001-01-01T00:00:00Z'
-    )
-      return null
-
-    const diff = new Date(checkOut) - new Date(checkIn)
-    if (diff <= 0) return null
-
-    const hours = Math.floor(diff / 3600000)
-    const minutes = Math.floor((diff % 3600000) / 60000)
-
-    return `${hours}j ${minutes}m`
+  const formatCardDateTime = (val) => {
+    if (!val || val.startsWith('0001')) return '-'
+    const d = new Date(val)
+    let str = d.toLocaleDateString('id-ID', {
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+    }) + ' ' + d.toLocaleTimeString('id-ID', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
+    return str.replace(/\./g, ':')
   }
 
   const getInitial = (name) => name?.charAt(0)?.toUpperCase() || '?'
@@ -104,138 +83,93 @@ export default function AttendanceReportPage() {
     'bg-teal-500',
   ]
 
+  const groupedAttendances = () => {
+    if (!data?.attendances) return {}
+    const grouped = {}
+    data.attendances.forEach(att => {
+      let outletName = 'Pusat'
+      const user = att.User || att.user
+      if (user && (user.Outlet || user.outlet)) {
+        outletName = user.Outlet?.Name || user.outlet?.Name || user.Outlet?.name || user.outlet?.name || 'Pusat'
+      }
+      if (!grouped[outletName]) grouped[outletName] = []
+      grouped[outletName].push(att)
+    })
+    return grouped
+  }
+
+  const groups = groupedAttendances()
+
   return (
     <Layout title="Laporan Absensi">
-      <div className="max-w-5xl mx-auto">
-
-        {/* Header */}
-
-        {/* Date Navigator */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm mb-5 flex items-center justify-between">
-          <button onClick={prevDay} className="p-2 hover:bg-gray-100 rounded-lg">
-            ◀
-          </button>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="px-4 py-2 border border-gray-200 rounded-xl text-sm"
-            />
-            <span className="text-gray-500 text-sm hidden md:block">
-              {formatDate(date)}
-            </span>
+      <div className="max-w-5xl mx-auto flex justify-center">
+        
+        <div className="w-full max-w-4xl bg-white rounded-2xl shadow-sm p-4 sm:p-8 min-h-[60vh]">
+          {/* Date Navigator Centered */}
+          <div className="flex justify-center items-center gap-4 mb-8">
+            <button onClick={prevDay} className="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-700 bg-gray-100 transition">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <div className="relative flex items-center justify-center">
+              <span className="font-bold text-sm text-gray-800 tracking-wide min-w-[140px] text-center">
+                {formatDate(date)}
+              </span>
+              {/* Invisible input overlay for date picker if user clicks text */}
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="absolute inset-0 opacity-0 cursor-pointer"
+              />
+            </div>
+            <button onClick={nextDay} className="w-8 h-8 flex items-center justify-center hover:bg-gray-200 rounded text-gray-700 bg-gray-100 transition">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+            </button>
           </div>
 
-          <button onClick={nextDay} className="p-2 hover:bg-gray-100 rounded-lg">
-            ▶
-          </button>
-        </div>
-
-        {/* Summary */}
-        <div className="grid grid-cols-3 gap-4 mb-5">
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <p className="text-gray-400 text-xs">Total Hadir</p>
-            <p className="text-xl font-bold">{data?.total || 0}</p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <p className="text-gray-400 text-xs">Sudah Keluar</p>
-            <p className="text-xl font-bold">
-              {data?.attendances?.filter((a) => {
-                const co = a.CheckOut || a.check_out
-                return co && !co.startsWith('0001')
-              }).length || 0}
-            </p>
-          </div>
-
-          <div className="bg-white rounded-2xl p-4 shadow-sm">
-            <p className="text-gray-400 text-xs">Masih Kerja</p>
-            <p className="text-xl font-bold">
-              {data?.attendances?.filter((a) => {
-                const co = a.CheckOut || a.check_out
-                return !co || co.startsWith('0001')
-              }).length || 0}
-            </p>
-          </div>
-        </div>
-
-        {/* List */}
-        {loading ? (
-          <div className="flex justify-center py-10">Loading...</div>
-        ) : data?.attendances?.length > 0 ? (
-          <div className="space-y-4">
-            {data.attendances.map((att, idx) => {
-              const checkIn = att.CheckIn || att.check_in
-              const checkOut = att.CheckOut || att.check_out
-              const photoIn = att.PhotoIn || att.photo_in
-              const photoOut = att.PhotoOut || att.photo_out
-
-              const userName =
-                att.User?.Name || att.user?.Name || att.User?.username || '-'
-
-              const color = avatarColors[idx % avatarColors.length]
-              const duration = getDuration(checkIn, checkOut)
-
-              return (
-                <div
-                  key={att.ID || idx}
-                  className="bg-white rounded-2xl shadow-sm p-5"
-                >
-                  <div className="flex items-center gap-4">
-
-                    <div
-                      className={`w-12 h-12 rounded-xl ${color} flex items-center justify-center text-white font-bold`}
-                    >
-                      {getInitial(userName)}
-                    </div>
-
-                    <div className="flex-1">
-                      <p className="font-bold">{userName}</p>
-
-                      {duration && (
-                        <p className="text-sm text-emerald-600">
-                          Durasi kerja: {duration}
-                        </p>
-                      )}
-                    </div>
-
-                    {photoIn && (
-                      <img
-                        src={getPhotoUrl(photoIn)}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                    )}
-
-                    {photoOut && (
-                      <img
-                        src={getPhotoUrl(photoOut)}
-                        className="w-12 h-12 object-cover rounded-lg"
-                      />
-                    )}
+          {/* Load / List */}
+          {loading ? (
+            <div className="flex justify-center py-20 text-gray-400">Loading...</div>
+          ) : Object.keys(groups).length > 0 ? (
+            <div className="space-y-8">
+              {Object.keys(groups).map((outletName) => (
+                <div key={outletName} className="mb-6">
+                  {/* Outlet Header */}
+                  <div className="bg-gray-200/80 border-l-4 border-orange-500 px-3 py-1.5 mb-5 flex items-center">
+                    <span className="text-[11px] font-bold text-gray-800 tracking-wide">{outletName}</span>
                   </div>
 
-                  <div className="grid grid-cols-2 mt-4 text-sm">
-                    <div>
-                      <p className="text-gray-400 dark:text-zinc-500">Check In</p>
-                      <p className="font-semibold">{formatTime(checkIn)}</p>
-                    </div>
-
-                    <div>
-                      <p className="text-gray-400 dark:text-zinc-500">Check Out</p>
-                      <p className="font-semibold">{formatTime(checkOut)}</p>
-                    </div>
+                  {/* Grid */}
+                  <div className="flex flex-wrap gap-5 justify-center sm:justify-start pl-1">
+                    {groups[outletName].map((att, idx) => {
+                      const checkIn = att.CheckIn || att.check_in
+                      const photoIn = att.PhotoIn || att.photo_in
+                      const userName = att.User?.Name || att.user?.Name || att.User?.username || '-'
+                      
+                      return (
+                         <div key={att.ID || idx} className="flex flex-col items-center w-[110px] sm:w-[130px] transition hover:scale-105 duration-200">
+                            {photoIn ? (
+                              <img src={getPhotoUrl(photoIn)} className="w-full h-[150px] sm:h-[180px] object-cover rounded-xl shadow-sm bg-gray-100 border border-gray-50" alt={`Absensi ${userName}`} />
+                            ) : (
+                              <div className={`w-full h-[150px] sm:h-[180px] rounded-xl shadow-sm border border-gray-50 flex items-center justify-center ${avatarColors[idx % avatarColors.length]} text-white text-3xl font-bold`}>
+                                {getInitial(userName)}
+                              </div>
+                            )}
+                            <p className="font-bold text-[10px] sm:text-xs mt-2 text-center w-full truncate px-1 text-gray-800">{userName}</p>
+                            <p className="text-[9px] sm:text-[10px] text-gray-500 text-center w-full truncate tracking-tight">{formatCardDateTime(checkIn)}</p>
+                         </div>
+                      )
+                    })}
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        ) : (
-          <div className="text-center py-10 text-gray-500 dark:text-zinc-400 dark:text-zinc-500">
-            Tidak ada data absensi
-          </div>
-        )}
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-gray-500 text-sm">
+              Tidak ada data absensi
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   )
