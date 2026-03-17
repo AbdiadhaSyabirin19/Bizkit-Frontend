@@ -144,7 +144,7 @@ export default function AttendanceReportPage() {
                     {groups[outletName].map((att, idx) => {
                       const checkIn = att.CheckIn || att.check_in
                       const photoIn = att.PhotoIn || att.photo_in
-                      const userName = att.User?.Name || att.user?.Name || att.User?.username || '-'
+                      const userName = att.User?.name || att.user?.name || att.User?.Name || att.user?.Name || att.User?.username || att.user?.username || '-'
                       
                       return (
                          <div key={att.ID || idx} className="flex flex-col items-center w-[110px] sm:w-[130px] transition hover:scale-105 duration-200">
