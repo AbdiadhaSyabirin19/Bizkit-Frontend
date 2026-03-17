@@ -30,6 +30,12 @@ export default function ProductFormPage() {
     custom_prices: {}
   })
 
+  // UI Toggles
+  const [showDescription, setShowDescription] = useState(false)
+  const [showVariants, setShowVariants] = useState(false)
+  const [showAdditionalPrice, setShowAdditionalPrice] = useState(false)
+  const [showOutlets, setShowOutlets] = useState(false) // For "Semua Outlet" logic
+
   const [errors, setErrors] = useState({})
 
   const validate = () => {
@@ -91,6 +97,9 @@ export default function ProductFormPage() {
         custom_prices: priceMap
       })
       setImagePreview(item.image || null)
+      setShowDescription(!!item.description)
+      setShowVariants(!!(item.variants && item.variants.length > 0))
+      setShowOutlets(!!(item.outlets && item.outlets.length > 0))
     } catch (err) { console.error(err) }
     finally { setLoading(false) }
   }
@@ -181,260 +190,273 @@ export default function ProductFormPage() {
 
   return (
     <Layout title={isEdit ? 'Edit Produk' : 'Tambah Produk'}>
-      <div className="max-w-3xl mx-auto">
-
-        {/* Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <button onClick={() => navigate('/products')} className="p-2 hover:bg-gray-100 rounded-lg transition">
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+      <div className="max-w-4xl mx-auto space-y-6 pb-20">
+        
+        {/* Card 1: Upload Gambar Produk */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8">
+          <h3 className="text-sm font-bold text-gray-800 mb-4">Upload Gambar Produk</h3>
+          <div className="flex items-center gap-4">
+            <button 
+              onClick={() => fileRef.current.click()}
+              className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-100 transition"
+            >
+              Choose File
+            </button>
+            <span className="text-sm text-gray-400">
+              {imagePreview ? 'Gambar dipilih' : 'No file chosen'}
+            </span>
+          </div>
+          {imagePreview && (
+            <div className="mt-4 relative w-32 h-32 rounded-xl overflow-hidden border border-gray-100 group">
+              <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
+              <button 
+                onClick={() => { setImagePreview(null); setForm(f => ({ ...f, image: '' })); fileRef.current.value = '' }}
+                className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-lg opacity-0 group-hover:opacity-100 transition"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+          )}
+          <input ref={fileRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
         </div>
 
-        <div className="space-y-5">
+        {/* Card 2: Informasi Produk */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-6">
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Kode Produk</label>
+            <input
+              type="text"
+              value={form.code}
+              onChange={e => setForm(f => ({ ...f, code: e.target.value }))}
+              placeholder="Kode Produk"
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 placeholder-gray-300"
+            />
+          </div>
 
-          {/* Gambar */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-800 mb-4">Gambar Produk</h3>
-            <div className="flex items-center gap-5">
-              <div
-                onClick={() => fileRef.current.click()}
-                className="w-28 h-28 rounded-2xl border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50 overflow-hidden flex-shrink-0 transition"
-              >
-                {imagePreview ? (
-                  <img src={imagePreview} alt="preview" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="text-center p-2">
-                    <p className="text-3xl mb-1">📷</p>
-                    <p className="text-xs text-gray-400">Upload</p>
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Nama Produk</label>
+            <input
+              type="text"
+              value={form.name}
+              onChange={e => {
+                setForm(f => ({ ...f, name: e.target.value }))
+                if (errors.name) setErrors(er => ({ ...er, name: '' }))
+              }}
+              placeholder="Nama Produk"
+              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 placeholder-gray-300 ${errors.name ? 'border-red-400' : 'border-gray-200'}`}
+            />
+            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <input 
+              type="checkbox" 
+              id="showDescription"
+              checked={showDescription}
+              onChange={e => setShowDescription(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <label htmlFor="showDescription" className="text-sm font-bold text-gray-800 cursor-pointer">Deskripsi</label>
+          </div>
+
+          {showDescription && (
+            <textarea
+              value={form.description}
+              onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+              placeholder="Masukkan deskripsi produk..."
+              rows={4}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400"
+            />
+          )}
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Merek</label>
+            <select
+              value={form.brand_id}
+              onChange={e => setForm(f => ({ ...f, brand_id: e.target.value }))}
+              className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 bg-white"
+            >
+              <option value="">[Merek]</option>
+              {brands.map(b => <option key={getID(b)} value={getID(b)}>{b.name}</option>)}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-gray-700 uppercase mb-2">Kategori</label>
+            <select
+              value={form.category_id}
+              onChange={e => {
+                setForm(f => ({ ...f, category_id: e.target.value }))
+                if (errors.category_id) setErrors(er => ({ ...er, category_id: '' }))
+              }}
+              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 bg-white ${errors.category_id ? 'border-red-400' : 'border-gray-200'}`}
+            >
+              <option value="">[Kategori]</option>
+              {categories.map(c => <option key={getID(c)} value={getID(c)}>{c.name}</option>)}
+            </select>
+            {errors.category_id && <p className="text-xs text-red-500 mt-1">{errors.category_id}</p>}
+          </div>
+        </div>
+
+        {/* Card 3: Satuan Utama */}
+        <div className="bg-[#EDF2FF] rounded-xl border border-gray-100 p-8">
+          <label className="block text-xs font-bold text-gray-700 uppercase mb-3">Satuan utama</label>
+          <select
+            value={form.unit_id}
+            onChange={e => setForm(f => ({ ...f, unit_id: e.target.value }))}
+            className="w-1/3 px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 bg-white"
+          >
+            <option value="">[Satuan]</option>
+            {units.map(u => <option key={getID(u)} value={getID(u)}>{u.name}</option>)}
+          </select>
+        </div>
+
+        {/* Card 4: Varian */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 space-y-4">
+          <div className="flex items-center gap-3">
+            <input 
+              type="checkbox" 
+              id="showVariants"
+              checked={showVariants}
+              onChange={e => setShowVariants(e.target.checked)}
+              className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+            />
+            <label htmlFor="showVariants" className="text-sm font-bold text-gray-800 cursor-pointer">Varian</label>
+          </div>
+
+          {showVariants && variants.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 mt-4">
+              {variants.map(v => {
+                const vid = getID(v)
+                const isSelected = form.variant_ids.includes(vid)
+                return (
+                  <div 
+                    key={vid} 
+                    onClick={() => toggleVariant(vid)}
+                    className={`flex items-center justify-between p-4 rounded-xl cursor-pointer border transition ${isSelected ? 'bg-emerald-50 border-emerald-500' : 'border-gray-100 hover:bg-gray-50'}`}
+                  >
+                    <div>
+                      <p className="text-sm font-bold text-gray-800">{v.name}</p>
+                      <p className="text-xs text-gray-400">{v.options?.map(o => o.name).join(', ')}</p>
+                    </div>
+                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'}`}>
+                      {isSelected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
+                    </div>
                   </div>
-                )}
-              </div>
-              <div>
-                <p className="text-sm text-gray-600 font-medium mb-1">Foto produk</p>
-                <p className="text-xs text-gray-400 mb-3">Format JPG, PNG. Maks 2MB</p>
-                <div className="flex gap-2">
-                  <button onClick={() => fileRef.current.click()} className="px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-600 rounded-lg text-xs font-medium transition">Pilih Foto</button>
-                  {imagePreview && (
-                    <button onClick={() => { setImagePreview(null); setForm(f => ({ ...f, image: '' })); fileRef.current.value = '' }} className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-500 rounded-lg text-xs font-medium transition">Hapus</button>
-                  )}
-                </div>
-              </div>
+                )
+              })}
             </div>
-            <input ref={fileRef} type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-          </div>
+          )}
+        </div>
 
-          {/* Info Dasar */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-800 mb-4">Informasi Produk</h3>
-            <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Kode Produk</label>
-                  <input
-                    type="text"
-                    value={form.code}
-                    onChange={e => setForm(f => ({ ...f, code: e.target.value }))}
-                    placeholder="PRD-001"
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Nama Produk <span className="text-red-400">*</span></label>
-                  <input
-                    type="text"
-                    value={form.name}
-                    onChange={e => {
-                      setForm(f => ({ ...f, name: e.target.value }))
-                      if (errors.name) setErrors(er => ({ ...er, name: '' }))
-                    }}
-                    placeholder="Nama produk"
-                    className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                  />
-                  {errors.name && <p className="text-xs text-red-400 mt-1">⚠ {errors.name}</p>}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi</label>
-                <textarea
-                  value={form.description}
-                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                  placeholder="Deskripsi produk (opsional)"
-                  rows={2}
-                  className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 resize-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Kategori <span className="text-red-400">*</span></label>
-                  <select
-                    value={form.category_id}
-                    onChange={e => {
-                      setForm(f => ({ ...f, category_id: e.target.value }))
-                      if (errors.category_id) setErrors(er => ({ ...er, category_id: '' }))
-                    }}
-                    className={`w-full px-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.category_id ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                  >
-                    <option value="">Pilih Kategori</option>
-                    {categories.map(c => <option key={getID(c)} value={getID(c)}>{c.name}</option>)}
-                  </select>
-                  {errors.category_id && <p className="text-xs text-red-400 mt-1">⚠ {errors.category_id}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Merek</label>
-                  <select
-                    value={form.brand_id}
-                    onChange={e => setForm(f => ({ ...f, brand_id: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  >
-                    <option value="">Pilih Merek</option>
-                    {brands.map(b => <option key={getID(b)} value={getID(b)}>{b.name}</option>)}
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Satuan</label>
-                  <select
-                    value={form.unit_id}
-                    onChange={e => setForm(f => ({ ...f, unit_id: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  >
-                    <option value="">Pilih Satuan</option>
-                    {units.map(u => <option key={getID(u)} value={getID(u)}>{u.name}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                  <select
-                    value={form.status}
-                    onChange={e => setForm(f => ({ ...f, status: e.target.value }))}
-                    className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  >
-                    <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
-                  </select>
-                </div>
-              </div>
+        {/* Card 5: Outlet & Pricing */}
+        <div className="bg-[#EDF2FF] rounded-xl border border-gray-100 p-8 space-y-6">
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <input 
+                type="checkbox" 
+                id="showOutlets"
+                checked={showOutlets}
+                onChange={e => {
+                  setShowOutlets(e.target.checked)
+                  if (!e.target.checked) setForm(f => ({ ...f, outlet_ids: [] }))
+                  else if (outlets.length > 0) setForm(f => ({ ...f, outlet_ids: outlets.map(o => getID(o)) }))
+                }}
+                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <label htmlFor="showOutlets" className="text-sm text-gray-800 font-medium">Semua Outlet</label>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <input 
+                type="checkbox" 
+                id="tampilPenjualan"
+                defaultChecked={true}
+                className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+              />
+              <label htmlFor="tampilPenjualan" className="text-sm text-gray-800 font-medium italic">Tampil Penjualan di Dagashi</label>
             </div>
           </div>
 
-          {/* Harga */}
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h3 className="font-semibold text-gray-800 mb-4">Harga</h3>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Harga Jual (Default) <span className="text-red-400">*</span></label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">Rp</span>
-                  <input
-                    type="number"
-                    value={form.price}
-                    onChange={e => {
-                      setForm(f => ({ ...f, price: e.target.value }))
-                      if (errors.price) setErrors(er => ({ ...er, price: '' }))
-                    }}
-                    placeholder="0"
-                    className={`w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${errors.price ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
-                  />
+          <div className="bg-[#C7D2FE] rounded-lg overflow-hidden border border-gray-200">
+            <div className="px-6 py-2 bg-[#C7D2FE] text-[10px] font-bold text-indigo-900 uppercase">Satuan Terkecil</div>
+            <div className="bg-[#EDF2FF] p-6 space-y-4">
+              <div className="flex flex-col gap-2">
+                <label className="text-xs font-bold text-gray-800">Harga Jual</label>
+                <div className="flex items-center gap-6">
+                  <div className="flex-1 flex items-center bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-emerald-400">
+                    <span className="px-3 text-xs text-gray-400 font-medium border-r border-gray-100 uppercase tracking-tighter">Rp</span>
+                    <input
+                      type="number"
+                      value={form.price}
+                      onChange={e => {
+                        setForm(f => ({ ...f, price: e.target.value }))
+                        if (errors.price) setErrors(er => ({ ...er, price: '' }))
+                      }}
+                      className="flex-1 px-4 py-2 text-sm focus:outline-none"
+                    />
+                  </div>
+                  
+                  <div className="flex items-center gap-2">
+                    <input 
+                      type="checkbox" 
+                      id="hargaTambahan"
+                      checked={showAdditionalPrice}
+                      onChange={e => setShowAdditionalPrice(e.target.checked)}
+                      className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                    <label htmlFor="hargaTambahan" className="text-xs font-bold text-gray-800 cursor-pointer">Harga Tambahan</label>
+                  </div>
                 </div>
-                {errors.price && <p className="text-xs text-red-400 mt-1">⚠ {errors.price}</p>}
+                {errors.price && <p className="text-xs text-red-500 mt-1">{errors.price}</p>}
               </div>
 
-              {priceCategories.length > 0 && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Harga per Kategori
-                    <span className="ml-2 text-xs text-gray-400 font-normal bg-gray-100 px-2 py-0.5 rounded-full">Multi Harga</span>
-                  </label>
-                  <div className="border border-gray-200 rounded-xl overflow-hidden">
-                    {priceCategories.map((pc, idx) => {
+              {showAdditionalPrice && priceCategories.length > 0 && (
+                <div className="space-y-3 pt-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <p className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Harga Per Kategori</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {priceCategories.map(pc => {
                       const pcID = getID(pc)
                       return (
-                        <div key={pcID} className={`flex items-center gap-3 px-4 py-2.5 ${idx !== priceCategories.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                          <span className="text-sm text-gray-600 flex-1">{pc.name}</span>
-                          <div className="relative w-40">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
-                            <input
+                        <div key={pcID} className="flex flex-col gap-1.5">
+                          <label className="text-[10px] font-bold text-gray-600 italic pl-1">{pc.name}</label>
+                          <div className="flex items-center bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-emerald-400">
+                             <span className="px-2.5 text-[10px] text-gray-400 font-medium border-r border-gray-100 uppercase tracking-tighter">Rp</span>
+                             <input
                               type="number"
                               value={form.custom_prices[pcID] || ''}
                               onChange={e => setForm(f => ({ ...f, custom_prices: { ...f.custom_prices, [pcID]: e.target.value } }))}
                               placeholder={form.price || '0'}
-                              className="w-full pl-8 pr-3 py-1.5 border border-gray-200 rounded-lg text-xs focus:outline-none focus:ring-2 focus:ring-emerald-400"
+                              className="flex-1 px-3 py-1.5 text-xs focus:outline-none"
                             />
                           </div>
                         </div>
                       )
                     })}
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Kosongkan jika sama dengan harga default</p>
                 </div>
               )}
             </div>
           </div>
-
-          {/* Varian */}
-          {variants.length > 0 && (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-1">Varian Produk</h3>
-              <p className="text-xs text-gray-400 mb-3">Opsional — pilih varian yang tersedia untuk produk ini</p>
-              <div className="space-y-2">
-                {variants.map(v => {
-                  const vid = getID(v)
-                  const isSelected = form.variant_ids.includes(vid)
-                  return (
-                    <div key={vid} onClick={() => toggleVariant(vid)} className={`flex items-center justify-between p-3 rounded-xl cursor-pointer border transition ${isSelected ? 'bg-emerald-50 border-emerald-300' : 'hover:bg-gray-50 border-gray-100'}`}>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">{v.name}</p>
-                        <p className="text-xs text-gray-400">{v.options?.map(o => o.name).join(', ') || '-'}</p>
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'}`}>
-                        {isSelected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Outlet */}
-          {outlets.length > 0 && (
-            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-              <h3 className="font-semibold text-gray-800 mb-1">Outlet</h3>
-              <p className="text-xs text-gray-400 mb-3">Opsional — pilih outlet yang menjual produk ini</p>
-              <div className="space-y-2">
-                {outlets.map(o => {
-                  const oid = getID(o)
-                  const isSelected = form.outlet_ids.includes(oid)
-                  return (
-                    <div key={oid} onClick={() => toggleOutlet(oid)} className={`flex items-center justify-between p-3 rounded-xl cursor-pointer border transition ${isSelected ? 'bg-emerald-50 border-emerald-300' : 'hover:bg-gray-50 border-gray-100'}`}>
-                      <div>
-                        <p className="text-sm font-medium text-gray-700">{o.name}</p>
-                        {o.address && <p className="text-xs text-gray-400">{o.address}</p>}
-                      </div>
-                      <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-emerald-500 border-emerald-500' : 'border-gray-300'}`}>
-                        {isSelected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* Tombol */}
-          <div className="flex gap-3 pb-6">
-            <button onClick={() => navigate('/products')} className="flex-1 px-4 py-3 border border-gray-200 rounded-xl text-gray-600 hover:bg-gray-50 text-sm font-medium transition">Batal</button>
-            <button onClick={handleSave} disabled={saving} className="flex-1 px-4 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-xl text-sm font-medium transition">
-              {saving ? 'Menyimpan...' : isEdit ? 'Simpan Perubahan' : 'Tambah Produk'}
-            </button>
-          </div>
         </div>
+
+        {/* Footer actions */}
+        <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 z-10 flex gap-4 pr-12">
+            <button 
+              onClick={() => navigate('/products')}
+              className="px-8 py-3 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl font-bold transition min-w-[140px]"
+            >
+              Batal
+            </button>
+            <button 
+              onClick={handleSave} 
+              disabled={saving}
+              className="flex-1 py-3 bg-[#0369a1] hover:bg-[#075985] text-white rounded-xl font-bold text-sm shadow-md transition active:scale-[0.98] disabled:opacity-50"
+            >
+              {saving ? 'Menyimpan...' : 'Simpan'}
+            </button>
+        </div>
+
       </div>
     </Layout>
   )
