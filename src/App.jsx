@@ -3,7 +3,6 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import { ThemeProvider } from './context/ThemeContext'
 import { usePermission } from './hooks/usePermission'
 import LoginPage from './pages/auth/LoginPage'
-import DashboardPage from './pages/dashboard/DashboardPage'
 import CategoryPage from './pages/category/CategoryPage'
 import BrandPage from './pages/brand/BrandPage'
 import UnitPage from './pages/unit/UnitPage'
@@ -36,7 +35,6 @@ import OutletFormPage from './pages/outlet/OutletFormPage'
 import UnitFormPage from './pages/unit/UnitFormPage'
 import PriceCategoryFormPage from './pages/price/PriceCategoryFormPage'
 import KasirLoginPage from './pages/auth/KasirLoginPage'
-import DashboardKasir from './pages/kasir/DashboardKasir'
 import KasirPage from './pages/kasir/KasirPage'
 import RiwayatTransaksi from './pages/kasir/RiwayatTransaksi'
 import LaporanShift from './pages/kasir/LaporanShift'
@@ -177,7 +175,7 @@ function AppRoutes() {
       <Route path="/kasir/login" element={<KasirPublicRoute><KasirLoginPage /></KasirPublicRoute>} />
       <Route path="/change-password" element={<PermissionRoute checkPermission={false}><ChangePasswordPage /></PermissionRoute>} />
 
-      <Route path="/dashboard" element={<PermissionRoute module="dashboard"><DashboardPage /></PermissionRoute>} />
+
 
       <Route path="/sales"          element={<PermissionRoute module="sales"><SalesPage /></PermissionRoute>} />
       <Route path="/sales/add"      element={<PermissionRoute module="sales" action="create"><SalesFormPage /></PermissionRoute>} />
@@ -235,7 +233,7 @@ function AppRoutes() {
       <Route path="/settings"        element={<PermissionRoute module="settings"><SettingPage /></PermissionRoute>} />
 
       <Route path="/kasir"           element={<KasirRoute module="kasir_pos"><KasirPage /></KasirRoute>} />
-      <Route path="/kasir/dashboard" element={<KasirRoute module="kasir_dashboard"><DashboardKasir /></KasirRoute>} />
+
       <Route path="/kasir/riwayat"   element={<KasirRoute module="kasir_riwayat"><RiwayatTransaksi /></KasirRoute>} />
       <Route path="/kasir/shift"     element={<KasirRoute module="kasir_shift"><LaporanShift /></KasirRoute>} />
 

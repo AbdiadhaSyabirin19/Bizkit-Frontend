@@ -4,7 +4,6 @@ import Layout from '../../components/Layout'
 import api from '../../api/axios'
 
 const MODULE_LIST = [
-  { key: 'dashboard',          label: 'Dashboard',                  actions: ['view'] },
   { key: 'products',           label: 'Produk',                     actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'categories',         label: 'Kategori',                   actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'brands',             label: 'Merek',                      actions: ['view', 'create', 'edit', 'delete'] },
@@ -23,7 +22,6 @@ const MODULE_LIST = [
   { key: 'roles',              label: 'Hak Akses',                  actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'payment_methods',    label: 'Metode Pembayaran',          actions: ['view', 'create', 'edit', 'delete'] },
   { key: 'settings',           label: 'Pengaturan Umum',            actions: ['view', 'edit'] },
-  { key: 'kasir_dashboard',    label: 'Dashboard Kasir',            actions: ['view'] },
   { key: 'kasir_pos',          label: 'POS Kasir',                  actions: ['view'] },
   { key: 'kasir_riwayat',      label: 'Riwayat Kasir',              actions: ['view'] },
   { key: 'kasir_shift',        label: 'Shift Kasir',                actions: ['view'] },
