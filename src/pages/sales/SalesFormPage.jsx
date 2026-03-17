@@ -36,6 +36,7 @@ export default function SalesFormPage() {
 
   const [appliedVoucher, setAppliedVoucher] = useState(null)
   const [voucherError, setVoucherError] = useState('')
+  const [errors, setErrors] = useState({})
 
   useEffect(() => {
     fetchData()
@@ -81,6 +82,18 @@ export default function SalesFormPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const validate = () => {
+    const e = {}
+    if (!formData.payment_method_id) e.payment_method_id = 'Metode pembayaran wajib dipilih'
+    if (formData.items.length === 0) {
+      e.items = 'Minimal satu produk harus ditambahkan'
+    } else if (formData.items.some(i => !i.product_id)) {
+      e.items = 'Terdapat baris produk yang belum dipilih'
+    }
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
 
   const handleAddItem = () => {
@@ -140,6 +153,10 @@ export default function SalesFormPage() {
     item.subtotal = getItemSubtotal(item.price, item.quantity, item.discount_enabled, item.discount, item.variants, prod)
     newItems[idx] = item
     setFormData(prev => ({ ...prev, items: newItems }))
+    // Clear item errors if user selects a product
+    if (errors.items && field === 'product_id') {
+      setErrors(er => ({ ...er, items: '' }))
+    }
   }
 
   const handleApplyVoucher = async () => {
@@ -300,10 +317,8 @@ export default function SalesFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!formData.payment_method_id || formData.items.some(i => !i.product_id)) {
-      alert('Mohon lengkapi data transaksi')
-      return
-    }
+    if (!validate()) return
+
 
     setSaving(true)
     try {
@@ -382,22 +397,29 @@ export default function SalesFormPage() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Bayar ke</label>
-            <select 
-              value={formData.payment_method_id}
-              onChange={e => setFormData(p => ({ ...p, payment_method_id: e.target.value }))}
-              className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
-            >
-              <option value="">Pilih...</option>
-              {paymentMethods.map(m => (
-                <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
-              ))}
-            </select>
-          </div>
+              <select 
+                value={formData.payment_method_id}
+                onChange={e => {
+                  setFormData(p => ({ ...p, payment_method_id: e.target.value }))
+                  if (errors.payment_method_id) setErrors(er => ({ ...er, payment_method_id: '' }))
+                }}
+                className={`w-full px-3 py-2 bg-white border rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 ${errors.payment_method_id ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+              >
+                <option value="">Pilih...</option>
+                {paymentMethods.map(m => (
+                  <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
+                ))}
+              </select>
+              {errors.payment_method_id && <p className="text-[10px] text-red-500 font-bold mt-1">⚠ {errors.payment_method_id}</p>}
+            </div>
         </div>
 
         {/* Detail Section */}
-        <div className="bg-[#eef2ff] p-6 rounded-lg border border-indigo-100 space-y-4">
-          <h2 className="text-sm font-bold text-gray-700">Detail</h2>
+        <div className={`bg-[#eef2ff] p-6 rounded-lg border space-y-4 ${errors.items ? 'border-red-400 shadow-[0_0_0_1px_rgba(248,113,113,1)]' : 'border-indigo-100'}`}>
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-bold text-gray-700">Detail Pembelian</h2>
+            {errors.items && <p className="text-xs font-bold text-red-500">⚠ {errors.items}</p>}
+          </div>
           {formData.items.map((item, idx) => (
             <div key={idx} className="bg-white p-4 rounded-lg relative shadow-sm border border-gray-100">
               <button 
