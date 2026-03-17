@@ -45,7 +45,7 @@ export default function SettingPage() {
   }
 
   return (
-    <Layout title="BizKit">
+    <Layout title="Pengaturan Umum">
       <div className="max-w-7xl mx-auto px-4 py-12">
 
         <div className="bg-white rounded-xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-gray-100 p-12">

@@ -70,7 +70,7 @@ export default function SalesDetailPage() {
   const grandTotal = sale.grand_total || sale.GrandTotal || 0
 
   return (
-    <Layout title="BizKit">
+    <Layout title="Detail Penjualan">
       <div className="max-w-4xl mx-auto py-8">
         {/* Info Card */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6 mx-auto max-w-2xl">

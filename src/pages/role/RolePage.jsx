@@ -38,7 +38,7 @@ export default function RolePage() {
   )
 
   return (
-    <Layout title="BizKit">
+    <Layout title="Hak Akses">
       <div className="max-w-7xl mx-auto px-4 py-8">
         
 
