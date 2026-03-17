@@ -224,27 +224,23 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       `}>
 
         {/* Logo Section */}
-        <div className="px-7 py-8 mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-11 h-11 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shadow-lg border border-white/20 overflow-hidden flex-shrink-0">
+        <div className="px-7 py-8 mb-4 border-b border-white/10">
+          <div className="flex items-center justify-center">
+            <div className="w-24 h-24 flex items-center justify-center overflow-hidden">
               {storeLogo ? (
                 <img
                   src={storeLogo}
                   alt={storeName}
-                  className="w-full h-full object-contain p-1"
+                  className="w-full h-full object-contain"
                   onError={() => setStoreLogo(null)}
                 />
               ) : (
-                <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+                <div className="w-full h-full bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-lg border border-white/20">
+                  <svg viewBox="0 0 24 24" className="w-12 h-12 text-white" fill="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg>
+                </div>
               )}
-            </div>
-            <div>
-              <p className="text-white text-lg font-bold leading-tight tracking-tight uppercase">
-                {storeName ? storeName : 'Kasir'}
-              </p>
-              {!storeName && <p className="text-white/70 text-[10px] font-black tracking-[0.2em] italic uppercase">Kuliner</p>}
             </div>
           </div>
         </div>

@@ -9,8 +9,10 @@ import BrandPage from './pages/brand/BrandPage'
 import UnitPage from './pages/unit/UnitPage'
 import VariantPage from './pages/variant/VariantPage'
 import ProductPage from './pages/product/ProductPage'
-import UserPage from './pages/user/UserPage'
 import RolePage from './pages/role/RolePage'
+import UserFormPage from './pages/user/UserFormPage'
+import RoleFormPage from './pages/role/RoleFormPage'
+import PaymentMethodFormPage from './pages/payment/PaymentMethodFormPage'
 import PaymentMethodPage from './pages/payment/PaymentMethodPage'
 import PromoPage from './pages/promo/PromoPage'
 import DailyReportPage from './pages/report/DailyReportPage'
@@ -221,8 +223,14 @@ function AppRoutes() {
       <Route path="/reports/trend"      element={<PermissionRoute module="reports_trend"><TrendReportPage /></PermissionRoute>} />
 
       <Route path="/users"           element={<PermissionRoute module="users"><UserPage /></PermissionRoute>} />
+      <Route path="/users/add"      element={<PermissionRoute module="users" action="create"><UserFormPage /></PermissionRoute>} />
+      <Route path="/users/:id/edit" element={<PermissionRoute module="users" action="edit"><UserFormPage /></PermissionRoute>} />
       <Route path="/roles"           element={<PermissionRoute module="roles"><RolePage /></PermissionRoute>} />
+      <Route path="/roles/add"      element={<PermissionRoute module="roles" action="create"><RoleFormPage /></PermissionRoute>} />
+      <Route path="/roles/:id/edit" element={<PermissionRoute module="roles" action="edit"><RoleFormPage /></PermissionRoute>} />
       <Route path="/payment-methods" element={<PermissionRoute module="payment_methods"><PaymentMethodPage /></PermissionRoute>} />
+      <Route path="/payment-methods/add"      element={<PermissionRoute module="payment_methods" action="create"><PaymentMethodFormPage /></PermissionRoute>} />
+      <Route path="/payment-methods/:id/edit" element={<PermissionRoute module="payment_methods" action="edit"><PaymentMethodFormPage /></PermissionRoute>} />
       <Route path="/settings"        element={<PermissionRoute module="settings"><SettingPage /></PermissionRoute>} />
 
       <Route path="/kasir"           element={<KasirRoute module="kasir_pos"><KasirPage /></KasirRoute>} />
