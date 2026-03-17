@@ -6,22 +6,22 @@ import api from '../api/axios'
 const menus = [
   {
     label: 'Penjualan',
-    icon: 'Penjualan',
+    icon: 'ListBullets',
     children: [
-      { label: 'Penjualan',       path: '/sales',   module: 'sales', icon: 'Penjualan' },
-      { label: 'Promo & Voucher', path: '/promos',  module: 'promos', icon: 'Penjualan' },
+      { label: 'Penjualan',       path: '/sales',   module: 'sales', icon: 'ShoppingCart' },
+      { label: 'Promo & Voucher', path: '/promos',  module: 'promos', icon: 'Percent' },
     ],
   },
   {
     label: 'Produk',
-    icon: 'Produk',
+    icon: 'ListBullets',
     children: [
-      { label: 'Produk',      path: '/products',    module: 'products', icon: 'Produk' },
-      { label: 'Kategori',    path: '/categories',  module: 'categories', icon: 'Produk' },
-      { label: 'Merek',       path: '/brands',      module: 'brands', icon: 'Produk' },
-      { label: 'Satuan',      path: '/units',       module: 'units', icon: 'Produk' },
-      { label: 'Varian',      path: '/variants',    module: 'variants', icon: 'Produk' },
-      { label: 'Multi Harga', path: '/multi-harga', module: 'multi_harga', icon: 'Produk' },
+      { label: 'Produk',      path: '/products',    module: 'products', icon: 'Box' },
+      { label: 'Kategori',    path: '/categories',  module: 'categories', icon: 'List' },
+      { label: 'Merek',       path: '/brands',      module: 'brands', icon: 'AlphaA' },
+      { label: 'Satuan',      path: '/units',       module: 'units', icon: 'ShoppingBag' },
+      { label: 'Varian',      path: '/variants',    module: 'variants', icon: 'Tree' },
+      { label: 'Multi Harga', path: '/multi-harga', module: 'multi_harga', icon: 'FilterDollar' },
     ],
   },
   {
@@ -74,14 +74,57 @@ const getActiveMenuLabel = (pathname) => {
 
 const MenuIcon = ({ label, size = "w-6 h-6" }) => {
   const icons = {
-    Penjualan: (
+    ListBullets: (
       <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H3m18 0h-8M9 12H3m18 0h-8M9 19H3m18 0h-8" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 4.5v1m0 6v1m0 6v1" />
+        <circle cx="5" cy="5" r="1" fill="currentColor" />
+        <circle cx="5" cy="12" r="1" fill="currentColor" />
+        <circle cx="5" cy="19" r="1" fill="currentColor" />
       </svg>
     ),
-    Produk: (
+    ShoppingCart: (
+      <svg className={size} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z" />
+      </svg>
+    ),
+    Percent: (
       <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M7 7l10 10M17 7c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2zM7 13c-1.105 0-2 .895-2 2s.895 2 2 2 2-.895 2-2-.895-2-2-2z" />
+      </svg>
+    ),
+    Box: (
+      <svg className={size} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 3L2 8l10 5 10-5-10-5z" />
+        <path d="M2 12l10 5 10-5" opacity="0.3" />
+        <path d="M2 17l10 5 10-5" />
+        <path d="M4.5 10.5v5L12 19l7.5-3.5v-5L12 14l-7.5-3.5z" />
+      </svg>
+    ),
+    List: (
+      <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    ),
+    AlphaA: (
+      <svg className={size} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M11 7l-5 12h2.1l1.1-2.8h5.6l1.1 2.8H18l-5-12h-2zm-.1 7.4L12 11l1.1 3.4h-2.2z" />
+      </svg>
+    ),
+    ShoppingBag: (
+      <svg className={size} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M20 6h-4V4c0-1.11-.89-2-2-2h-4c-1.11 0-2 .89-2 2v2H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-8-2h4v2h-4V4zm8 15H4V8h3v2c0 .55.45 1 1 1s1-.45 1-1V8h6v2c0 .55.45 1 1 1s1-.45 1-1V8h3v11z" />
+      </svg>
+    ),
+    Tree: (
+      <svg className={size} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M22 11V3h-7v3H9V3H2v8h7V8h2v10h4v3h7v-8h-7v3h-2V8h2v3h7zM4 9V5h3v4H4zm15 14v-4h3v4h-3z" />
+      </svg>
+    ),
+    FilterDollar: (
+      <svg className={size} fill="currentColor" viewBox="0 0 24 24">
+        <path d="M10 18h4v-2h-4v2zM3 6v2h18V6H3zm3 7h12v-2H6v2z" />
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 14h-2v-2h2v2zm0-4h-2V7h2v5z" opacity="0.1" />
       </svg>
     ),
     Laporan: (
@@ -168,7 +211,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       )}
 
       <aside className={`
-        fixed top-0 left-0 h-full w-[260px] bg-[#0fb38e] text-white z-50 flex flex-col
+        fixed top-0 left-0 h-full w-[260px] bg-[#00A389] text-white z-50 flex flex-col
         transform transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]
         border-r border-white/20
         shadow-[6px_0_32px_-2px_rgba(0,0,0,0.35)]
@@ -177,13 +220,13 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       `}>
 
         {/* Logo Section */}
-        <div className="px-6 py-6 border-b border-white/10 mb-4 bg-[#0ca180]">
+        <div className="px-4 py-6 border-b border-white/10 mb-4 bg-[#008F78]">
           <div className="flex items-center justify-center">
              {storeLogo ? (
                 <img
                   src={storeLogo}
                   alt={storeName}
-                  className="h-12 w-auto object-contain"
+                  className="w-full h-auto max-h-16 object-contain"
                   onError={() => setStoreLogo(null)}
                 />
               ) : (
