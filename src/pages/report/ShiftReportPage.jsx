@@ -17,42 +17,73 @@ export default function ShiftReportPage() {
     finally { setLoading(false) }
   }
 
-  const formatDate = (val) => {
-    if (!val) return '-'
-    return new Date(val).toLocaleDateString('id-ID', {
-      day: '2-digit', month: '2-digit', year: 'numeric'
-    })
-  }
 
-  // format time
-  const formatTime = (val) => {
-    if (!val) return '-'
-    return new Date(val).toLocaleTimeString('id-ID', {
-      hour: '2-digit', minute: '2-digit'
-    })
-  }
 
-  // Hitung saldo running total (urutan dari terlama ke terbaru)
+  // Hitung selisih dan split jadi dua baris (Awal & Akhir)
   const getShiftsWithSaldo = (shifts) => {
     if (!shifts?.length) return []
-    const sorted = [...shifts].reverse() // backend DESC, balik jadi ASC dulu
-    let saldo = 0
-    return sorted.map((shift, idx) => {
+    // backend mengembalikan desc, kita ubah jadi asc untuk hitung selisih dari awal
+    const sorted = [...shifts].reverse() 
+    const rows = []
+    let prevCashOut = null
+
+    sorted.forEach((shift) => {
       const cashIn = shift.CashIn || shift.cash_in || 0
       const cashOut = shift.CashOut || shift.cash_out || 0
-      const totalSales = shift.total_sales || 0
-      // Saldo per shift = saldo sebelumnya + kasIn + penjualan shift - kasOut
-      // Tapi karena kita tidak punya penjualan per-shift di sini, gunakan Difference dari backend
-      const diff = shift.Difference || shift.difference || (cashIn - cashOut)
-      saldo += diff
-      return { ...shift, _saldo: saldo, _cashIn: cashIn, _cashOut: cashOut, _diff: diff, no: idx + 1 }
-    }).reverse()
-  }
+      const diffEnd = shift.Difference || shift.difference || 0
+      const startTime = shift.StartTime || shift.start_time
+      const endTime = shift.EndTime || shift.end_time
+      const userName = shift.User?.Name || shift.user?.Name || shift.User?.username || shift.user?.username || shift.User?.name || shift.user?.name || '-'
 
-  const getJenis = (shift) => {
-    if (shift.CashIn > 0 && shift.CashOut > 0) return { label: 'Buka & Tutup', color: 'bg-blue-100 text-blue-700' }
-    if (shift.CashOut > 0) return { label: 'Tutup Shift', color: 'bg-red-100 text-red-600' }
-    return { label: 'Buka Shift', color: 'bg-emerald-100 text-emerald-700' }
+      // 1. Awal Shift
+      const selisihAwal = prevCashOut !== null ? (cashIn - prevCashOut) : 0
+      
+      let uraianAwal = ''
+      if (selisihAwal > 0) uraianAwal = `Sistem : Kas lebih ${selisihAwal} dari kas sebelumnya.`
+      else if (selisihAwal < 0) uraianAwal = `Sistem : Kas kurang ${Math.abs(selisihAwal)} dari kas sebelumnya.`
+
+      rows.push({
+        id: `${shift.ID || shift.id}-awal`,
+        waktu: startTime,
+        uraian: uraianAwal,
+        jenis: 'Awal Shift',
+        nama: userName,
+        masuk: cashIn,
+        keluar: null,
+        selisih: selisihAwal,
+        saldo: cashIn // Fix: Saldo Awal adalah modal yang dimasukkan
+      })
+
+      // 2. Akhir Shift
+      const isEnded = endTime && !String(endTime).startsWith('0001')
+      if (isEnded) {
+        // Difference dari backend -> (CashIn + Sales) - CashOut
+        // Selisih Laporan -> CashOut - Expected = -(Difference)
+        const selisihAkhir = -diffEnd
+
+        let uraianAkhir = ''
+        if (selisihAkhir > 0) uraianAkhir = `Sistem : Kas lebih ${selisihAkhir} dari estimasi saldo.`
+        else if (selisihAkhir < 0) uraianAkhir = `Sistem : Kas kurang ${Math.abs(selisihAkhir)} dari estimasi saldo.`
+
+        rows.push({
+          id: `${shift.ID || shift.id}-akhir`,
+          waktu: endTime,
+          uraian: uraianAkhir,
+          jenis: 'Akhir Shift',
+          nama: userName,
+          masuk: null,
+          keluar: cashOut,
+          selisih: selisihAkhir,
+          saldo: cashOut // Fix: Saldo Akhir adalah uang yang ada di laci saat shift ditutup
+        })
+
+        prevCashOut = cashOut
+      } else {
+        prevCashOut = cashIn
+      }
+    })
+
+    return rows
   }
 
   const shiftsWithSaldo = getShiftsWithSaldo(data?.shifts)
@@ -114,63 +145,34 @@ export default function ShiftReportPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 bg-white">
-                  {shiftsWithSaldo.length > 0 ? shiftsWithSaldo.map((shift, idx) => {
-                    const cashIn = shift.CashIn || shift.cash_in || 0
-                    const cashOut = shift.CashOut || shift.cash_out || 0
-                    const diff = shift.Difference || shift.difference || (cashIn - cashOut)
-                    const saldo = shift._saldo || 0
-                    const startTime = shift.StartTime || shift.start_time
-                    const userName = shift.User?.Name || shift.user?.Name || shift.User?.username || shift.user?.username || shift.User?.name || shift.user?.name || '-'
-
-                    // Determine type (Jenis) based on cashflow
-                    let jenisStr = 'Awal Shift'
-                    if (cashOut > 0 && cashIn === 0) jenisStr = 'Akhir Shift'
-                    else if (cashOut > 0 && cashIn > 0) jenisStr = 'Update Shift'
-
-                    // Format numbers clean like screenshot: 50.000 (no Rp)
+                  {shiftsWithSaldo.length > 0 ? shiftsWithSaldo.map((row) => {
                     const fmtNum = (num) => num === 0 ? '0' : Number(num).toLocaleString('id-ID')
 
                     return (
-                      <tr key={shift.ID || idx} className="hover:bg-gray-50/50 transition border-b border-gray-100">
-                        {/* Waktu */}
-                        <td className="px-4 py-3 text-gray-800 font-medium">
-                          {new Date(startTime).toLocaleString('sv').replace(' ', ' ')}
+                      <tr key={row.id} className="hover:bg-gray-50/50 transition border-b border-gray-100">
+                        <td className="px-4 py-3 text-gray-800 font-medium whitespace-nowrap">
+                          {new Date(row.waktu).toLocaleString('sv').replace(' ', ' ')}
                         </td>
-
-                        {/* Uraian */}
                         <td className="px-4 py-3 text-gray-700">
-                           {/* Using static uraian string to mimic screenshot style, ideally from backend */}
-                           {shift.Description || shift.description || (diff !== 0 ? `Sistem : Kas ${diff > 0 ? 'lebih' : 'kurang'} ${Math.abs(diff)} dari ${jenisStr === 'Awal Shift' ? 'kas sebelumnya' : 'estimasi saldo'}.` : '')}
+                           {row.uraian}
                         </td>
-
-                        {/* Jenis */}
                         <td className="px-4 py-3 text-gray-700">
-                          {jenisStr}
+                          {row.jenis}
                         </td>
-
-                        {/* Nama (Kasir) */}
                         <td className="px-4 py-3 text-gray-700">
-                          {userName}
+                          {row.nama}
                         </td>
-
-                        {/* Masuk */}
                         <td className="px-4 py-3 text-right text-gray-800">
-                          {cashIn > 0 ? fmtNum(cashIn) : ''}
+                          {row.masuk !== null && row.masuk > 0 ? fmtNum(row.masuk) : (row.masuk === 0 ? '0' : '')}
                         </td>
-
-                        {/* Keluar */}
                         <td className="px-4 py-3 text-right text-gray-800">
-                          {cashOut > 0 ? fmtNum(cashOut) : ''}
+                          {row.keluar !== null && row.keluar > 0 ? fmtNum(row.keluar) : (row.keluar === 0 ? '0' : '')}
                         </td>
-
-                        {/* Selisih */}
                         <td className="px-4 py-3 text-right text-gray-800">
-                           {fmtNum(diff)}
+                           {fmtNum(row.selisih)}
                         </td>
-
-                        {/* Saldo */}
                         <td className="px-4 py-3 text-right text-gray-800">
-                           {fmtNum(saldo)}
+                           {fmtNum(row.saldo)}
                         </td>
                       </tr>
                     )
