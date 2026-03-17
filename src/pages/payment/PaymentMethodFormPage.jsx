@@ -93,92 +93,102 @@ export default function PaymentMethodFormPage() {
 
   return (
     <Layout title={isEdit ? 'Edit Metode Pembayaran' : 'Tambah Metode Pembayaran'}>
-      <div className="max-w-3xl mx-auto px-4">
-        {/* Header Section */}
-        <div className="flex items-center gap-3 mb-8">
-          <button onClick={() => navigate('/payment-methods')} className="p-2 hover:bg-white rounded-xl shadow-sm border border-gray-100 transition group">
-            <svg className="w-5 h-5 text-gray-500 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+      <div className="max-w-4xl mx-auto px-4 py-8 pb-32">
+        <div className="space-y-6">
+          {/* Main Info Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 space-y-6">
+              
+              {/* Name */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Metode Bayar</label>
+                <input 
+                  type="text" 
+                  value={form.name}
+                  onChange={e => { 
+                    setForm(f => ({ ...f, name: e.target.value })); 
+                    if (errors.name) setErrors(er => ({ ...er, name: '' })) 
+                  }}
+                  placeholder="Enter Name" 
+                  className={`w-full px-4 py-3 bg-white border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200 focus:border-emerald-500'}`} 
+                  autoFocus
+                />
+                {errors.name && (
+                  <p className="text-xs text-red-500 mt-2 flex items-center gap-1 font-medium">
+                    <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                    {errors.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Tampil di pembelian? */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tampil di pembelian?</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    id="showPurchase"
+                    checked={form.show_in_purchase}
+                    onChange={e => setForm(f => ({ ...f, show_in_purchase: e.target.checked }))}
+                    className="w-4 h-4 rounded border-gray-300 text-[#00A389] focus:ring-[#00A389]"
+                  />
+                  <label htmlFor="showPurchase" className="text-sm font-medium text-gray-800 cursor-pointer">Ya</label>
+                </div>
+              </div>
+
+              {/* Tampil di penjualan? */}
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Tampil di penjualan?</label>
+                <div className="flex items-center gap-2">
+                  <input 
+                    type="checkbox" 
+                    id="showSale"
+                    checked={form.show_in_sale}
+                    onChange={e => setForm(f => ({ ...f, show_in_sale: e.target.checked }))}
+                    className="w-4 h-4 rounded border-gray-300 text-[#00A389] focus:ring-[#00A389]"
+                  />
+                  <label htmlFor="showSale" className="text-sm font-medium text-gray-800 cursor-pointer">Ya</label>
+                </div>
+              </div>
+
+              {/* Outlet List */}
+              <div className="pt-2">
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">Outlet</label>
+                <div className="space-y-3">
+                  {outlets.length === 0 ? (
+                    <p className="text-sm text-gray-400 italic">Tidak ada outlet tersedia</p>
+                  ) : (
+                    outlets.map(o => (
+                      <div key={o.ID} className="flex items-center gap-2">
+                        <input 
+                          type="checkbox" 
+                          id={`outlet-${o.ID}`}
+                          checked={form.outlet_id == o.ID}
+                          onChange={() => setForm(f => ({ ...f, outlet_id: f.outlet_id == o.ID ? '' : o.ID }))}
+                          className="w-4 h-4 rounded border-gray-300 text-[#00A389] focus:ring-[#00A389]"
+                        />
+                        <label htmlFor={`outlet-${o.ID}`} className="text-sm font-medium text-gray-800 cursor-pointer">
+                          {o.name || o.Name}
+                        </label>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 space-y-8">
-          <div className="space-y-6">
-            {/* Name */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Metode Pembayaran</label>
-              <input 
-                type="text" 
-                value={form.name}
-                onChange={e => { setForm(f => ({ ...f, name: e.target.value })); if (errors.name) setErrors(er => ({ ...er, name: '' })) }}
-                placeholder="Contoh: Tunai, QRIS, GoPay" 
-                className={inputClass('name')} 
-              />
-              {errors.name && <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1 font-medium italic"><span>⚠</span> {errors.name}</p>}
-            </div>
-
-            {/* Outlet Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Outlet <span className="text-xs font-normal text-gray-400">(Biarkan kosong untuk semua outlet)</span></label>
-              <div className="relative">
-                <select 
-                  value={form.outlet_id} 
-                  onChange={e => setForm(f => ({ ...f, outlet_id: e.target.value }))}
-                  className="w-full px-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 appearance-none bg-white hover:border-emerald-300 transition-all font-medium text-gray-700"
-                >
-                  <option value="">Semua Outlet</option>
-                  {outlets.map(o => <option key={o.ID} value={o.ID}>{o.name || o.Name}</option>)}
-                </select>
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Visibility Toggles */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-gray-100 group transition hover:border-emerald-200 hover:bg-emerald-50/20">
-                <div>
-                  <p className="text-sm font-bold text-gray-800">Tampil di Penjualan</p>
-                  <p className="text-[10px] text-gray-400 font-medium">Aktifkan saat transaksi penjualan</p>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={() => setForm(f => ({ ...f, show_in_sale: !f.show_in_sale }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none ${form.show_in_sale ? 'bg-[#00A389]' : 'bg-gray-300'}`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${form.show_in_sale ? 'translate-x-6' : 'translate-x-1'}`} />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between p-5 bg-gray-50/50 rounded-2xl border border-gray-100 group transition hover:border-emerald-200 hover:bg-emerald-50/20">
-                <div>
-                  <p className="text-sm font-bold text-gray-800">Tampil di Pembelian</p>
-                  <p className="text-[10px] text-gray-400 font-medium">Aktifkan saat transaksi pembelian</p>
-                </div>
-                <button 
-                  type="button" 
-                  onClick={() => setForm(f => ({ ...f, show_in_purchase: !f.show_in_purchase }))}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-all duration-300 focus:outline-none ${form.show_in_purchase ? 'bg-[#00A389]' : 'bg-gray-300'}`}
-                >
-                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform duration-300 ${form.show_in_purchase ? 'translate-x-6' : 'translate-x-1'}`} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <button 
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full py-4 bg-[#00A389] hover:bg-[#008F78] disabled:bg-emerald-300 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200 transition-all active:scale-[0.98]"
-            >
-              {saving ? 'Menyimpan...' : 'Simpan'}
-            </button>
-          </div>
+        {/* Global Action Footer */}
+        <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 z-10">
+          <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full py-4 bg-[#374151] hover:bg-[#1f2937] text-white rounded-xl font-bold text-sm shadow-lg transition-all active:scale-[0.99] disabled:opacity-50"
+          >
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
         </div>
       </div>
     </Layout>
