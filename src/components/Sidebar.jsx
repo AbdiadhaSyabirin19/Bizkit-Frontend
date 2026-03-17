@@ -211,7 +211,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       )}
 
       <aside className={`
-        fixed top-0 left-0 h-full w-[260px] bg-[#00A389] text-white z-50 flex flex-col
+        fixed top-0 left-0 h-full w-[260px] bg-[#009E86] text-white z-50 flex flex-col
         transform transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]
         border-r border-white/20
         shadow-[6px_0_32px_-2px_rgba(0,0,0,0.35)]
@@ -220,7 +220,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       `}>
 
         {/* Logo Section */}
-        <div className="px-4 py-6 border-b border-white/10 mb-4 bg-[#008F78]">
+        <div className="px-0 py-4 border-b border-white/10 mb-4 bg-[#008F78]">
           <div className="flex items-center justify-center">
              {storeLogo ? (
                 <img
