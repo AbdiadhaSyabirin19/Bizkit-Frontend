@@ -39,7 +39,7 @@ export default function RoleFormPage() {
 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  const [form, setForm] = useState({ name: '', permissions: emptyPermissions() })
+  const [form, setForm] = useState({ name: '', description: '', permissions: emptyPermissions() })
   const [errors, setErrors] = useState({})
 
   useEffect(() => {
@@ -52,7 +52,11 @@ export default function RoleFormPage() {
       const res = await api.get(`/roles/${id}`)
       const item = res.data.data
       const perms = item.permissions || item.Permissions || {}
-      setForm({ name: item.name || item.Name || '', permissions: { ...emptyPermissions(), ...perms } })
+      setForm({ 
+        name: item.name || item.Name || '', 
+        description: item.description || item.Description || '',
+        permissions: { ...emptyPermissions(), ...perms } 
+      })
     } catch (err) {
       console.error(err)
     } finally {
@@ -83,9 +87,7 @@ export default function RoleFormPage() {
     }))
   }
 
-  const isAllChecked = MODULE_LIST.every(m =>
-    m.actions.every(a => (form.permissions[m.key] || []).includes(a))
-  )
+
 
   const validate = () => {
     const e = {}
@@ -98,7 +100,11 @@ export default function RoleFormPage() {
     if (!validate()) return
     setSaving(true)
     try {
-      const payload = { name: form.name, permissions: form.permissions }
+      const payload = { 
+        name: form.name, 
+        description: form.description,
+        permissions: form.permissions 
+      }
       if (isEdit) {
         await api.put(`/roles/${id}`, payload)
       } else {
@@ -119,110 +125,113 @@ export default function RoleFormPage() {
   )
 
   return (
-    <Layout title={isEdit ? 'Edit Role' : 'Tambah Role'}>
-      <div className="max-w-5xl mx-auto px-4">
-        {/* Header Section */}
-        <div className="flex items-center gap-3 mb-8">
-          <button onClick={() => navigate('/roles')} className="p-2 hover:bg-white rounded-xl shadow-sm border border-gray-100 transition group">
-            <svg className="w-5 h-5 text-gray-500 group-hover:text-emerald-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+    <Layout title={isEdit ? 'Edit Hak Akses' : 'Tambah Hak Akses'}>
+      <div className="max-w-44xl mx-auto px-4 py-8 pb-32">
+        <div className="space-y-6">
+          {/* Header Info Card */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="p-6 space-y-6">
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Nama Role</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => { 
+                    setForm(f => ({ ...f, name: e.target.value })); 
+                    if (errors.name) setErrors(er => ({ ...er, name: '' })) 
+                  }}
+                  placeholder="Enter Name"
+                  className={`w-full px-4 py-3 bg-white border rounded-lg text-sm transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${
+                    errors.name ? 'border-red-300 bg-red-50' : 'border-gray-200 focus:border-emerald-500'
+                  }`}
+                  autoFocus
+                />
+                {errors.name && <p className="text-xs text-red-500 mt-2 flex items-center gap-1 font-medium italic"><span>⚠</span> {errors.name}</p>}
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Role Deskripsi</label>
+                <input
+                  type="text"
+                  value={form.description}
+                  onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
+                  placeholder="Enter Description"
+                  className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg text-sm focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 focus:outline-none transition-all"
+                />
+              </div>
+
+              <div className="flex items-center gap-3 pt-2">
+                <button 
+                  onClick={() => toggleAll(true)}
+                  className="px-4 py-2 bg-[#00A389] hover:bg-[#008F78] text-white rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95"
+                >
+                  Select All
+                </button>
+                <button 
+                  onClick={() => toggleAll(false)}
+                  className="px-4 py-2 bg-[#00A389] hover:bg-[#008F78] text-white rounded-lg text-xs font-bold shadow-sm transition-all active:scale-95"
+                >
+                  Unselect All
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Privilege Groups */}
+          <div className="space-y-8">
+            {MODULE_LIST.map((mod) => {
+              const checked = form.permissions[mod.key] || []
+              const allChecked = mod.actions.every(a => checked.includes(a))
+              
+              return (
+                <div key={mod.key} className="space-y-4">
+                  <h3 className="text-sm font-bold text-gray-800 tracking-tight">Privilege Group : {mod.label.toUpperCase()}</h3>
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex flex-wrap items-center gap-6">
+                      {/* Select All in Group */}
+                      <label className="flex items-center gap-3 cursor-pointer group">
+                        <input 
+                          type="checkbox" 
+                          checked={allChecked}
+                          onChange={() => toggleModule(mod.key, mod.actions)}
+                          className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all" 
+                        />
+                        <span className="text-xs font-semibold text-gray-600 group-hover:text-gray-900 transition-colors">Select All</span>
+                      </label>
+
+                      {/* Individual Actions */}
+                      <div className="flex flex-wrap gap-x-8 gap-y-3">
+                        {mod.actions.map(action => (
+                          <label key={action} className="flex items-center gap-3 cursor-pointer group">
+                            <input 
+                              type="checkbox" 
+                              checked={checked.includes(action)}
+                              onChange={() => toggleAction(mod.key, action)}
+                              className="w-4 h-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500 transition-all" 
+                            />
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-widest group-hover:text-gray-800 transition-colors">
+                              {action}_{mod.key.toUpperCase()}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
         </div>
 
-        <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-gray-100 space-y-8">
-          {/* Role Name */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Nama Role</label>
-            <input 
-              type="text" 
-              value={form.name}
-              onChange={e => { setForm(f => ({ ...f, name: e.target.value })); if (errors.name) setErrors(er => ({ ...er, name: '' })) }}
-              placeholder="Contoh: Admin, Kasir, Owner" 
-              className={`w-full px-4 py-3 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all ${errors.name ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-emerald-300'}`}
-            />
-            {errors.name && <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1 font-medium italic"><span>⚠</span> {errors.name}</p>}
-          </div>
-
-          {/* Permissions Table */}
-          <div>
-            <div className="flex items-center justify-between mb-4">
-              <button 
-                type="button"
-                onClick={() => toggleAll(!isAllChecked)}
-                className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition px-3 py-1.5 bg-emerald-50 rounded-lg"
-              >
-                {isAllChecked ? 'Hapus Semua' : 'Pilih Semua'}
-              </button>
-            </div>
-
-            <div className="border border-gray-100 rounded-3xl overflow-hidden shadow-sm">
-              <div className="grid grid-cols-7 bg-gray-50/50 px-6 py-4 border-b border-gray-100">
-                <div className="col-span-2 text-xs font-bold text-gray-500 uppercase tracking-wider">Modul</div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Semua</div>
-                <div className="text-xs font-bold text-blue-500 uppercase tracking-wider text-center">Lihat</div>
-                <div className="text-xs font-bold text-emerald-500 uppercase tracking-wider text-center">Tambah</div>
-                <div className="text-xs font-bold text-yellow-500 uppercase tracking-wider text-center">Edit</div>
-                <div className="text-xs font-bold text-red-500 uppercase tracking-wider text-center">Hapus</div>
-              </div>
-
-              <div className="divide-y divide-gray-50">
-                {MODULE_LIST.map((mod) => {
-                  const checked = form.permissions[mod.key] || []
-                  const allChecked = mod.actions.every(a => checked.includes(a))
-                  return (
-                    <div key={mod.key} className="grid grid-cols-7 items-center px-6 py-4 hover:bg-gray-50/50 transition">
-                      <div className="col-span-2 text-sm font-semibold text-gray-700">{mod.label}</div>
-                      
-                      <div className="flex justify-center">
-                        <label className="relative flex items-center justify-center cursor-pointer group">
-                          <input 
-                            type="checkbox" 
-                            checked={allChecked}
-                            onChange={() => toggleModule(mod.key, mod.actions)}
-                            className="peer appearance-none w-5 h-5 rounded-md border-2 border-gray-300 checked:bg-emerald-500 checked:border-emerald-500 transition-all" 
-                          />
-                          <svg className="absolute w-3.5 h-3.5 text-white scale-0 peer-checked:scale-100 transition-transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
-                          </svg>
-                        </label>
-                      </div>
-
-                      {['view', 'create', 'edit', 'delete'].map(action => (
-                        <div key={action} className="flex justify-center">
-                          {mod.actions.includes(action) ? (
-                            <label className="relative flex items-center justify-center cursor-pointer group">
-                              <input 
-                                type="checkbox" 
-                                checked={checked.includes(action)}
-                                onChange={() => toggleAction(mod.key, action)}
-                                className="peer appearance-none w-4.5 h-4.5 rounded border-2 border-gray-300 checked:bg-emerald-500 checked:border-emerald-500 transition-all" 
-                              />
-                              <svg className="absolute w-3 h-3 text-white scale-0 peer-checked:scale-100 transition-transform pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </label>
-                          ) : (
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-200" />
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-4">
-            <button 
-              onClick={handleSave}
-              disabled={saving}
-              className="w-full py-4 bg-[#00A389] hover:bg-[#008F78] disabled:bg-emerald-300 text-white rounded-2xl font-bold shadow-lg shadow-emerald-200 transition-all active:scale-[0.98]"
-            >
-              {saving ? 'Menyimpan...' : 'Simpan'}
-            </button>
-          </div>
+        {/* Global Action Footer */}
+        <div className="fixed bottom-0 left-0 lg:left-[260px] right-0 bg-white/80 backdrop-blur-md border-t border-gray-100 p-6 z-10">
+          <button 
+            onClick={handleSave}
+            disabled={saving}
+            className="w-full py-4 bg-[#374151] hover:bg-[#1f2937] text-white rounded-xl font-bold text-sm shadow-lg transition-all active:scale-[0.99] disabled:opacity-50"
+          >
+            {saving ? 'Menyimpan...' : 'Simpan'}
+          </button>
         </div>
       </div>
     </Layout>
