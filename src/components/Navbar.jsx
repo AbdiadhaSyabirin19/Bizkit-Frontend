@@ -26,7 +26,7 @@ export default function Navbar({ title, setIsOpen }) {
   }, [])
 
   return (
-    <header className="bg-[#009E86] text-white px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-black/5 transition-colors duration-300">
+    <header className="bg-[#019D76] text-white px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm border-b border-black/5 transition-colors duration-300">
 
       {/* Hamburger + Title */}
       <div className="flex items-center gap-4">
