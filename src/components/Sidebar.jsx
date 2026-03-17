@@ -76,11 +76,8 @@ const MenuIcon = ({ label, size = "w-6 h-6" }) => {
   const icons = {
     ListBullets: (
       <svg className={size} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H3m18 0h-8M9 12H3m18 0h-8M9 19H3m18 0h-8" />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 4.5v1m0 6v1m0 6v1" />
-        <circle cx="5" cy="5" r="1" fill="currentColor" />
-        <circle cx="5" cy="12" r="1" fill="currentColor" />
-        <circle cx="5" cy="19" r="1" fill="currentColor" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M10 6h10M10 12h10M10 18h10M4 6l1 1 2-2M4 12l1 1 2-2" />
+        <circle cx="5" cy="18" r="1.5" fill="currentColor" />
       </svg>
     ),
     ShoppingCart: (
@@ -220,7 +217,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       `}>
 
         {/* Logo Section */}
-        <div className="px-0 py-4 border-b border-white/10 mb-4 bg-[#008F78]">
+        <div className="px-0 py-6 mb-2">
           <div className="flex items-center justify-center">
              {storeLogo ? (
                 <img
@@ -260,7 +257,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                     ${isAnyChildActive ? 'bg-white/10 text-white font-bold' : 'text-white/80 hover:bg-white/5 hover:text-white'}
                   `}
                 >
-                  <MenuIcon label={menu.label} />
+                  <MenuIcon label={menu.icon} />
                   <span className="flex-1 text-left text-[15px] font-semibold tracking-tight">
                     {menu.label}
                   </span>
