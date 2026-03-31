@@ -13,12 +13,12 @@ export default function SalesFormPage() {
 
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
-  
+
   const [products, setProducts] = useState([])
   const [paymentMethods, setPaymentMethods] = useState([])
   const [promos, setPromos] = useState([])
   const [priceCategories, setPriceCategories] = useState([])
-  
+
   const [formData, setFormData] = useState({
     note_type: 'Kontan',
     date: new Date().toISOString().slice(0, 16).replace('T', ' '),
@@ -55,7 +55,7 @@ export default function SalesFormPage() {
       setPaymentMethods(pmRes.data?.data || [])
       setPromos((promoRes.data?.data || []).filter(p => p.status === 'active'))
       setPriceCategories(pcRes.data?.data || [])
-      
+
       if (isEdit) {
         const sRes = await api.get(`/sales/${id}`)
         const s = sRes.data?.data
@@ -128,12 +128,12 @@ export default function SalesFormPage() {
   const handleItemChange = async (idx, field, value) => {
     const newItems = [...formData.items]
     const item = { ...newItems[idx], [field]: value }
-    
+
     if (field === 'product_id') {
       const prod = products.find(p => String(p.ID || p.id) === String(value))
       item.unit_name = prod?.unit?.name || 'Item'
       item.variants = [] // Reset variants on product change
-      
+
       let price = 0
       if (!formData.price_category_id) {
         price = prod?.price || 0
@@ -148,7 +148,7 @@ export default function SalesFormPage() {
       }
       item.price = price
     }
-    
+
     const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
     item.subtotal = getItemSubtotal(item.price, item.quantity, item.discount_enabled, item.discount, item.variants, prod)
     newItems[idx] = item
@@ -189,11 +189,11 @@ export default function SalesFormPage() {
 
   const handlePriceCategoryChange = async (catId) => {
     setFormData(prev => ({ ...prev, price_category_id: catId }))
-    
+
     // Update all item prices
     const newItems = await Promise.all(formData.items.map(async item => {
       if (!item.product_id) return item
-      
+
       let price = 0
       if (!catId) {
         // Balik ke harga default
@@ -215,12 +215,12 @@ export default function SalesFormPage() {
           price = prod?.price || 0
         }
       }
-      
+
       const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
       const subtotal = getItemSubtotal(price, item.quantity, item.discount_enabled, item.discount, item.variants, prod)
       return { ...item, price, subtotal }
     }))
-    
+
     setFormData(prev => ({ ...prev, items: newItems }))
   }
 
@@ -237,10 +237,10 @@ export default function SalesFormPage() {
     // Cek syarat minimum
     const subtotal = calculateSubtotal()
     const totalQty = formData.items.reduce((s, i) => s + Number(i.quantity), 0)
-    
+
     const minTotal = promo.min_total || promo.MinTotal || 0
     const minQty = promo.min_qty || promo.MinQty || 0
-    
+
     if (minTotal > 0 && subtotal < minTotal) return 0
     if (minQty > 0 && totalQty < minQty) return 0
 
@@ -337,7 +337,7 @@ export default function SalesFormPage() {
           variants: i.variants.map(v => ({ variant_option_id: Number(v) }))
         }))
       }
-      
+
       if (isEdit) {
         await api.put(`/sales/${id}`, payload)
       } else {
@@ -365,7 +365,7 @@ export default function SalesFormPage() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Jenis Nota</label>
-              <select 
+              <select
                 value={formData.note_type}
                 onChange={e => setFormData(p => ({ ...p, note_type: e.target.value }))}
                 className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -376,7 +376,7 @@ export default function SalesFormPage() {
             </div>
             <div>
               <label className="block text-xs font-bold text-gray-700 mb-1">Tanggal Penjualan</label>
-              <input 
+              <input
                 type="text"
                 value={formData.date}
                 onChange={e => setFormData(p => ({ ...p, date: e.target.value }))}
@@ -386,7 +386,7 @@ export default function SalesFormPage() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Pelanggan</label>
-            <select 
+            <select
               value={formData.customer_name}
               onChange={e => setFormData(p => ({ ...p, customer_name: e.target.value }))}
               className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -397,21 +397,21 @@ export default function SalesFormPage() {
           </div>
           <div>
             <label className="block text-xs font-bold text-gray-700 mb-1">Bayar ke</label>
-              <select 
-                value={formData.payment_method_id}
-                onChange={e => {
-                  setFormData(p => ({ ...p, payment_method_id: e.target.value }))
-                  if (errors.payment_method_id) setErrors(er => ({ ...er, payment_method_id: '' }))
-                }}
-                className={`w-full px-3 py-2 bg-white border rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 ${errors.payment_method_id ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
-              >
-                <option value="">Pilih...</option>
-                {paymentMethods.map(m => (
-                  <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
-                ))}
-              </select>
-              {errors.payment_method_id && <p className="text-[10px] text-red-500 font-bold mt-1">⚠ {errors.payment_method_id}</p>}
-            </div>
+            <select
+              value={formData.payment_method_id}
+              onChange={e => {
+                setFormData(p => ({ ...p, payment_method_id: e.target.value }))
+                if (errors.payment_method_id) setErrors(er => ({ ...er, payment_method_id: '' }))
+              }}
+              className={`w-full px-3 py-2 bg-white border rounded text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 ${errors.payment_method_id ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+            >
+              <option value="">Pilih...</option>
+              {paymentMethods.map(m => (
+                <option key={m.ID || m.id} value={m.ID || m.id}>{m.Name || m.name}</option>
+              ))}
+            </select>
+            {errors.payment_method_id && <p className="text-[10px] text-red-500 font-bold mt-1">⚠ {errors.payment_method_id}</p>}
+          </div>
         </div>
 
         {/* Detail Section */}
@@ -422,7 +422,7 @@ export default function SalesFormPage() {
           </div>
           {formData.items.map((item, idx) => (
             <div key={idx} className="bg-white p-4 rounded-lg relative shadow-sm border border-gray-100">
-              <button 
+              <button
                 type="button"
                 onClick={() => handleRemoveItem(idx)}
                 className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-lg transform transition active:scale-95 z-10"
@@ -431,12 +431,12 @@ export default function SalesFormPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
-              
+
               <p className="text-[10px] font-bold text-gray-800 mb-2 uppercase tracking-tight">Produk #{idx + 1}</p>
-              
+
               <div className="flex gap-2 mb-4">
                 <div className="flex-1 relative">
-                  <select 
+                  <select
                     value={item.product_id}
                     onChange={e => handleItemChange(idx, 'product_id', e.target.value)}
                     className="w-full px-3 py-2 bg-white border border-gray-300 rounded text-sm appearance-none focus:outline-none focus:ring-1 focus:ring-blue-400"
@@ -454,7 +454,7 @@ export default function SalesFormPage() {
                 const prod = products.find(p => String(p.ID || p.id) === String(item.product_id))
                 const variants = prod?.variants || prod?.Variants || []
                 if (variants.length === 0) return null
-                
+
                 return (
                   <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100 space-y-3">
                     {variants.map(cat => (
@@ -481,13 +481,12 @@ export default function SalesFormPage() {
                                   }
                                   handleItemChange(idx, 'variants', newVariants)
                                 }}
-                                className={`px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all duration-200 ${
-                                  isSelected 
-                                    ? 'bg-blue-600 border-blue-600 text-white shadow-sm' 
+                                className={`px-3 py-1.5 rounded-full text-[10px] font-bold border transition-all duration-200 ${isSelected
+                                    ? 'bg-blue-600 border-blue-600 text-white shadow-sm'
                                     : 'bg-white border-gray-200 text-gray-600 hover:border-blue-400 hover:bg-blue-50'
-                                }`}
+                                  }`}
                               >
-                                {opt.name || opt.Name} 
+                                {opt.name || opt.Name}
                                 {(opt.additional_price || opt.AdditionalPrice) > 0 && ` (+${formatRp(opt.additional_price || opt.AdditionalPrice)})`}
                               </button>
                             )
@@ -502,7 +501,7 @@ export default function SalesFormPage() {
               <div className="grid grid-cols-12 gap-3 items-end">
                 <div className="col-span-3">
                   <label className="block text-[10px] font-bold text-gray-600 mb-1">Qty</label>
-                  <input 
+                  <input
                     type="number"
                     value={item.quantity}
                     onChange={e => handleItemChange(idx, 'quantity', Number(e.target.value))}
@@ -519,7 +518,7 @@ export default function SalesFormPage() {
                   <label className="block text-[10px] font-bold text-gray-600 mb-1">Harga</label>
                   <div className="flex items-center">
                     <span className="px-2 py-1.5 bg-gray-100 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-500">Rp</span>
-                    <input 
+                    <input
                       type="text"
                       readOnly
                       value={item.price.toLocaleString('id-ID')}
@@ -532,8 +531,8 @@ export default function SalesFormPage() {
               <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-gray-50">
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 cursor-pointer group">
-                    <input 
-                      type="checkbox" 
+                    <input
+                      type="checkbox"
                       checked={item.discount_enabled}
                       onChange={e => handleItemChange(idx, 'discount_enabled', e.target.checked)}
                       className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
@@ -544,7 +543,7 @@ export default function SalesFormPage() {
                     <span className="text-[10px] font-bold text-gray-600">Subtotal</span>
                     <div className="flex items-center">
                       <span className="px-2 py-1 bg-gray-100 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400 italic">Rp</span>
-                      <input 
+                      <input
                         type="text"
                         readOnly
                         value={item.subtotal.toLocaleString('id-ID')}
@@ -558,7 +557,7 @@ export default function SalesFormPage() {
                   <div className="flex items-center gap-2 ml-6">
                     <div className="flex items-center flex-1 max-w-[150px]">
                       <span className="px-2 py-1.5 bg-gray-50 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400">Rp</span>
-                      <input 
+                      <input
                         type="number"
                         value={item.discount}
                         onChange={e => handleItemChange(idx, 'discount', e.target.value)}
@@ -571,14 +570,14 @@ export default function SalesFormPage() {
               </div>
             </div>
           ))}
-          
+
           <div className="flex justify-end">
-            <button 
+            <button
               type="button"
               onClick={handleAddItem}
               className="p-2 bg-[#004e7c] text-white rounded-md shadow hover:bg-opacity-90 active:scale-95 transition"
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
             </button>
           </div>
         </div>
@@ -595,15 +594,15 @@ export default function SalesFormPage() {
               <div className="flex justify-between items-center gap-4">
                 <span className="text-xs font-bold text-gray-700">Voucher</span>
                 <div className="flex-1 flex justify-end gap-2">
-                  <input 
+                  <input
                     type="text"
                     placeholder="Kode voucher..."
                     value={formData.voucher_code}
                     onChange={e => setFormData(p => ({ ...p, voucher_code: e.target.value }))}
                     className="max-w-[200px] w-full px-3 py-1 border border-gray-300 rounded text-xs focus:outline-none focus:border-blue-400"
                   />
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={handleApplyVoucher}
                     className="px-3 py-1 bg-[#004e7c] text-white rounded text-[10px] font-bold hover:bg-opacity-90"
                   >
@@ -615,15 +614,15 @@ export default function SalesFormPage() {
               {appliedVoucher && (
                 <div className="mt-1 p-2 bg-green-50 border border-green-200 rounded flex justify-between items-center">
                   <span className="text-[10px] font-bold text-green-700">{appliedVoucher.name || appliedVoucher.Name} Berhasil Diterapkan!</span>
-                  <button 
+                  <button
                     type="button"
                     onClick={() => {
                       setAppliedVoucher(null)
                       setFormData(p => ({ ...p, promo_id: '' }))
-                    }} 
+                    }}
                     className="text-red-500 hover:text-red-700"
                   >
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12"/></svg>
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
               )}
@@ -647,11 +646,11 @@ export default function SalesFormPage() {
             <div className="px-6 py-3 flex flex-col gap-2">
               <div className="flex justify-between items-center text-xs">
                 <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={formData.manual_discount_enabled}
                     onChange={e => setFormData(p => ({ ...p, manual_discount_enabled: e.target.checked }))}
-                    className="w-3.5 h-3.5" 
+                    className="w-3.5 h-3.5"
                   /> Diskon Manual
                   <span className="opacity-0 group-hover:opacity-100 transition text-[9px] text-gray-400 font-normal ml-1">(Penyesuaian di luar promo)</span>
                 </label>
@@ -661,7 +660,7 @@ export default function SalesFormPage() {
                 <div className="flex justify-end gap-2 pr-2">
                   <div className="flex items-center max-w-[150px]">
                     <span className="px-2 py-1 bg-gray-50 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400">Rp</span>
-                    <input 
+                    <input
                       type="number"
                       value={formData.manual_discount}
                       onChange={e => setFormData(p => ({ ...p, manual_discount: e.target.value }))}
@@ -675,11 +674,11 @@ export default function SalesFormPage() {
             <div className="px-6 py-3 flex flex-col gap-2">
               <div className="flex justify-between items-center text-xs">
                 <label className="flex items-center gap-2 font-bold text-gray-700 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={formData.additional_fee_enabled}
                     onChange={e => setFormData(p => ({ ...p, additional_fee_enabled: e.target.checked }))}
-                    className="w-3.5 h-3.5" 
+                    className="w-3.5 h-3.5"
                   /> Biaya Lain
                   <span className="opacity-0 group-hover:opacity-100 transition text-[9px] text-gray-400 font-normal ml-1">(Ongkir, packing, dll)</span>
                 </label>
@@ -687,9 +686,9 @@ export default function SalesFormPage() {
               </div>
               {formData.additional_fee_enabled && (
                 <div className="flex justify-end gap-2 pr-2">
-                   <div className="flex items-center max-w-[150px]">
+                  <div className="flex items-center max-w-[150px]">
                     <span className="px-2 py-1 bg-gray-50 border border-r-0 border-gray-300 rounded-l text-[10px] text-gray-400">Rp</span>
-                    <input 
+                    <input
                       type="number"
                       value={formData.additional_fee}
                       onChange={e => setFormData(p => ({ ...p, additional_fee: e.target.value }))}
@@ -707,8 +706,8 @@ export default function SalesFormPage() {
           </div>
         </div>
 
-        <button 
-          type="submit" 
+        <button
+          type="submit"
           disabled={saving}
           className="w-full py-3.5 bg-[#005c94] hover:bg-[#004e7c] text-white font-bold rounded-lg shadow-lg active:scale-[0.99] transition-all disabled:opacity-50"
         >

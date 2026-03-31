@@ -1,171 +1,202 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/Layout'
 import api from '../../api/axios'
 
 export default function SalesReportPage() {
+  const navigate = useNavigate()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(false)
-  const [expandedId, setExpandedId] = useState(null)
   const today = new Date().toISOString().split('T')[0]
   const [filter, setFilter] = useState({
     start_date: today,
-    end_date: today
+    end_date: today,
+    only_discounted: false
   })
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await api.get(`/reports/sales?start_date=${filter.start_date}&end_date=${filter.end_date}`)
+      const res = await api.get(`/reports/sales?start_date=${filter.start_date}&end_date=${filter.end_date}&only_discounted=${filter.only_discounted}`)
       setData(res.data.data)
     } catch (err) { console.error(err) }
     finally { setLoading(false) }
   }
 
-  const formatRp = (val) => `Rp ${Number(val || 0).toLocaleString('id-ID')}`
+  // Load data awal
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const formatNumber = (val) => Number(val || 0).toLocaleString('id-ID')
+
+  // ── Export Excel ──
+  const exportExcel = async () => {
+    if (!data || !data.sales) return
+    const XLSX = await import('https://cdn.sheetjs.com/xlsx-0.20.0/package/xlsx.mjs')
+    const wb = XLSX.utils.book_new()
+
+    const rows = [
+      ['LAPORAN RIWAYAT PENJUALAN'],
+      [`Periode: ${filter.start_date} - ${filter.end_date}`],
+      [''],
+      ['No', 'Tanggal', 'Total', 'ID Penjualan', 'Nama Pelanggan']
+    ]
+
+    data.sales.forEach((s, i) => {
+      rows.push([
+        i + 1,
+        new Date(s.created_at).toLocaleDateString('id-ID'),
+        s.grand_total,
+        s.invoice_number,
+        s.customer_name || 'Umum'
+      ])
+    })
+
+    rows.push([''])
+    rows.push(['', 'TOTAL PENJUALAN', data.total_omzet])
+
+    const ws = XLSX.utils.aoa_to_sheet(rows)
+    XLSX.utils.book_append_sheet(wb, ws, 'Riwayat Penjualan')
+    XLSX.writeFile(wb, `Riwayat_Penjualan_${filter.start_date}_${filter.end_date}.xlsx`)
+  }
+
+  // ── Export PDF (Print) ──
+  const exportPDF = () => {
+    window.print()
+  }
 
   return (
-    <Layout title="Riwayat Penjualan">
-      <div className="max-w-6xl mx-auto">
+    <Layout title="Laporan Riwayat Penjualan">
+      <div className="max-w-[1200px] mx-auto px-4 py-6 print:p-0">
 
-        {/* Filter */}
-        <div className="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-700 mb-6 transition-colors duration-200">
-          <div className="flex items-end gap-4 flex-wrap">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400">Tanggal Mulai</label>
-              <input type="date" value={filter.start_date} onChange={e => setFilter(f => ({ ...f, start_date: e.target.value }))} className="px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200" />
+        {/* Filter Section - Hidden on print */}
+        <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700 p-6 mb-6 print:hidden">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-1.5 min-w-[320px]">
+                <span className="text-gray-500 dark:text-zinc-400">📅</span>
+                <span className="text-xs font-semibold text-gray-600 dark:text-zinc-400 uppercase tracking-wider mr-2">Periode</span>
+                <input
+                  type="date"
+                  value={filter.start_date}
+                  onChange={e => setFilter(f => ({ ...f, start_date: e.target.value }))}
+                  className="bg-transparent text-sm focus:outline-none font-medium text-gray-700 dark:text-gray-200"
+                />
+                <span className="text-gray-400 px-1">—</span>
+                <input
+                  type="date"
+                  value={filter.end_date}
+                  onChange={e => setFilter(f => ({ ...f, end_date: e.target.value }))}
+                  className="bg-transparent text-sm focus:outline-none font-medium text-gray-700 dark:text-gray-200"
+                />
+              </div>
+
+              <button
+                onClick={fetchData}
+                className="bg-[#374151] hover:bg-[#1f2937] text-white px-8 py-2 rounded-lg text-sm font-semibold transition-all shadow-sm active:scale-95"
+              >
+                Ganti
+              </button>
+
+              <div className="flex items-center gap-2 ml-2">
+                <input
+                  type="checkbox"
+                  id="discount-only"
+                  checked={filter.only_discounted}
+                  onChange={e => setFilter(f => ({ ...f, only_discounted: e.target.checked }))}
+                  className="w-4 h-4 rounded border-gray-300 text-teal-600 focus:ring-teal-500 cursor-pointer"
+                />
+                <label htmlFor="discount-only" className="text-sm font-medium text-gray-600 dark:text-zinc-400 cursor-pointer select-none">
+                  Tampilkan data yang ada diskon
+                </label>
+              </div>
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-semibold text-gray-500 dark:text-zinc-400">Tanggal Akhir</label>
-              <input type="date" value={filter.end_date} onChange={e => setFilter(f => ({ ...f, end_date: e.target.value }))} className="px-4 py-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-colors font-medium text-gray-800 dark:text-gray-200" />
+
+            <div className="flex items-center gap-3">
+              <button
+                onClick={exportPDF}
+                className="flex items-center gap-2 bg-[#22d3ee] hover:bg-[#06b6d4] text-white px-10 py-2 rounded-lg text-sm font-bold transition-all shadow-sm active:scale-95 uppercase"
+              >
+                📄 PDF
+              </button>
+              <button
+                onClick={exportExcel}
+                className="flex items-center gap-2 bg-[#22d3ee] hover:bg-[#06b6d4] text-white px-10 py-2 rounded-lg text-sm font-bold transition-all shadow-sm active:scale-95 uppercase"
+              >
+                📊 EXCEL
+              </button>
             </div>
-            <button onClick={fetchData} className="px-6 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition-colors shadow-sm active:scale-95">
-              Tampilkan
-            </button>
           </div>
         </div>
 
+        {/* Loading State */}
         {loading && (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
+          <div className="flex justify-center py-20 print:hidden">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500"></div>
           </div>
         )}
 
+        {/* Table Section */}
         {data && !loading && (
-          <>
-            {/* Summary */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[
-                { label: 'Total Transaksi', value: data.total_transaksi, icon: '🧾', color: 'blue' },
-                { label: 'Total Diskon', value: formatRp(data.total_diskon), icon: '🏷️', color: 'orange' },
-                { label: 'Total Omzet', value: formatRp(data.total_omzet), icon: '💰', color: 'emerald' },
-              ].map(s => (
-                <div key={s.label} className="bg-white dark:bg-zinc-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-zinc-700 transition-transform hover:-translate-y-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <p className="text-sm font-semibold text-gray-500 dark:text-zinc-400">{s.label}</p>
-                    <span className="text-xl p-2 bg-gray-50 dark:bg-gray-700 rounded-xl">{s.icon}</span>
-                  </div>
-                  <p className="text-2xl font-bold text-gray-800 dark:text-white">{s.value}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Tabel */}
-            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden transition-colors">
-              <div className="px-6 py-4 border-b border-gray-100 dark:border-zinc-700">
-                <h2 className="text-lg font-bold text-gray-800 dark:text-white">Detail Transaksi</h2>
-              </div>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 dark:bg-zinc-900/50">
+          <div className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700 mb-6 overflow-hidden print:border-none print:shadow-none">
+            <div className="overflow-x-auto overflow-y-auto max-h-[70vh] print:overflow-visible print:max-h-full">
+              <table className="w-full text-sm border-collapse">
+                <thead className="sticky top-0 z-10 bg-[#f8fafc] dark:bg-zinc-900 shadow-sm print:bg-white border-b border-gray-200 dark:border-zinc-700">
                   <tr>
-                    {['No', 'Invoice', 'Tanggal', 'Pembeli', 'Kasir', 'Metode', 'Subtotal', 'Diskon', 'Total', ''].map(h => (
-                      <th key={h} className="px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-zinc-400 uppercase">{h}</th>
-                    ))}
+                    <th className="px-6 py-4 text-left font-bold text-gray-700 dark:text-zinc-300 w-16">No</th>
+                    <th className="px-6 py-4 text-left font-bold text-gray-700 dark:text-zinc-300">
+                      <div className="flex items-center gap-1">Tgl <span className="text-[10px] text-gray-400 print:hidden">⇅</span></div>
+                    </th>
+                    <th className="px-6 py-4 text-left font-bold text-gray-700 dark:text-zinc-300">Total</th>
+                    <th className="px-6 py-4 text-left font-bold text-gray-700 dark:text-zinc-300">ID Penjualan</th>
+                    <th className="px-6 py-4 text-left font-bold text-gray-700 dark:text-zinc-300">
+                      <div className="flex items-center gap-1">Nama Pelanggan <span className="text-[10px] text-gray-400 print:hidden">⇅</span></div>
+                    </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 dark:divide-zinc-700/50">
-                  {data.sales?.length > 0 ? data.sales.map((sale, idx) => {
-                    const invoice = sale.InvoiceNumber || sale.invoice_number
-                    const tanggal = new Date(sale.CreatedAt || sale.created_at).toLocaleDateString('id-ID')
-                    const pembeli = sale.CustomerName || sale.customer_name || '-'
-                    const kasir = sale.User?.Name || sale.user?.Name || '-'
-                    const metode = sale.PaymentMethod?.Name || sale.payment_method?.Name || '-'
-                    const subtotal = sale.Subtotal || sale.subtotal || 0
-                    const diskon = sale.DiscountTotal || sale.discount_total || 0
-                    const total = sale.GrandTotal || sale.grand_total || 0
-                    const items = sale.Items || sale.items || []
-                    const isExpanded = expandedId === (sale.ID || idx)
-
-                    return (
-                      <>
-                        <tr key={`row-${sale.ID || idx}`} className="hover:bg-gray-50 dark:hover:bg-zinc-700/50 transition-colors">
-                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-400">{idx + 1}</td>
-                          <td className="px-6 py-4 font-mono text-xs text-gray-800 dark:text-gray-200">{invoice}</td>
-                          <td className="px-6 py-4 text-gray-500 dark:text-zinc-400 text-xs">{tanggal}</td>
-                          <td className="px-6 py-4 text-gray-700 dark:text-gray-300 text-xs font-medium">{pembeli}</td>
-                          <td className="px-6 py-4 text-gray-600 dark:text-zinc-400 text-xs">{kasir}</td>
-                          <td className="px-6 py-4">
-                            <span className="px-3 py-1 bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-xl text-xs font-medium">{metode}</span>
-                          </td>
-                          <td className="px-6 py-4 text-gray-500 dark:text-zinc-400 text-xs">{formatRp(subtotal)}</td>
-                          <td className="px-6 py-4 text-red-500 text-xs">{diskon > 0 ? `-${formatRp(diskon)}` : '-'}</td>
-                          <td className="px-6 py-4 font-bold text-gray-900 dark:text-white">{formatRp(total)}</td>
-                          <td className="px-4 py-3">
-                            {items.length > 0 && (
-                              <button
-                                onClick={() => setExpandedId(isExpanded ? null : (sale.ID || idx))}
-                                className="text-xs text-emerald-600 hover:text-emerald-800 font-medium"
-                              >
-                                {isExpanded ? '▲ Tutup' : `▼ ${items.length} item`}
-                              </button>
-                            )}
-                          </td>
-                        </tr>
-                        {isExpanded && items.length > 0 && (
-                          <tr key={`detail-${sale.ID || idx}`} className="bg-emerald-50/40">
-                            <td colSpan={10} className="px-8 py-3">
-                              <table className="w-full text-xs">
-                                <thead>
-                                  <tr className="text-gray-500">
-                                    <th className="text-left pb-1">Produk</th>
-                                    <th className="text-left pb-1">Qty</th>
-                                    <th className="text-left pb-1">Harga Satuan</th>
-                                    <th className="text-left pb-1">Subtotal</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {items.map((item, i) => {
-                                    const prodName = item.Product?.Name || item.product?.Name || item.product?.name || '-'
-                                    const qty = item.Quantity || item.quantity || 0
-                                    const basePrice = item.BasePrice || item.base_price || 0
-                                    const itemSubtotal = item.Subtotal || item.subtotal || 0
-                                    return (
-                                      <tr key={i} className="border-t border-emerald-100 dark:border-zinc-700">
-                                        <td className="py-2 text-gray-700 dark:text-gray-300 font-medium">{prodName}</td>
-                                        <td className="py-2 text-gray-500 dark:text-zinc-400">{qty}x</td>
-                                        <td className="py-2 text-gray-500 dark:text-zinc-400">{formatRp(basePrice)}</td>
-                                        <td className="py-2 font-bold text-gray-900 dark:text-white">{formatRp(itemSubtotal)}</td>
-                                      </tr>
-                                    )
-                                  })}
-                                </tbody>
-                              </table>
-                            </td>
-                          </tr>
-                        )}
-                      </>
-                    )
-                  }) : (
+                <tbody className="divide-y divide-gray-100 dark:divide-zinc-700/50">
+                  {data.sales?.length > 0 ? data.sales.map((sale, idx) => (
+                    <tr key={sale.id || sale.ID || idx} className="hover:bg-gray-50/50 dark:hover:bg-zinc-700/30 transition-colors">
+                      <td className="px-6 py-4 text-gray-600 dark:text-zinc-400">{idx + 1}</td>
+                      <td className="px-6 py-4 text-gray-600 dark:text-zinc-400">{new Date(sale.created_at || sale.CreatedAt).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}</td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-200 font-medium">{formatNumber(sale.grand_total)}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          onClick={() => navigate(`/sales/${sale.id || sale.ID}`)}
+                          className="text-teal-500 hover:text-teal-600 font-medium cursor-pointer transition-colors print:text-black underline decoration-dotted underline-offset-4"
+                        >
+                          {sale.invoice_number}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-gray-700 dark:text-gray-200">{sale.customer_name || 'Umum'}</td>
+                    </tr>
+                  )) : (
                     <tr>
-                      <td colSpan={10} className="px-4 py-12 text-center text-gray-400">
-                        <p className="text-3xl mb-2">📭</p>
-                        <p>Tidak ada data pada periode ini</p>
+                      <td colSpan={5} className="px-6 py-20 text-center text-gray-400 font-medium bg-gray-50/20">
+                        Tidak ada data penjualan pada periode ini
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
             </div>
-          </>
+
+            {/* Footer Summary */}
+            <div className="px-6 py-6 border-t border-gray-100 dark:border-zinc-700 bg-gray-50/30 print:bg-white print:border-none">
+              <div className="space-y-1">
+                <p className="text-sm font-medium text-gray-600 dark:text-zinc-400">
+                  Tanggal: {new Date(filter.start_date).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                  -
+                  {new Date(filter.end_date).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' })}
+                </p>
+                <p className="text-sm font-bold text-gray-800 dark:text-gray-100">
+                  Total Penjualan: {formatNumber(data.total_omzet)}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </Layout>

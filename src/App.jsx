@@ -42,6 +42,8 @@ import ChangePasswordPage from './pages/auth/ChangePasswordPage'
 import SalesPage from './pages/sales/SalesPage'
 import SalesFormPage from './pages/sales/SalesFormPage'
 import SalesDetailPage from './pages/sales/SalesDetailPage'
+import PaymentHistoryPage from './pages/sales/PaymentHistoryPage'
+import ReceivableFormPage from './pages/receivables/ReceivableFormPage'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 const getRoleName = (user) =>
@@ -98,7 +100,7 @@ const ForbiddenPage = ({ message, showLogout = false }) => {
           {showLogout ? 'Kembali ke Login' : 'Kembali'}
         </button>
         {!showLogout && (
-          <button 
+          <button
             onClick={() => { logout(); navigate(isKasirRole(user) ? '/kasir/login' : '/login') }}
             className="text-gray-400 hover:text-red-500 text-xs font-semibold transition mt-2 p-2"
           >
@@ -119,7 +121,7 @@ const PublicRoute = ({ children }) => {
   if (!token) return children
   return isKasirRole(user)
     ? <Navigate to="/kasir" replace />
-    : <Navigate to="/reports/sales" replace />
+    : <Navigate to="/reports/daily" replace />
 }
 
 // Guard untuk halaman public kasir (kasir/login)
@@ -129,7 +131,7 @@ const KasirPublicRoute = ({ children }) => {
   if (!token) return children
   return isKasirRole(user)
     ? <Navigate to="/kasir" replace />
-    : <Navigate to="/reports/sales" replace />
+    : <Navigate to="/reports/daily" replace />
 }
 
 // Guard dengan permission check (admin)
@@ -151,7 +153,7 @@ const KasirRoute = ({ children, module }) => {
   const { can } = usePermission()
   if (loading) return <Spinner />
   if (!token) return <Navigate to="/kasir/login" replace />
-  if (!isKasirRole(user)) return <Navigate to="/reports/sales" replace />
+  if (!isKasirRole(user)) return <Navigate to="/reports/daily" replace />
   if (module && !can(module, 'view')) return <ForbiddenPage />
   return children
 }
@@ -163,7 +165,7 @@ const RootRedirect = () => {
   if (!token) return <Navigate to="/login" replace />
   return isKasirRole(user)
     ? <Navigate to="/kasir" replace />
-    : <Navigate to="/reports/sales" replace />
+    : <Navigate to="/reports/daily" replace />
 }
 
 // ── Routes ─────────────────────────────────────────────────────────────────
@@ -171,73 +173,74 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<RootRedirect />} />
-      <Route path="/login"       element={<PublicRoute><LoginPage /></PublicRoute>} />
+      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
       <Route path="/kasir/login" element={<KasirPublicRoute><KasirLoginPage /></KasirPublicRoute>} />
       <Route path="/change-password" element={<PermissionRoute checkPermission={false}><ChangePasswordPage /></PermissionRoute>} />
 
 
 
-      <Route path="/sales"          element={<PermissionRoute module="sales"><SalesPage /></PermissionRoute>} />
-      <Route path="/sales/add"      element={<PermissionRoute module="sales" action="create"><SalesFormPage /></PermissionRoute>} />
-      <Route path="/sales/:id"      element={<PermissionRoute module="sales"><SalesDetailPage /></PermissionRoute>} />
+      <Route path="/sales" element={<PermissionRoute module="sales"><SalesPage /></PermissionRoute>} />
+      <Route path="/sales/add" element={<PermissionRoute module="sales" action="create"><SalesFormPage /></PermissionRoute>} />
+      <Route path="/sales/:id" element={<PermissionRoute module="sales"><SalesDetailPage /></PermissionRoute>} />
       <Route path="/sales/:id/edit" element={<PermissionRoute module="sales" action="edit"><SalesFormPage /></PermissionRoute>} />
+      <Route path="/sales/:id/payments" element={<PermissionRoute module="sales"><PaymentHistoryPage /></PermissionRoute>} />
 
-      <Route path="/products"          element={<PermissionRoute module="products"><ProductPage /></PermissionRoute>} />
-      <Route path="/products/add"      element={<PermissionRoute module="products" action="create"><ProductFormPage /></PermissionRoute>} />
-      <Route path="/products/:id"      element={<PermissionRoute module="products"><ProductDetailPage /></PermissionRoute>} />
+      <Route path="/products" element={<PermissionRoute module="products"><ProductPage /></PermissionRoute>} />
+      <Route path="/products/add" element={<PermissionRoute module="products" action="create"><ProductFormPage /></PermissionRoute>} />
+      <Route path="/products/:id" element={<PermissionRoute module="products"><ProductDetailPage /></PermissionRoute>} />
       <Route path="/products/:id/edit" element={<PermissionRoute module="products" action="edit"><ProductFormPage /></PermissionRoute>} />
 
-      <Route path="/categories"          element={<PermissionRoute module="categories"><CategoryPage /></PermissionRoute>} />
-      <Route path="/categories/add"      element={<PermissionRoute module="categories" action="create"><CategoryFormPage /></PermissionRoute>} />
+      <Route path="/categories" element={<PermissionRoute module="categories"><CategoryPage /></PermissionRoute>} />
+      <Route path="/categories/add" element={<PermissionRoute module="categories" action="create"><CategoryFormPage /></PermissionRoute>} />
       <Route path="/categories/:id/edit" element={<PermissionRoute module="categories" action="edit"><CategoryFormPage /></PermissionRoute>} />
 
-      <Route path="/brands"          element={<PermissionRoute module="brands"><BrandPage /></PermissionRoute>} />
-      <Route path="/brands/add"      element={<PermissionRoute module="brands" action="create"><BrandFormPage /></PermissionRoute>} />
+      <Route path="/brands" element={<PermissionRoute module="brands"><BrandPage /></PermissionRoute>} />
+      <Route path="/brands/add" element={<PermissionRoute module="brands" action="create"><BrandFormPage /></PermissionRoute>} />
       <Route path="/brands/:id/edit" element={<PermissionRoute module="brands" action="edit"><BrandFormPage /></PermissionRoute>} />
 
-      <Route path="/units"          element={<PermissionRoute module="units"><UnitPage /></PermissionRoute>} />
-      <Route path="/units/add"      element={<PermissionRoute module="units" action="create"><UnitFormPage /></PermissionRoute>} />
+      <Route path="/units" element={<PermissionRoute module="units"><UnitPage /></PermissionRoute>} />
+      <Route path="/units/add" element={<PermissionRoute module="units" action="create"><UnitFormPage /></PermissionRoute>} />
       <Route path="/units/:id/edit" element={<PermissionRoute module="units" action="edit"><UnitFormPage /></PermissionRoute>} />
 
-      <Route path="/variants"          element={<PermissionRoute module="variants"><VariantPage /></PermissionRoute>} />
-      <Route path="/variants/add"      element={<PermissionRoute module="variants" action="create"><VariantFormPage /></PermissionRoute>} />
-      <Route path="/variants/:id"      element={<PermissionRoute module="variants"><VariantDetailPage /></PermissionRoute>} />
+      <Route path="/variants" element={<PermissionRoute module="variants"><VariantPage /></PermissionRoute>} />
+      <Route path="/variants/add" element={<PermissionRoute module="variants" action="create"><VariantFormPage /></PermissionRoute>} />
+      <Route path="/variants/:id" element={<PermissionRoute module="variants"><VariantDetailPage /></PermissionRoute>} />
       <Route path="/variants/:id/edit" element={<PermissionRoute module="variants" action="edit"><VariantFormPage /></PermissionRoute>} />
 
-      <Route path="/multi-harga"               element={<PermissionRoute module="multi_harga"><MultiHargaPage /></PermissionRoute>} />
-      <Route path="/price-categories/add"      element={<PermissionRoute module="multi_harga" action="create"><PriceCategoryFormPage /></PermissionRoute>} />
+      <Route path="/multi-harga" element={<PermissionRoute module="multi_harga"><MultiHargaPage /></PermissionRoute>} />
+      <Route path="/price-categories/add" element={<PermissionRoute module="multi_harga" action="create"><PriceCategoryFormPage /></PermissionRoute>} />
       <Route path="/price-categories/:id/edit" element={<PermissionRoute module="multi_harga" action="edit"><PriceCategoryFormPage /></PermissionRoute>} />
-      <Route path="/promos"                    element={<PermissionRoute module="promos"><PromoPage /></PermissionRoute>} />
-      <Route path="/promos/:id"                element={<PermissionRoute module="promos"><PromoDetailPage /></PermissionRoute>} />
+      <Route path="/promos" element={<PermissionRoute module="promos"><PromoPage /></PermissionRoute>} />
+      <Route path="/promos/:id" element={<PermissionRoute module="promos"><PromoDetailPage /></PermissionRoute>} />
 
-      <Route path="/outlets"          element={<PermissionRoute module="outlets"><OutletPage /></PermissionRoute>} />
-      <Route path="/outlets/add"      element={<PermissionRoute module="outlets" action="create"><OutletFormPage /></PermissionRoute>} />
-      <Route path="/outlets/:id"      element={<PermissionRoute module="outlets"><OutletDetailPage /></PermissionRoute>} />
+      <Route path="/outlets" element={<PermissionRoute module="outlets"><OutletPage /></PermissionRoute>} />
+      <Route path="/outlets/add" element={<PermissionRoute module="outlets" action="create"><OutletFormPage /></PermissionRoute>} />
+      <Route path="/outlets/:id" element={<PermissionRoute module="outlets"><OutletDetailPage /></PermissionRoute>} />
       <Route path="/outlets/:id/edit" element={<PermissionRoute module="outlets" action="edit"><OutletFormPage /></PermissionRoute>} />
 
       <Route path="/reports/attendance" element={<PermissionRoute module="reports_attendance"><AttendanceReportPage /></PermissionRoute>} />
-      <Route path="/reports/shift"      element={<PermissionRoute module="reports_shift"><ShiftReportPage /></PermissionRoute>} />
-      <Route path="/reports/daily"      element={<PermissionRoute module="reports_daily"><DailyReportPage /></PermissionRoute>} />
-      <Route path="/reports/sales"      element={<PermissionRoute module="reports_sales"><SalesReportPage /></PermissionRoute>} />
-      <Route path="/reports/trend"      element={<PermissionRoute module="reports_trend"><TrendReportPage /></PermissionRoute>} />
+      <Route path="/reports/shift" element={<PermissionRoute module="reports_shift"><ShiftReportPage /></PermissionRoute>} />
+      <Route path="/reports/daily" element={<PermissionRoute module="reports_daily"><DailyReportPage /></PermissionRoute>} />
+      <Route path="/reports/sales" element={<PermissionRoute module="reports_sales"><SalesReportPage /></PermissionRoute>} />
+      <Route path="/reports/trend" element={<PermissionRoute module="reports_trend"><TrendReportPage /></PermissionRoute>} />
 
-      <Route path="/users"           element={<PermissionRoute module="users"><UserPage /></PermissionRoute>} />
-      <Route path="/users/add"      element={<PermissionRoute module="users" action="create"><UserFormPage /></PermissionRoute>} />
+      <Route path="/users" element={<PermissionRoute module="users"><UserPage /></PermissionRoute>} />
+      <Route path="/users/add" element={<PermissionRoute module="users" action="create"><UserFormPage /></PermissionRoute>} />
       <Route path="/users/:id/edit" element={<PermissionRoute module="users" action="edit"><UserFormPage /></PermissionRoute>} />
-      <Route path="/roles"           element={<PermissionRoute module="roles"><RolePage /></PermissionRoute>} />
-      <Route path="/roles/add"      element={<PermissionRoute module="roles" action="create"><RoleFormPage /></PermissionRoute>} />
+      <Route path="/roles" element={<PermissionRoute module="roles"><RolePage /></PermissionRoute>} />
+      <Route path="/roles/add" element={<PermissionRoute module="roles" action="create"><RoleFormPage /></PermissionRoute>} />
       <Route path="/roles/:id/edit" element={<PermissionRoute module="roles" action="edit"><RoleFormPage /></PermissionRoute>} />
       <Route path="/payment-methods" element={<PermissionRoute module="payment_methods"><PaymentMethodPage /></PermissionRoute>} />
-      <Route path="/payment-methods/add"      element={<PermissionRoute module="payment_methods" action="create"><PaymentMethodFormPage /></PermissionRoute>} />
+      <Route path="/payment-methods/add" element={<PermissionRoute module="payment_methods" action="create"><PaymentMethodFormPage /></PermissionRoute>} />
       <Route path="/payment-methods/:id/edit" element={<PermissionRoute module="payment_methods" action="edit"><PaymentMethodFormPage /></PermissionRoute>} />
-      <Route path="/settings"        element={<PermissionRoute module="settings"><SettingPage /></PermissionRoute>} />
+      <Route path="/settings" element={<PermissionRoute module="settings"><SettingPage /></PermissionRoute>} />
 
-      <Route path="/kasir"           element={<KasirRoute module="kasir_pos"><KasirPage /></KasirRoute>} />
+      <Route path="/kasir" element={<KasirRoute module="kasir_pos"><KasirPage /></KasirRoute>} />
 
-      <Route path="/kasir/riwayat"   element={<KasirRoute module="kasir_riwayat"><RiwayatTransaksi /></KasirRoute>} />
-      <Route path="/kasir/shift"     element={<KasirRoute module="kasir_shift"><LaporanShift /></KasirRoute>} />
+      <Route path="/kasir/riwayat" element={<KasirRoute module="kasir_riwayat"><RiwayatTransaksi /></KasirRoute>} />
+      <Route path="/kasir/shift" element={<KasirRoute module="kasir_shift"><LaporanShift /></KasirRoute>} />
 
-      <Route path="*" element={<Navigate to="/reports/sales" replace />} />
+      <Route path="*" element={<Navigate to="/reports/daily" replace />} />
     </Routes>
   )
 }

@@ -3,7 +3,7 @@ import Layout from '../../components/Layout'
 import api from '../../api/axios'
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, ResponsiveContainer
+  Tooltip, ResponsiveContainer, LineChart, Line, AreaChart, Area
 } from 'recharts'
 
 export default function TrendReportPage() {
@@ -21,9 +21,7 @@ export default function TrendReportPage() {
   // Load produk & kategori saat mount
   useEffect(() => {
     api.get('/products').then(r => {
-      const list = r.data.data || []
-      setProducts(list)
-      if (list.length > 0) setSelectedID(String(list[0].ID || list[0].id))
+      setProducts(r.data.data || [])
     })
     api.get('/categories').then(r => {
       setCategories(r.data.data || [])
@@ -32,11 +30,7 @@ export default function TrendReportPage() {
 
   // Reset selectedID saat ganti tab
   useEffect(() => {
-    if (activeTab === 'product' && products.length > 0) {
-      setSelectedID(String(products[0].ID || products[0].id))
-    } else if (activeTab === 'category' && categories.length > 0) {
-      setSelectedID(String(categories[0].ID || categories[0].id))
-    }
+    setSelectedID('')
   }, [activeTab])
 
   // Fetch data saat year / selectedID / activeTab berubah
@@ -155,15 +149,15 @@ export default function TrendReportPage() {
       if (!weekMap[key]) return
       weekMap[key].nota += 1
       weekMap[key].omzet += sale.GrandTotal || sale.grand_total || 0
-      ;(sale.Items || sale.items || []).forEach(item => {
-        if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
-          weekMap[key].qty += item.Quantity || item.quantity || 0
-        } else if (activeTab === 'category') {
-          const product = item.Product || item.product || {}
-          const catID = String(product.CategoryID || product.category_id || product.Category?.ID || product.category?.id || '')
-          if (catID === selectedID) weekMap[key].qty += item.Quantity || item.quantity || 0
-        }
-      })
+        ; (sale.Items || sale.items || []).forEach(item => {
+          if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
+            weekMap[key].qty += item.Quantity || item.quantity || 0
+          } else if (activeTab === 'category') {
+            const product = item.Product || item.product || {}
+            const catID = String(product.CategoryID || product.category_id || product.Category?.ID || product.category?.id || '')
+            if (catID === selectedID) weekMap[key].qty += item.Quantity || item.quantity || 0
+          }
+        })
     })
     return Object.values(weekMap).sort((a, b) => a.key.localeCompare(b.key))
   }
@@ -182,15 +176,15 @@ export default function TrendReportPage() {
       if (!dayStats[day]) { dayStats[day] = { nota: 0, qty: 0, omzet: 0 }; dayCounts[day] = new Set() }
       dayStats[day].nota += 1
       dayStats[day].omzet += sale.GrandTotal || sale.grand_total || 0
-      ;(sale.Items || sale.items || []).forEach(item => {
-        if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
-          dayStats[day].qty += item.Quantity || item.quantity || 0
-        } else if (activeTab === 'category') {
-          const product = item.Product || item.product || {}
-          const catID = String(product.CategoryID || product.category_id || product.Category?.ID || product.category?.id || '')
-          if (catID === selectedID) dayStats[day].qty += item.Quantity || item.quantity || 0
-        }
-      })
+        ; (sale.Items || sale.items || []).forEach(item => {
+          if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
+            dayStats[day].qty += item.Quantity || item.quantity || 0
+          } else if (activeTab === 'category') {
+            const product = item.Product || item.product || {}
+            const catID = String(product.CategoryID || product.category_id || product.Category?.ID || product.category?.id || '')
+            if (catID === selectedID) dayStats[day].qty += item.Quantity || item.quantity || 0
+          }
+        })
       dayCounts[day].add(dateKey)
     })
     return DAY_LABELS.map((label, i) => {
@@ -215,15 +209,15 @@ export default function TrendReportPage() {
       if (!hourMap[hour]) hourMap[hour] = { hour, nota: 0, qty: 0, omzet: 0 }
       hourMap[hour].nota += 1
       hourMap[hour].omzet += sale.GrandTotal || sale.grand_total || 0
-      ;(sale.Items || sale.items || []).forEach(item => {
-        if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
-          hourMap[hour].qty += item.Quantity || item.quantity || 0
-        } else if (activeTab === 'category') {
-          const product = item.Product || item.product || {}
-          const catID = String(product.CategoryID || product.category_id || product.Category?.ID || product.category?.id || '')
-          if (catID === selectedID) hourMap[hour].qty += item.Quantity || item.quantity || 0
-        }
-      })
+        ; (sale.Items || sale.items || []).forEach(item => {
+          if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
+            hourMap[hour].qty += item.Quantity || item.quantity || 0
+          } else if (activeTab === 'category') {
+            const product = item.Product || item.product || {}
+            const catID = String(product.CategoryID || product.category_id || product.Category?.ID || product.category?.id || '')
+            if (catID === selectedID) hourMap[hour].qty += item.Quantity || item.quantity || 0
+          }
+        })
     })
     return Array.from({ length: 24 }, (_, h) => ({
       hour: `${String(h).padStart(2, '0')}`,
@@ -242,7 +236,7 @@ export default function TrendReportPage() {
     const totalNota = filteredSales.length
     let totalQty = 0
     filteredSales.forEach(sale => {
-      ;(sale.Items || sale.items || []).forEach(item => {
+      ; (sale.Items || sale.items || []).forEach(item => {
         if (activeTab === 'product' && String(item.ProductID || item.product_id) === selectedID) {
           totalQty += item.Quantity || item.quantity || 0
         } else if (activeTab === 'category') {
@@ -288,11 +282,15 @@ export default function TrendReportPage() {
   }
 
   // ── Chart data ──
-  const weeklyChartData = weeklyStats.map(w => ({
-    name: w.label.replace(/\(.*?\)/, '').trim(),
-    value: getStatValue(w),
-    fullLabel: w.label,
-  }))
+  const weeklyChartData = weeklyStats.map((w, idx) => {
+    const month = w.label.split(' ')[0]
+    const prevMonth = idx > 0 ? weeklyStats[idx - 1].label.split(' ')[0] : null
+    return {
+      name: month !== prevMonth ? month : '',
+      value: getStatValue(w),
+      fullLabel: w.label,
+    }
+  })
 
   const dailyChartData = dailyAvg.map(d => ({
     day: d.day,
@@ -433,14 +431,15 @@ export default function TrendReportPage() {
         {/* Dropdown pilih produk/kategori + Export */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
           <div>
-            <p className="text-sm font-medium text-gray-700 mb-1">
+            <p className="text-sm font-bold text-gray-700 dark:text-gray-200 mb-1">
               Pilih {activeTab === 'product' ? 'Produk' : 'Produk Kategori'}:
             </p>
             <select
               value={selectedID}
               onChange={e => setSelectedID(e.target.value)}
-            className="px-4 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 min-w-48"
+              className="px-4 py-2.5 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-800 dark:text-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 min-w-[280px] shadow-sm"
             >
+              <option value="">[{activeTab === 'product' ? 'Produk' : 'Kategori'}]</option>
               {(activeTab === 'product' ? products : categories).map(item => (
                 <option key={item.ID || item.id} value={String(item.ID || item.id)}>
                   {item.Name || item.name}
@@ -449,147 +448,161 @@ export default function TrendReportPage() {
             </select>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button onClick={exportPDF} className="w-9 h-9 flex items-center justify-center bg-red-500 hover:bg-red-600 text-white rounded-lg transition" title="Export PDF">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.5 14h1.8c.9 0 1.5.5 1.5 1.3 0 .9-.6 1.4-1.6 1.4H9.4v1.3H8.5V14zm.9.7v1.3h.8c.5 0 .7-.2.7-.6 0-.5-.3-.7-.8-.7h-.7zm3.1-.7h1.6c1.1 0 1.8.7 1.8 1.9 0 1.3-.7 2.1-1.9 2.1h-1.5V14zm.9.7v2.5h.6c.7 0 1-.4 1-1.3 0-.8-.3-1.2-1-1.2h-.6zm3.6 0v1h1.4v.7H17v1.6h-.9V14H19v.7h-1.5z"/></svg>
-            </button>
-            <button onClick={exportExcel} className="w-9 h-9 flex items-center justify-center bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition" title="Export Excel">
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM7 14.5l1.5 2.5L7 19.5h1l1-1.8 1 1.8h1l-1.5-2.5 1.5-2.5h-1l-1 1.8-1-1.8H7zm5 0v5h3.3c.9 0 1.4-.5 1.4-1.2 0-.5-.3-.9-.7-1 .3-.2.5-.5.5-.9 0-.7-.5-1.1-1.3-1.1H12v.2zm.9.6h1c.4 0 .6.2.6.5s-.2.5-.6.5h-1v-1zm0 1.8h1.1c.4 0 .6.2.6.5s-.2.5-.6.5H12.9V17z"/></svg>
-            </button>
-          </div>
-        </div>
-
-        {/* Navigasi Tahun */}
-        <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-4 flex items-center justify-between px-4 py-2">
-          <button onClick={() => setYear(y => y - 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition">
-            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
-          </button>
-          <span className="font-semibold text-gray-800 dark:text-white">{year}</span>
-          <button onClick={() => setYear(y => y + 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition">
-            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-          </button>
-        </div>
-
-        {/* Dropdown Statistik */}
-        <div className="relative mb-4 inline-block">
-          <button
-            onClick={() => setShowStatDropdown(v => !v)}
-            className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-medium transition"
-          >
-            {statModeOptions.find(o => o.key === statMode)?.label}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-          </button>
-          {showStatDropdown && (
-            <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-20 min-w-48">
-              {statModeOptions.map(opt => (
-                <button key={opt.key} onClick={() => { setStatMode(opt.key); setShowStatDropdown(false) }}
-                  className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition ${statMode === opt.key ? 'text-emerald-600 font-medium' : 'text-gray-700'}`}>
-                  {opt.label}
-                </button>
-              ))}
+          {selectedID && (
+            <div className="flex items-center gap-2">
+              <button onClick={exportPDF} className="p-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-red-50 text-red-500 rounded-lg transition shadow-sm" title="Export PDF">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.5 14h1.8c.9 0 1.5.5 1.5 1.3 0 .9-.6 1.4-1.6 1.4H9.4v1.3H8.5V14zm.9.7v1.3h.8c.5 0 .7-.2.7-.6 0-.5-.3-.7-.8-.7h-.7zm3.1-.7h1.6c1.1 0 1.8.7 1.8 1.9 0 1.3-.7 2.1-1.9 2.1h-1.5V14zm.9.7v2.5h.6c.7 0 1-.4 1-1.3 0-.8-.3-1.2-1-1.2h-.6zm3.6 0v1h1.4v.7H17v1.6h-.9V14H19v.7h-1.5z" /></svg>
+              </button>
+              <button onClick={exportExcel} className="p-2 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:bg-emerald-50 text-emerald-600 rounded-lg transition shadow-sm" title="Export Excel">
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM7 14.5l1.5 2.5L7 19.5h1l1-1.8 1 1.8h1l-1.5-2.5 1.5-2.5h-1l-1 1.8-1-1.8H7zm5 0v5h3.3c.9 0 1.4-.5 1.4-1.2 0-.5-.3-.9-.7-1 .3-.2.5-.5.5-.9 0-.7-.5-1.1-1.3-1.1H12v.2zm.9.6h1c.4 0 .6.2.6.5s-.2.5-.6.5h-1v-1zm0 1.8h1.1c.4 0 .6.2.6.5s-.2.5-.6.5H12.9V17z" /></svg>
+              </button>
             </div>
           )}
         </div>
 
-        {loading ? (
-          <div className="flex justify-center py-12">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-500"></div>
-          </div>
-        ) : (
+        {selectedID && (
           <>
-            {/* Chart Total Per Minggu */}
-            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
-              <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2.5">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            {/* Navigasi Tahun */}
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-4 flex items-center justify-between px-4 py-2 shadow-sm">
+              <button onClick={() => setYear(y => y - 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition text-blue-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" /></svg>
+              </button>
+              <span className="font-bold text-gray-800 dark:text-white text-lg">{year}</span>
+              <button onClick={() => setYear(y => y + 1)} className="p-1 hover:bg-gray-100 dark:hover:bg-zinc-700 rounded transition text-blue-500">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" /></svg>
+              </button>
+            </div>
+
+            {/* Dropdown Statistik */}
+            <div className="flex justify-center mb-6">
+              <div className="relative inline-block">
+                <button
+                  onClick={() => setShowStatDropdown(v => !v)}
+                  className="flex items-center gap-2 px-6 py-2.5 bg-[#4f67b5] hover:bg-[#3f51b5] text-white rounded-lg text-sm font-semibold transition shadow-md"
+                >
+                  {statModeOptions.find(o => o.key === statMode)?.label}
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M19 9l-7 7-7-7" /></svg>
+                </button>
+                {showStatDropdown && (
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 rounded-xl shadow-xl z-20 min-w-56 overflow-hidden">
+                    {statModeOptions.map(opt => (
+                      <button key={opt.key} onClick={() => { setStatMode(opt.key); setShowStatDropdown(false) }}
+                        className={`w-full text-left px-5 py-3 text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 transition ${statMode === opt.key ? 'text-emerald-600 font-bold bg-emerald-50/50 dark:bg-emerald-900/20' : 'text-gray-700 dark:text-zinc-300'}`}>
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </>
+        )}
+
+        {loading ? (
+          <div className="flex justify-center py-24">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+          </div>
+        ) : selectedID && (
+          <>
+            {/* Chart Total Per Minggu (Line chart with Area) */}
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-6 overflow-hidden shadow-sm">
+              <div className="bg-gray-100/80 dark:bg-zinc-700 px-4 py-2.5 border-b border-gray-200 dark:border-zinc-600">
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200 text-center uppercase tracking-tight">
                   Total {statMode === 'qty' ? 'Qty' : statMode === 'nota' ? 'Nota' : 'Omzet'} Per Minggu
                 </p>
               </div>
-              <div className="p-4">
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={weeklyChartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 9 }} interval={1} />
-                    <YAxis tick={{ fontSize: 9 }} />
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={260}>
+                  <AreaChart data={weeklyChartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorVal" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.1} />
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 10, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} interval={0} />
+                    <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" fill="#10b981" radius={[2, 2, 0, 0]} />
-                  </BarChart>
+                    <Area type="monotone" dataKey="value" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorVal)" />
+                  </AreaChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Chart Analisis Per Hari */}
-            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
-              <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2.5">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-6 overflow-hidden shadow-sm">
+              <div className="bg-gray-100/80 dark:bg-zinc-700 px-4 py-2.5 border-b border-gray-200 dark:border-zinc-600">
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200 text-center uppercase tracking-tight">
                   Analisis Perhari - Rata-rata {statMode === 'qty' ? 'Qty' : statMode === 'nota' ? 'Nota' : 'Omzet'}
                 </p>
               </div>
-              <div className="p-4">
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={dailyChartData} margin={{ top: 15, right: 10, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="day" tick={{ fontSize: 10 }} />
-                    <YAxis tick={{ fontSize: 9 }} />
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={dailyChartData} margin={{ top: 20, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="day" tick={{ fontSize: 11, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
+                    <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" fill="#10b981" radius={[2, 2, 0, 0]}
-                      label={{ position: 'top', fontSize: 9, formatter: (v) => Number(v).toFixed(2) }} />
+                    <Bar dataKey="value" fill="#9ca3af" radius={[2, 2, 0, 0]} barSize={40}
+                      label={{ position: 'top', fontSize: 10, fontWeight: 600, formatter: (v) => v > 0 ? Number(v).toFixed(2) : '' }} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Chart Analisis Per Jam */}
-            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
-              <div className="bg-gray-100 dark:bg-gray-700 px-4 py-2.5">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-8 overflow-hidden shadow-sm">
+              <div className="bg-gray-100/80 dark:bg-zinc-700 px-4 py-2.5 border-b border-gray-200 dark:border-zinc-600">
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200 text-center uppercase tracking-tight">
                   Analisis Perjam - Rata-rata {statMode === 'qty' ? 'Qty' : statMode === 'nota' ? 'Nota' : 'Omzet'}
                 </p>
               </div>
-              <div className="p-4">
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={hourlyChartData} margin={{ top: 15, right: 10, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="hour" tick={{ fontSize: 9 }} />
-                    <YAxis tick={{ fontSize: 9 }} />
+              <div className="p-6">
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={hourlyChartData} margin={{ top: 20, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="hour" tick={{ fontSize: 10, fontWeight: 500 }} axisLine={false} tickLine={false} dy={10} />
+                    <YAxis tick={{ fontSize: 10 }} axisLine={false} tickLine={false} />
                     <Tooltip content={<CustomTooltip />} />
-                    <Bar dataKey="value" fill="#10b981" radius={[2, 2, 0, 0]}
-                      label={{ position: 'top', fontSize: 8, formatter: (v) => v > 0 ? Number(v).toFixed(2) : '' }} />
+                    <Bar dataKey="value" fill="#9ca3af" radius={[1, 1, 0, 0]} barSize={12}
+                      label={{ position: 'top', fontSize: 9, formatter: (v) => v > 0 ? Number(v).toFixed(2) : '' }} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>
 
             {/* Tabel Detail Per Minggu */}
-            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 mb-4 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-700">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200">Detail</p>
-              </div>
+            <p className="text-sm font-medium text-gray-600 mb-2">Detail</p>
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-200 dark:border-zinc-700 mb-8 overflow-hidden shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b border-gray-200">
+                  <thead className="bg-[#cbd5e1] border-b border-gray-300">
                     <tr>
-                      {['No.', 'Minggu', 'N', 'Q', 'Omzet'].map(h => (
-                        <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-600 dark:text-zinc-400 dark:text-zinc-500">{h}</th>
-                      ))}
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-800 uppercase tracking-wider w-16">No.</th>
+                      <th className="px-4 py-3 text-left text-xs font-bold text-gray-800 uppercase tracking-wider">Minggu</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-gray-800 uppercase tracking-wider">N</th>
+                      <th className="px-4 py-3 text-center text-xs font-bold text-gray-800 uppercase tracking-wider">Q</th>
+                      <th className="px-4 py-3 text-right text-xs font-bold text-gray-800 uppercase tracking-wider">Omzet</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-gray-100 dark:divide-zinc-700">
                     {weeklyStats.map((w, idx) => (
-                      <tr key={idx} className="hover:bg-gray-50">
-                        <td className="px-4 py-2.5 text-xs text-gray-500 dark:text-zinc-400 dark:text-zinc-500">{idx + 1}</td>
-                        <td className="px-4 py-2.5 text-xs text-gray-700">{w.label}</td>
-                        <td className="px-4 py-2.5 text-xs text-gray-700">{w.nota}</td>
-                        <td className="px-4 py-2.5 text-xs text-gray-700">{w.qty}</td>
-                        <td className="px-4 py-2.5 text-xs text-gray-700">{formatRp(w.omzet)}</td>
+                      <tr key={idx} className="hover:bg-gray-50/50 dark:hover:bg-zinc-700/50 transition">
+                        <td className="px-4 py-2.5 text-xs text-gray-500">{idx + 1}</td>
+                        <td className="px-4 py-2.5 text-xs text-gray-700 dark:text-zinc-300 font-medium">{w.label}</td>
+                        <td className="px-4 py-2.5 text-xs text-center font-semibold">{w.nota}</td>
+                        <td className="px-4 py-2.5 text-xs text-center font-semibold">{w.qty}</td>
+                        <td className="px-4 py-2.5 text-xs text-right font-semibold">{formatRp(w.omzet)}</td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="bg-gray-50 border-t-2 border-gray-200">
+                  <tfoot className="bg-gray-50 dark:bg-zinc-700/50 border-t-2 border-gray-300 dark:border-zinc-600">
                     <tr>
-                      <td colSpan={2} className="px-4 py-2.5 text-xs font-bold text-gray-600 dark:text-zinc-400 dark:text-zinc-500">Total</td>
-                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{weeklyStats.reduce((s, w) => s + w.nota, 0)}</td>
-                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{weeklyStats.reduce((s, w) => s + w.qty, 0)}</td>
-                      <td className="px-4 py-2.5 text-xs font-bold text-gray-800 dark:text-white">{formatRp(weeklyStats.reduce((s, w) => s + w.omzet, 0))}</td>
+                      <td colSpan={2} className="px-4 py-3 text-center text-sm font-bold text-gray-800 dark:text-white uppercase tracking-wider">Total</td>
+                      <td className="px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">{weeklyStats.reduce((s, w) => s + w.nota, 0)}</td>
+                      <td className="px-4 py-3 text-center text-sm font-bold text-gray-900 dark:text-white">{weeklyStats.reduce((s, w) => s + w.qty, 0)}</td>
+                      <td className="px-4 py-3 text-right text-sm font-bold text-gray-900 dark:text-white">{formatRp(weeklyStats.reduce((s, w) => s + w.omzet, 0))}</td>
                     </tr>
                   </tfoot>
                 </table>
@@ -597,13 +610,13 @@ export default function TrendReportPage() {
             </div>
 
             {/* Rata-rata Keseluruhan */}
-            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 overflow-hidden">
-              <div className="px-4 py-3 border-b border-gray-100 dark:border-zinc-700">
-                <p className="text-sm font-semibold text-gray-700 dark:text-gray-200 text-center">
+            <div className="bg-white dark:bg-zinc-800 rounded-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden shadow-sm mb-12">
+              <div className="bg-gray-100 dark:bg-zinc-700 px-4 py-2.5 border-b border-gray-200 dark:border-zinc-600">
+                <p className="text-sm font-bold text-gray-700 dark:text-gray-200 text-center uppercase tracking-tight">
                   1 Januari {year} - 31 Desember {year}
                 </p>
               </div>
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-100 dark:divide-zinc-700">
                 {[
                   { label: 'Rata-rata Nota', value: overallAvg ? fmt2(overallAvg.avgNota) : '0,00' },
                   { label: 'Rata-rata Qty', value: overallAvg ? fmt2(overallAvg.avgQty) : '0,00' },
@@ -612,9 +625,9 @@ export default function TrendReportPage() {
                   { label: 'Rata-rata Omzet/Nota', value: overallAvg ? formatRp(overallAvg.omzetPerNota) : 'Rp 0' },
                   { label: 'Rata-rata Omzet/Qty', value: overallAvg ? formatRp(overallAvg.omzetPerQty) : 'Rp 0' },
                 ].map(m => (
-                  <div key={m.label} className="flex justify-between items-center px-4 py-2.5">
-                    <span className="text-sm text-gray-600 dark:text-zinc-400 dark:text-zinc-500">{m.label}</span>
-                    <span className="text-sm font-semibold text-gray-800 dark:text-white">{m.value}</span>
+                  <div key={m.label} className="flex justify-between items-center px-6 py-3 hover:bg-gray-50/50 dark:hover:bg-zinc-700/50 transition">
+                    <span className="text-sm text-gray-600 dark:text-zinc-400 font-medium">{m.label}</span>
+                    <span className="text-sm font-bold text-gray-900 dark:text-white">{m.value}</span>
                   </div>
                 ))}
               </div>

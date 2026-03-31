@@ -16,7 +16,7 @@ export default function SalesDetailPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { can } = usePermission()
-  
+
   const [sale, setSale] = useState(null)
   const [storeSettings, setStoreSettings] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -97,17 +97,17 @@ export default function SalesDetailPage() {
             <div className="text-gray-600">{sale.payment_method?.name || sale.PaymentMethod?.Name || '-'}</div>
 
             <div className="font-bold text-gray-800">Status Pembayaran:</div>
-            <div className="text-gray-600">Lunas</div>
+            <div className="text-gray-600 capitalize">{sale.payment_status || sale.PaymentStatus || 'Lunas'}</div>
 
             <div className="font-bold text-gray-800">Sisa Pembayaran:</div>
-            <div className="text-gray-600">0</div>
+            <div className="text-gray-600">{formatRp(Math.max(0, grandTotal - (sale.amount_paid || sale.AmountPaid || grandTotal)))}</div>
           </div>
         </div>
 
         {/* Action Buttons */}
         <div className="flex justify-center gap-2 mb-10">
           {can('sales', 'edit') && (
-            <button 
+            <button
               onClick={() => navigate(`/sales/${id}/edit`)}
               className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-bold transition shadow-sm"
             >
@@ -115,7 +115,7 @@ export default function SalesDetailPage() {
             </button>
           )}
           {can('sales', 'delete') && (
-            <button 
+            <button
               onClick={handleDelete}
               disabled={deleting}
               className="px-4 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-xs font-bold transition shadow-sm disabled:opacity-50"
@@ -123,7 +123,10 @@ export default function SalesDetailPage() {
               Delete
             </button>
           )}
-          <button className="px-4 py-1.5 bg-amber-400 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition shadow-sm">
+          <button
+            onClick={() => navigate(`/sales/${id}/payments`)}
+            className="px-4 py-1.5 bg-amber-400 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition shadow-sm"
+          >
             Pembayaran
           </button>
         </div>
@@ -159,7 +162,7 @@ export default function SalesDetailPage() {
                   <td className="px-4 py-3 text-right font-bold text-gray-800">{(item.subtotal || item.Subtotal).toLocaleString('id-ID')}</td>
                 </tr>
               ))}
-              
+
               {/* Summary Rows */}
               <tr>
                 <td colSpan="6" className="px-4 py-2 text-right font-bold text-gray-800">Promo</td>
