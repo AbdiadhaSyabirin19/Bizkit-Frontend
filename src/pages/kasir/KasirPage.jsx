@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import KasirLayout from '../../components/KasirLayout'
 import api from '../../api/axios'
+import { useOfflineSync } from '../../hooks/useOfflineSync'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const formatRp = (v) => `Rp ${Number(v || 0).toLocaleString('id-ID')}`
@@ -8,7 +9,7 @@ const getID    = (r) => r.ID || r.id
 
 // ── Komponen Popup Keranjang ──────────────────────────────────────────────────
 // ── Komponen Popup Keranjang ──────────────────────────────────────────────────
-function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRemove }) {
+function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRemove, onSubmit, isOnline }) {
   const [step, setStep]                 = useState('cart')
   const [customerName, setCustomerName] = useState('')
   const [nameError, setNameError]       = useState('')
@@ -23,6 +24,8 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
   const [selectedPayments, setSelectedPayments] = useState([{ method_id: '', amount: 0 }])
   const [saving, setSaving]             = useState(false)
   const [receipt, setReceipt]           = useState(null)
+  const [isOfflineTx, setIsOfflineTx]   = useState(false)
+  const [offlineInvoice, setOfflineInvoice] = useState('')
 
   const subtotal   = cart.reduce((s, i) => s + i.price * i.qty, 0)
   const discount   = selectedPromo?.discount_amount || 0
@@ -142,8 +145,28 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
           variants: (i.variantOptions || []).map(v => ({ variant_option_id: Number(v.id) }))
         }))
       }
-      const res = await api.post('/sales', payload)
-      setReceipt(res.data.data)
+
+      const result = await onSubmit(payload)
+
+      if (result.offline) {
+        // Mode offline — buat struk lokal dari data cart
+        setIsOfflineTx(true)
+        setOfflineInvoice(result.pendingInvoice)
+        setReceipt({
+          invoice_number: result.pendingInvoice,
+          grand_total:    grandTotal,
+          subtotal:       subtotal,
+          items: cart.map(i => ({
+            product:    { name: i.name },
+            quantity:   i.qty,
+            base_price: i.price,
+            subtotal:   i.price * i.qty,
+          })),
+        })
+      } else {
+        setIsOfflineTx(false)
+        setReceipt(result.data)
+      }
       setStep('success')
     } catch (err) {
       alert(err.response?.data?.message || 'Transaksi gagal')
@@ -452,11 +475,19 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
               )}
             </div>
 
-            <div className="px-5 py-4 border-t border-gray-100">
+            <div className="px-5 py-4 border-t border-gray-100 space-y-2">
+              {!isOnline && (
+                <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                  <span className="text-amber-500 text-sm">📵</span>
+                  <p className="text-xs text-amber-700 font-medium">Anda offline — transaksi akan disimpan &amp; disinkronkan otomatis nanti.</p>
+                </div>
+              )}
               <button onClick={handleSubmit}
                 disabled={saving || !selectedPayments[0]?.method_id || totalPaid < grandTotal}
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-300 text-white rounded-2xl font-semibold text-sm transition flex items-center justify-center gap-2">
-                {saving ? <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Memproses...</> : '✓ Proses Transaksi'}
+                {saving
+                  ? <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" /> Memproses...</>
+                  : isOnline ? '✓ Proses Transaksi' : '💾 Simpan Offline'}
               </button>
             </div>
           </>
@@ -465,24 +496,45 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
         {/* STEP: SUCCESS */}
         {step === 'success' && receipt && (
           <div className="flex flex-col items-center px-5 py-8 text-center">
-            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
+            {/* Icon & judul — berbeda untuk offline vs online */}
+            <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${isOfflineTx ? 'bg-amber-100' : 'bg-emerald-100'}`}>
+              {isOfflineTx
+                ? <svg className="w-10 h-10 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>
+                : <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+              }
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-1">Transaksi Berhasil!</h2>
-            <p className="text-sm text-gray-500 mb-0.5">{receipt.invoice_number || receipt.InvoiceNumber}</p>
+
+            {isOfflineTx ? (
+              <>
+                <h2 className="text-xl font-bold text-gray-800 mb-1">Transaksi Tersimpan!</h2>
+                <div className="bg-amber-50 border border-amber-200 rounded-2xl px-4 py-3 mb-3 max-w-xs">
+                  <p className="text-xs text-amber-700 font-semibold mb-1">📵 Mode Offline</p>
+                  <p className="text-xs text-amber-600">Transaksi ini telah disimpan di perangkat. Akan dikirim ke server secara otomatis saat koneksi kembali.</p>
+                </div>
+                <p className="text-sm text-gray-500 font-mono mb-0.5">{offlineInvoice}</p>
+              </>
+            ) : (
+              <>
+                <h2 className="text-xl font-bold text-gray-800 mb-1">Transaksi Berhasil!</h2>
+                <p className="text-sm text-gray-500 mb-0.5">{receipt.invoice_number || receipt.InvoiceNumber}</p>
+              </>
+            )}
+
             <p className="text-xs text-gray-400 mb-3">Pembeli: <span className="font-semibold">{customerName}</span></p>
             <p className="text-3xl font-bold text-emerald-600 mb-1">{formatRp(receipt.grand_total || receipt.GrandTotal)}</p>
-            {change > 0 && <p className="text-sm text-gray-500 mb-6">Kembalian: <span className="font-semibold text-gray-700">{formatRp(change)}</span></p>}
+            {change > 0 && <p className="text-sm text-gray-500 mb-2">Kembalian: <span className="font-semibold text-gray-700">{formatRp(change)}</span></p>}
+
             <div className="w-full space-y-3 mt-4">
-              <button onClick={handlePrint}
-                className="w-full py-3 border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 rounded-2xl font-semibold text-sm transition flex items-center justify-center gap-2">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
-                Cetak Struk
-              </button>
+              {/* Cetak struk hanya jika online (data lengkap dari server) */}
+              {!isOfflineTx && (
+                <button onClick={handlePrint}
+                  className="w-full py-3 border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 rounded-2xl font-semibold text-sm transition flex items-center justify-center gap-2">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                  </svg>
+                  Cetak Struk
+                </button>
+              )}
               <button onClick={onSuccess}
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold text-sm transition">
                 Transaksi Baru
@@ -585,11 +637,22 @@ function VariantPopup({ product, onClose, onAdd }) {
 
 // ── MAIN PAGE ─────────────────────────────────────────────────────────────────
 export default function KasirPage() {
+  // ── Offline sync hook ───────────────────────────────────────────────────────
+  const {
+    isOnline,
+    pendingCount,
+    isSyncing,
+    lastSyncResult,
+    submitTransaction,
+    syncQueue,
+  } = useOfflineSync()
+
   const [products, setProducts]           = useState([])
   const [categories, setCategories]       = useState([])
   const [brands, setBrands]               = useState([])
   const [paymentMethods, setPaymentMethods] = useState([])
   const [loading, setLoading]             = useState(true)
+  const [showSyncDetail, setShowSyncDetail] = useState(false)
 
   const [search, setSearch]               = useState('')
   const [filterCat, setFilterCat]         = useState('')
@@ -677,6 +740,59 @@ export default function KasirPage() {
   return (
     <KasirLayout title="Kasir">
       <div className="max-w-7xl mx-auto select-none">
+
+        {/* ── Banner Status Offline ── */}
+        {!isOnline && (
+          <div className="mb-4 flex items-center gap-3 bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3">
+            <span className="text-2xl flex-shrink-0">📵</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-800">Sedang Offline</p>
+              <p className="text-xs text-amber-600">Transaksi tetap bisa diproses dan akan disinkronisasi otomatis saat koneksi pulih.</p>
+            </div>
+            {pendingCount > 0 && (
+              <span className="flex-shrink-0 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                {pendingCount} pending
+              </span>
+            )}
+          </div>
+        )}
+
+        {/* ── Banner Sinkronisasi ── */}
+        {isOnline && pendingCount > 0 && (
+          <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3">
+            <span className="text-2xl flex-shrink-0">{isSyncing ? '🔄' : '📶'}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-blue-800">
+                {isSyncing ? 'Sedang menyinkronkan...' : `${pendingCount} transaksi belum tersinkronisasi`}
+              </p>
+              <p className="text-xs text-blue-600">
+                {isSyncing ? 'Mohon tunggu sebentar.' : 'Klik Sync Sekarang untuk mengirim ke server.'}
+              </p>
+            </div>
+            {!isSyncing && (
+              <button onClick={syncQueue}
+                className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
+                Sync
+              </button>
+            )}
+            {isSyncing && (
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin flex-shrink-0" />
+            )}
+          </div>
+        )}
+
+        {/* ── Banner Hasil Sync ── */}
+        {isOnline && lastSyncResult && pendingCount === 0 && (
+          <div className="mb-4 flex items-center gap-3 bg-emerald-50 border border-emerald-200 rounded-2xl px-4 py-2.5">
+            <span className="text-lg">✅</span>
+            <div className="flex-1">
+              <p className="text-xs font-semibold text-emerald-700">
+                Sinkronisasi selesai — {lastSyncResult.summary?.created || 0} berhasil
+                {lastSyncResult.summary?.skipped > 0 ? `, ${lastSyncResult.summary.skipped} sudah ada` : ''}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* ── Top Bar ── */}
         <div className="flex items-center gap-3 mb-5 flex-wrap">
@@ -795,6 +911,8 @@ export default function KasirPage() {
           onSuccess={clearCart}
           onUpdateQty={updateQty}
           onRemove={removeFromCart}
+          onSubmit={submitTransaction}
+          isOnline={isOnline}
         />
       )}
 
