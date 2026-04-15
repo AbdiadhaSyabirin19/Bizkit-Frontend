@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import KasirLayout from '../../components/KasirLayout'
 import api from '../../api/axios'
-import { useOfflineSync } from '../../hooks/useOfflineSync'
+import { useOfflineSync, saveCache, getCache } from '../../hooks/useOfflineSync'
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 const formatRp = (v) => `Rp ${Number(v || 0).toLocaleString('id-ID')}`
@@ -43,6 +43,9 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
 
   useEffect(() => {
     if (cart.length === 0) { setAutoPromos([]); return }
+    // Cek promo hanya saat online — tidak bisa dilakukan offline
+    if (!isOnline) { setAutoPromos([]); return }
+
     const fetchPromos = async () => {
       setLoadingPromos(true)
       try {
@@ -56,28 +59,38 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
       finally { setLoadingPromos(false) }
     }
     fetchPromos()
-  }, [JSON.stringify(cart), subtotal])
+  }, [JSON.stringify(cart), subtotal, isOnline])
 
   useEffect(() => {
     const fetchCats = async () => {
+      // Coba baca cache dulu
+      const cached = getCache('price_categories')
+      if (cached) setPriceCategories(cached)
+      // Jika offline, gunakan cache saja
+      if (!isOnline) return
+      // Jika online, fetch fresh dan update cache
       try {
         const res = await api.get('/price-categories')
-        setPriceCategories(res.data?.data || [])
-      } catch {}
+        const data = res.data?.data || []
+        saveCache('price_categories', data)
+        setPriceCategories(data)
+      } catch {
+        // Sudah ada data dari cache, tidak perlu action
+      }
     }
     fetchCats()
-  }, [])
+  }, [isOnline])
 
   const handleLevelChange = async (levelId) => {
     setSelectedLevelId(levelId)
-    // Update all items in cart with new prices from this level
     for (let i = 0; i < cart.length; i++) {
       const item = cart[i]
       let newBasePrice = 0
       if (!levelId) {
-        // Fallback to original product price (need to find it from products or store it)
-        // For simplicity, let's assume we can fetch it or it's in the item
-        newBasePrice = item.originalPrice || item.price 
+        newBasePrice = item.originalPrice || item.price
+      } else if (!isOnline) {
+        // Offline: tidak bisa fetch harga custom, tetap pakai harga normal
+        newBasePrice = item.originalPrice || item.price
       } else {
         try {
           const res = await api.get(`/products/${getID(item)}/prices`)
@@ -87,8 +100,6 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
           newBasePrice = item.originalPrice || item.price
         }
       }
-      
-      // Re-calculate with variants extra
       const extra = (item.variantOptions || []).reduce((s, v) => s + (v.additionalPrice || 0), 0)
       onUpdateQty(i, item.qty, newBasePrice + extra)
     }
@@ -96,6 +107,11 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
 
   const checkVoucher = async () => {
     if (!voucherCode.trim()) return
+    // Cek voucher membutuhkan koneksi ke server
+    if (!isOnline) {
+      setVoucherError('Tidak bisa cek voucher saat offline. Coba lagi saat koneksi pulih.')
+      return
+    }
     setVoucherError('')
     setVoucherLoading(true)
     try {
@@ -677,6 +693,20 @@ export default function KasirPage() {
 
   const fetchAll = async () => {
     setLoading(true)
+    // ─── Offline: baca dari cache ─────────────────────────────────────────────
+    if (!navigator.onLine) {
+      const cp = getCache('products')
+      const cc = getCache('categories')
+      const cb = getCache('brands')
+      const cpm = getCache('payment_methods')
+      if (cp)  setProducts(cp)
+      if (cc)  setCategories(cc)
+      if (cb)  setBrands(cb)
+      if (cpm) setPaymentMethods(cpm)
+      setLoading(false)
+      return
+    }
+    // ─── Online: fetch fresh + simpan ke cache ────────────────────────────────
     try {
       const [pRes, cRes, bRes, pmRes] = await Promise.all([
         api.get('/products'),
@@ -684,12 +714,33 @@ export default function KasirPage() {
         api.get('/brands'),
         api.get('/payment-methods'),
       ])
-      setProducts(pRes.data.data || [])
-      setCategories(cRes.data.data || [])
-      setBrands(bRes.data.data || [])
-      setPaymentMethods(pmRes.data.data || [])
-    } catch (err) { console.error(err) }
-    finally { setLoading(false) }
+      const products      = pRes.data.data  || []
+      const categories    = cRes.data.data  || []
+      const brands        = bRes.data.data  || []
+      const paymentMethods = pmRes.data.data || []
+
+      // Simpan ke cache untuk kebutuhan offline nanti
+      saveCache('products',        products)
+      saveCache('categories',      categories)
+      saveCache('brands',          brands)
+      saveCache('payment_methods', paymentMethods)
+
+      setProducts(products)
+      setCategories(categories)
+      setBrands(brands)
+      setPaymentMethods(paymentMethods)
+    } catch (err) {
+      console.error(err)
+      // Fetch gagal (jaringan putus tiba-tiba) → fallback ke cache
+      const cp  = getCache('products')
+      const cc  = getCache('categories')
+      const cb  = getCache('brands')
+      const cpm = getCache('payment_methods')
+      if (cp)  setProducts(cp)
+      if (cc)  setCategories(cc)
+      if (cb)  setBrands(cb)
+      if (cpm) setPaymentMethods(cpm)
+    } finally { setLoading(false) }
   }
 
   const filtered = products.filter(p => {

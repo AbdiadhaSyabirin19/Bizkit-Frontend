@@ -2,8 +2,46 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import api from '../api/axios'
 
 // ── Konstanta ────────────────────────────────────────────────────────────────
-const QUEUE_KEY = 'bizkit_offline_queue'
-const MAX_BATCH  = 50 // kirim 50 per batch agar tidak overload
+const QUEUE_KEY    = 'bizkit_offline_queue'
+const CACHE_PREFIX = 'bizkit_cache_'
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 hari
+
+// ── Cache Utilities (dieksport agar bisa dipakai di komponen lain) ────────────
+
+/**
+ * Simpan data ke localStorage dengan TTL.
+ * @param {string} key - nama cache (tanpa prefix)
+ * @param {*} data - data yang akan disimpan
+ */
+export function saveCache(key, data) {
+  try {
+    localStorage.setItem(CACHE_PREFIX + key, JSON.stringify({
+      data,
+      timestamp: Date.now(),
+    }))
+  } catch (e) {
+    console.warn('[Cache] Gagal menyimpan cache:', key, e)
+  }
+}
+
+/**
+ * Baca data dari cache localStorage.
+ * Mengembalikan null jika tidak ada atau sudah kadaluarsa.
+ * @param {string} key - nama cache (tanpa prefix)
+ */
+export function getCache(key) {
+  try {
+    const raw = localStorage.getItem(CACHE_PREFIX + key)
+    if (!raw) return null
+    const parsed = JSON.parse(raw)
+    if (Date.now() - parsed.timestamp > CACHE_TTL_MS) return null
+    return parsed.data
+  } catch {
+    return null
+  }
+}
+
+
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

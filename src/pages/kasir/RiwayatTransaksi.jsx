@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import KasirLayout from '../../components/KasirLayout'
 import api from '../../api/axios'
+import { saveCache, getCache, useOfflineSync } from '../../hooks/useOfflineSync'
 
 const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID')
 const formatDate = (str) => {
@@ -146,29 +147,51 @@ export default function RiwayatTransaksi() {
   const [filterDate, setFilterDate] = useState(() => new Date().toISOString().split('T')[0])
   const [paymentMethods, setPaymentMethods] = useState([])
   const [selected, setSelected] = useState(null)
+  const [isOfflineMode, setIsOfflineMode] = useState(false)
+
+  // Status koneksi & pending offline
+  const { isOnline, pendingCount } = useOfflineSync()
+
+  // ── Cache key berdasarkan tanggal ─────────────────────────────────────────
+  const salesCacheKey = `daily_sales_${filterDate}`
 
   const fetchSales = async () => {
     setLoading(true)
+    // 1. Isi dulu dari cache (tampil instan)
+    const cached = getCache(salesCacheKey)
+    if (cached) { setSales(cached); setIsOfflineMode(!navigator.onLine) }
+
+    // 2. Jika offline, berhenti di sini
+    if (!navigator.onLine) { setLoading(false); return }
+
     try {
-        // Gunakan endpoint daily yang sudah ada di backend
-        const res = await api.get('/sales/daily', {
-          params: { date: filterDate, source: 'pos' }
-        })
-        // Response daily: { data: { sales: [...], ... } }
-        const data = res.data?.data?.sales || res.data?.sales || []
-        setSales(Array.isArray(data) ? data : [])
+      const res = await api.get('/sales/daily', {
+        params: { date: filterDate, source: 'pos' }
+      })
+      const data = res.data?.data?.sales || res.data?.sales || []
+      const list = Array.isArray(data) ? data : []
+      saveCache(salesCacheKey, list)
+      setSales(list)
+      setIsOfflineMode(false)
     } catch (err) {
-        console.error(err)
-        setSales([])
+      console.error(err)
+      if (!cached) setSales([])
+      setIsOfflineMode(true)
     } finally {
-        setLoading(false)
+      setLoading(false)
     }
-    }
+  }
 
   const fetchPaymentMethods = async () => {
+    // Coba cache dulu
+    const cached = getCache('payment_methods')
+    if (cached) setPaymentMethods(cached)
+    if (!navigator.onLine) return
     try {
       const res = await api.get('/payment-methods')
-      setPaymentMethods(res.data?.data || res.data || [])
+      const data = res.data?.data || res.data || []
+      saveCache('payment_methods', data)
+      setPaymentMethods(data)
     } catch (err) {
       console.error(err)
     }
@@ -201,6 +224,26 @@ export default function RiwayatTransaksi() {
   return (
     <KasirLayout title="Riwayat Transaksi">
       <div className="max-w-3xl mx-auto space-y-4">
+
+        {/* ── Banner Offline ── */}
+        {(!isOnline || isOfflineMode) && (
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3">
+            <span className="text-xl flex-shrink-0">📵</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-800">Mode Offline</p>
+              <p className="text-xs text-amber-600">
+                {isOfflineMode && isOnline
+                  ? 'Menampilkan data dari cache terakhir.'
+                  : 'Menampilkan data dari cache. Riwayat terbaru akan tersedia saat online.'}
+              </p>
+            </div>
+            {pendingCount > 0 && (
+              <span className="flex-shrink-0 bg-amber-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+                {pendingCount} belum sync
+              </span>
+            )}
+          </div>
+        )}
 
         {/* ── Summary Cards ── */}
         <div className="grid grid-cols-2 gap-3">

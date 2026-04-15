@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import KasirLayout from '../../components/KasirLayout'
 import api from '../../api/axios'
+import { saveCache, getCache, useOfflineSync } from '../../hooks/useOfflineSync'
 
 const formatRp = (n) => 'Rp ' + Number(n || 0).toLocaleString('id-ID')
 const formatDateTime = (str) => {
@@ -637,8 +638,23 @@ export default function LaporanShift() {
   const [showClose, setShowClose] = useState(false)
   const [editShift, setEditShift] = useState(null)
 
+  // Status koneksi
+  const { isOnline } = useOfflineSync()
+
   const fetchData = async () => {
     setLoading(true)
+    // ── Baca cache dulu (tampil instan) ────────────────────────────────
+    const cachedShift   = getCache('active_shift')
+    const cachedHistory = getCache('shift_history')
+    const cachedSummary = getCache('shift_summary')
+    if (cachedShift)   setActiveShift(cachedShift)
+    if (cachedHistory) setHistory(Array.isArray(cachedHistory) ? cachedHistory : [])
+    if (cachedSummary) setSummary(cachedSummary)
+
+    // ── Jika offline, hentikan di sini ────────────────────────────────
+    if (!navigator.onLine) { setLoading(false); return }
+
+    // ── Online: fetch fresh + update cache ─────────────────────────────
     try {
       const [activeRes, historyRes] = await Promise.allSettled([
         api.get('/shifts/active'),
@@ -647,16 +663,21 @@ export default function LaporanShift() {
 
       const shift = activeRes.status === 'fulfilled' ? activeRes.value.data?.data || null : null
       setActiveShift(shift)
+      saveCache('active_shift', shift)
 
       if (shift?.ID || shift?.id) {
         try {
           const sumRes = await api.get(`/shifts/${shift.ID || shift.id}/summary`)
-          setSummary(sumRes.data?.data || null)
+          const sum = sumRes.data?.data || null
+          setSummary(sum)
+          saveCache('shift_summary', sum)
         } catch {}
       }
 
       const hist = historyRes.status === 'fulfilled' ? historyRes.value.data?.data || [] : []
-      setHistory(Array.isArray(hist) ? hist : [])
+      const histList = Array.isArray(hist) ? hist : []
+      setHistory(histList)
+      saveCache('shift_history', histList)
     } catch (err) {
       console.error(err)
     } finally { setLoading(false) }
@@ -677,6 +698,17 @@ export default function LaporanShift() {
   return (
     <KasirLayout title="Shift & Absensi">
       <div className="max-w-2xl mx-auto space-y-4">
+
+        {/* ── Banner Offline ── */}
+        {!isOnline && (
+          <div className="flex items-center gap-3 bg-amber-50 border border-amber-300 rounded-2xl px-4 py-3">
+            <span className="text-xl flex-shrink-0">📵</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-amber-800">Mode Offline</p>
+              <p className="text-xs text-amber-600">Menampilkan data shift dari cache. Buka/Tutup shift &amp; absensi membutuhkan koneksi.</p>
+            </div>
+          </div>
+        )}
 
         {/* Tab Switcher */}
         <div className="flex bg-gray-100 rounded-2xl p-1 gap-1">
@@ -733,9 +765,14 @@ export default function LaporanShift() {
                     </div>
                   </div>
 
-                  <button onClick={() => setShowClose(true)}
-                    className="w-full py-3 bg-white text-emerald-600 rounded-xl text-sm font-bold hover:bg-emerald-50 transition">
-                    Tutup Shift Sekarang
+                  <button
+                    onClick={() => isOnline ? setShowClose(true) : alert('Tutup shift membutuhkan koneksi internet.')}
+                    className={`w-full py-3 rounded-xl text-sm font-bold transition ${
+                      isOnline
+                        ? 'bg-white text-emerald-600 hover:bg-emerald-50'
+                        : 'bg-white/50 text-emerald-400 cursor-not-allowed'
+                    }`}>
+                    {isOnline ? 'Tutup Shift Sekarang' : '📵 Butuh Koneksi untuk Tutup Shift'}
                   </button>
                 </div>
               ) : (
@@ -747,9 +784,14 @@ export default function LaporanShift() {
                   </div>
                   <h3 className="font-semibold text-gray-700 mb-1">Belum Ada Shift Aktif</h3>
                   <p className="text-sm text-gray-400 mb-4">Buka shift untuk mulai menerima transaksi</p>
-                  <button onClick={() => setShowOpen(true)}
-                    className="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold transition">
-                    Buka Shift Sekarang
+                  <button
+                    onClick={() => isOnline ? setShowOpen(true) : alert('Buka shift membutuhkan koneksi internet.')}
+                    className={`px-6 py-3 rounded-xl text-sm font-semibold transition text-white ${
+                      isOnline
+                        ? 'bg-emerald-600 hover:bg-emerald-700'
+                        : 'bg-gray-300 cursor-not-allowed'
+                    }`}>
+                    {isOnline ? 'Buka Shift Sekarang' : '📵 Butuh Koneksi'}
                   </button>
                 </div>
               )}
