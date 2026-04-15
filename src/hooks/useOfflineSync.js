@@ -208,7 +208,12 @@ export function useOfflineSync() {
 function _saveOffline(payload, setPendingCount) {
   const offlineId = generateUUID()
   const soldAt    = new Date().toISOString()
-  const shortId   = offlineId.slice(0, 8).toUpperCase()
+
+  // Format invoice sama persis dengan backend: INV-YYYYMMDD-XXXX
+  const now       = new Date()
+  const dateStr   = now.toISOString().slice(0, 10).replace(/-/g, '')   // "20260415"
+  const randomNum = String(Math.floor(Math.random() * 9000) + 1000)    // 4 digit
+  const invoiceNum = `INV-${dateStr}-${randomNum}`
 
   const offlineEntry = {
     ...payload,
@@ -225,7 +230,7 @@ function _saveOffline(payload, setPendingCount) {
   return {
     success:        true,
     offline:        true,
-    pendingInvoice: `OFFLINE-${shortId}`,
+    pendingInvoice: invoiceNum,
     offlineId,
   }
 }
