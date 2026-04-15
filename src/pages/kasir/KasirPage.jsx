@@ -175,6 +175,11 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
 
   const handlePrint = () => {
     if (!receipt) return
+    // Gunakan waktu saat ini jika created_at tidak tersedia (mode offline)
+    const txTime = receipt.created_at || receipt.CreatedAt
+      ? new Date(receipt.created_at || receipt.CreatedAt).toLocaleString('id-ID')
+      : new Date().toLocaleString('id-ID')
+
     const win = window.open('', '_blank')
     win.document.write(`
       <!DOCTYPE html><html><head><meta charset="utf-8">
@@ -194,7 +199,7 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
       <h2>BizKit POS</h2>
       <p class="sub">Invoice: ${receipt.invoice_number || receipt.InvoiceNumber}<br>
       Pembeli: ${customerName}<br>
-      ${new Date(receipt.created_at || receipt.CreatedAt).toLocaleString('id-ID')}</p>
+      ${txTime}</p>
       <hr>
       ${(receipt.items || []).map(item => `
         <p class="item-name">${item.product?.name || item.product?.Name || '-'}</p>
@@ -525,16 +530,17 @@ function CartPopup({ cart, paymentMethods, onClose, onSuccess, onUpdateQty, onRe
             {change > 0 && <p className="text-sm text-gray-500 mb-2">Kembalian: <span className="font-semibold text-gray-700">{formatRp(change)}</span></p>}
 
             <div className="w-full space-y-3 mt-4">
-              {/* Cetak struk hanya jika online (data lengkap dari server) */}
-              {!isOfflineTx && (
-                <button onClick={handlePrint}
-                  className="w-full py-3 border-2 border-emerald-500 text-emerald-600 hover:bg-emerald-50 rounded-2xl font-semibold text-sm transition flex items-center justify-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                  </svg>
-                  Cetak Struk
-                </button>
-              )}
+              <button onClick={handlePrint}
+                className={`w-full py-3 border-2 rounded-2xl font-semibold text-sm transition flex items-center justify-center gap-2 ${
+                  isOfflineTx
+                    ? 'border-amber-400 text-amber-600 hover:bg-amber-50'
+                    : 'border-emerald-500 text-emerald-600 hover:bg-emerald-50'
+                }`}>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                </svg>
+                {isOfflineTx ? 'Cetak Struk Sementara' : 'Cetak Struk'}
+              </button>
               <button onClick={onSuccess}
                 className="w-full py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold text-sm transition">
                 Transaksi Baru
