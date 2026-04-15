@@ -664,6 +664,7 @@ export default function KasirPage() {
     isOnline,
     pendingCount,
     isSyncing,
+    syncError,
     lastSyncResult,
     submitTransaction,
     syncQueue,
@@ -816,20 +817,42 @@ export default function KasirPage() {
 
         {/* ── Banner Sinkronisasi ── */}
         {isOnline && pendingCount > 0 && (
-          <div className="mb-4 flex items-center gap-3 bg-blue-50 border border-blue-200 rounded-2xl px-4 py-3">
-            <span className="text-2xl flex-shrink-0">{isSyncing ? '🔄' : '📶'}</span>
+          <div className={`mb-4 flex items-center gap-3 rounded-2xl px-4 py-3 border ${
+            syncError
+              ? 'bg-red-50 border-red-200'
+              : 'bg-blue-50 border-blue-200'
+          }`}>
+            <span className="text-2xl flex-shrink-0">
+              {isSyncing ? '🔄' : syncError ? '⚠️' : '📶'}
+            </span>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-blue-800">
-                {isSyncing ? 'Sedang menyinkronkan...' : `${pendingCount} transaksi belum tersinkronisasi`}
+              <p className={`text-sm font-bold ${
+                syncError ? 'text-red-800' : 'text-blue-800'
+              }`}>
+                {isSyncing
+                  ? 'Sedang menyinkronkan...'
+                  : syncError
+                  ? 'Sinkronisasi gagal'
+                  : `${pendingCount} transaksi belum tersinkronisasi`}
               </p>
-              <p className="text-xs text-blue-600">
-                {isSyncing ? 'Mohon tunggu sebentar.' : 'Klik Sync Sekarang untuk mengirim ke server.'}
+              <p className={`text-xs ${
+                syncError ? 'text-red-600' : 'text-blue-600'
+              }`}>
+                {isSyncing
+                  ? 'Mohon tunggu sebentar.'
+                  : syncError
+                  ? syncError
+                  : 'Klik Sync Sekarang untuk mengirim ke server.'}
               </p>
             </div>
             {!isSyncing && (
               <button onClick={syncQueue}
-                className="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-1.5 rounded-xl transition">
-                Sync
+                className={`flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-xl transition text-white ${
+                  syncError
+                    ? 'bg-red-600 hover:bg-red-700'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}>
+                {syncError ? 'Coba Lagi' : 'Sync'}
               </button>
             )}
             {isSyncing && (

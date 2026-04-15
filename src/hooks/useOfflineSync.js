@@ -5,6 +5,7 @@ import api from '../api/axios'
 const QUEUE_KEY    = 'bizkit_offline_queue'
 const CACHE_PREFIX = 'bizkit_cache_'
 const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 hari
+const MAX_BATCH    = 50                       // maks transaksi per sekali sync
 
 // ── Cache Utilities (dieksport agar bisa dipakai di komponen lain) ────────────
 
@@ -93,6 +94,7 @@ export function useOfflineSync() {
   const [pendingCount, setPendingCount]   = useState(() => getQueue().length)
   const [isSyncing, setIsSyncing]         = useState(false)
   const [lastSyncResult, setLastSyncResult] = useState(null)
+  const [syncError, setSyncError]         = useState('')
 
   // Ref agar syncQueue bisa dipanggil di dalam event listener tanpa stale closure
   const isSyncingRef = useRef(false)
@@ -110,6 +112,7 @@ export function useOfflineSync() {
 
     isSyncingRef.current = true
     setIsSyncing(true)
+    setSyncError('')
 
     try {
       // Kirim dalam batch agar tidak overload server
@@ -126,8 +129,11 @@ export function useOfflineSync() {
       setPendingCount(remaining.length)
       setLastSyncResult({ ...res.data, timestamp: new Date().toISOString() })
     } catch (err) {
-      // Jaringan gagal — pertahankan antrian, coba lagi nanti
-      console.warn('[OfflineSync] Sync gagal, antrian dipertahankan:', err.message)
+      // Tampilkan pesan error agar user tahu kenapa gagal
+      const msg = err.response?.data?.message
+        || (err.response ? `Server error ${err.response.status}` : 'Tidak dapat terhubung ke server')
+      setSyncError(msg)
+      console.warn('[OfflineSync] Sync gagal:', msg)
     } finally {
       isSyncingRef.current = false
       setIsSyncing(false)
@@ -185,6 +191,7 @@ export function useOfflineSync() {
     isOnline,
     pendingCount,
     isSyncing,
+    syncError,
     lastSyncResult,
     submitTransaction,
     syncQueue,
