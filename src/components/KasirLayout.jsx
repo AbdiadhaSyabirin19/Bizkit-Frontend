@@ -84,19 +84,27 @@ export default function KasirLayout({ children, title }) {
       {/* ── Navbar Atas ── */}
       <header className="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 h-14 flex items-center px-4 gap-3 shadow-sm">
         {/* Logo */}
-        <Link to="/kasir" className="flex items-center gap-2 flex-shrink-0">
+        <Link to="/kasir" className="flex items-center gap-3 flex-shrink-0 group">
           {storeLogo ? (
-            <img src={storeLogo} alt={storeName} className="w-8 h-8 object-contain rounded-lg" />
+            <div className="h-11 w-auto min-w-[44px] bg-gray-50 rounded-xl p-1.5 flex items-center justify-center border border-gray-100 transition-all group-hover:bg-gray-100 group-hover:border-gray-200">
+              <img 
+                src={storeLogo} 
+                alt={storeName} 
+                className="h-full w-auto object-contain transition-transform group-hover:scale-105" 
+              />
+            </div>
           ) : (
-            <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm shadow-emerald-200">
-              <span className="text-white text-sm font-black">{storeName.charAt(0).toUpperCase()}</span>
+            <div className="w-11 h-11 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm shadow-emerald-100 transition-all group-hover:scale-105 group-hover:shadow-md">
+              <span className="text-white text-lg font-black">{storeName.charAt(0).toUpperCase()}</span>
             </div>
           )}
-          <div className="hidden sm:block">
-            <span className="text-sm font-bold text-gray-800">{storeName}</span>
-            <span className="text-xs text-emerald-600 font-semibold ml-1.5">Kasir</span>
+          <div className="hidden sm:flex flex-col justify-center leading-tight">
+            <span className="text-[15px] font-extrabold text-gray-800 tracking-tight">{storeName}</span>
+            <span className="text-[10px] text-emerald-600 font-bold uppercase tracking-wider">Kasir POS</span>
           </div>
         </Link>
+
+
 
         {/* Title halaman */}
         <div className="flex-1 text-center">
