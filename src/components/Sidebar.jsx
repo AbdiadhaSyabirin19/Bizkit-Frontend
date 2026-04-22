@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import { usePermission } from '../hooks/usePermission'
-import api from '../api/axios'
+import { useSettings } from '../context/SettingsContext'
 
 const menus = [
   {
@@ -177,19 +177,7 @@ const MenuIcon = ({ label, size = "w-6 h-6" }) => {
 export default function Sidebar({ isOpen, setIsOpen }) {
   const { canView } = usePermission()
   const location = useLocation()
-
-  const [storeLogo, setStoreLogo] = useState(null)
-  const [storeName, setStoreName] = useState('')
-
-  useEffect(() => {
-    api.get('/settings')
-      .then(res => {
-        const d = res.data.data
-        setStoreLogo(d?.Logo || d?.logo || null)
-        setStoreName(d?.StoreName || d?.store_name || '')
-      })
-      .catch(() => {})
-  }, [])
+  const { logo: storeLogo, store_name: storeName } = useSettings()
 
   const [openMenus, setOpenMenus] = useState(() => {
     const activeLabel = getActiveMenuLabel(location.pathname) || 'Laporan'
@@ -256,7 +244,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
                       <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
                   </div>
-                  <span className="font-bold text-lg tracking-tight uppercase">Kasir Kuliner</span>
+                  <span className="font-bold text-lg tracking-tight uppercase">{storeName}</span>
                 </div>
               )}
           </div>

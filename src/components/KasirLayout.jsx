@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { usePermission } from '../hooks/usePermission'
+import { useSettings } from '../context/SettingsContext'
 import Footer from './Footer'
 
 const NAV_ITEMS = [
@@ -56,6 +57,7 @@ const NAV_ITEMS = [
 export default function KasirLayout({ children, title }) {
   const { user, logout } = useAuth()
   const { canView } = usePermission()
+  const { logo: storeLogo, store_name: storeName } = useSettings()
   const navigate = useNavigate()
   const location = useLocation()
   
@@ -83,11 +85,15 @@ export default function KasirLayout({ children, title }) {
       <header className="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-100 h-14 flex items-center px-4 gap-3 shadow-sm">
         {/* Logo */}
         <Link to="/kasir" className="flex items-center gap-2 flex-shrink-0">
-          <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm shadow-emerald-200">
-            <span className="text-white text-sm font-black">B</span>
-          </div>
+          {storeLogo ? (
+            <img src={storeLogo} alt={storeName} className="w-8 h-8 object-contain rounded-lg" />
+          ) : (
+            <div className="w-8 h-8 bg-emerald-600 rounded-xl flex items-center justify-center shadow-sm shadow-emerald-200">
+              <span className="text-white text-sm font-black">{storeName.charAt(0).toUpperCase()}</span>
+            </div>
+          )}
           <div className="hidden sm:block">
-            <span className="text-sm font-bold text-gray-800">BizKit</span>
+            <span className="text-sm font-bold text-gray-800">{storeName}</span>
             <span className="text-xs text-emerald-600 font-semibold ml-1.5">Kasir</span>
           </div>
         </Link>

@@ -1,8 +1,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Layout from '../../components/Layout'
 import api from '../../api/axios'
+import { useSettings } from '../../context/SettingsContext'
 
 export default function SettingPage() {
+  const { refreshSettings } = useSettings()
   const [form, setForm] = useState({ logo: '' })
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -38,8 +40,7 @@ export default function SettingPage() {
     setSaving(true)
     try {
       await api.put('/settings', form)
-      // Reload page or sidebar to see changes
-      window.location.reload()
+      refreshSettings()
     } catch (err) { console.error(err) }
     finally { setSaving(false) }
   }
