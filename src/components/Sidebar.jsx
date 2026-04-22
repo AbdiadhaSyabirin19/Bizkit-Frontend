@@ -228,29 +228,28 @@ export default function Sidebar({ isOpen, setIsOpen }) {
       `}>
 
         {/* Logo Section */}
-        <div className="px-6 py-8 mb-4">
+        <div className="px-0 py-6 mb-2">
           <div className="flex items-center justify-center">
              {storeLogo ? (
-                <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 shadow-lg w-full flex items-center justify-center group transition-all hover:bg-white/20">
-                  <img
-                    src={storeLogo}
-                    alt={storeName}
-                    className="w-full h-auto max-h-20 object-contain transition-transform group-hover:scale-105"
-                    onError={() => setStoreLogo(null)}
-                  />
-                </div>
+                <img
+                  src={storeLogo}
+                  alt={storeName}
+                  className="w-full h-auto max-h-16 object-contain"
+                  onError={() => setStoreLogo(null)}
+                />
               ) : (
-                <div className="flex flex-col items-center gap-3">
-                   <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md shadow-xl border border-white/20 transition-transform hover:scale-110">
-                    <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="currentColor">
+                <div className="flex items-center gap-2">
+                   <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md shadow-lg border border-white/10">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
                       <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                     </svg>
                   </div>
-                  <span className="font-black text-xl tracking-wider uppercase text-center">{storeName}</span>
+                  <span className="font-bold text-lg tracking-tight uppercase">{storeName}</span>
                 </div>
               )}
           </div>
         </div>
+
 
 
         {/* Navigation */}
