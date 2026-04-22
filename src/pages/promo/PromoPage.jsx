@@ -687,7 +687,7 @@ export default function PromoPage() {
                     <td className="px-3 py-2.5 text-gray-600">{promoTypeLabel(promo.promo_type)}</td>
                     <td className="px-3 py-2.5 text-gray-600">{appliesToLabel(promo.applies_to)}</td>
                     <td className="px-3 py-2.5 text-gray-600">{promo.max_usage || '-'}</td>
-                    <td className="px-3 py-2.5 text-gray-600">{(promo.max_usage || 0) - (promo.used_count || 0)}</td>
+                    <td className="px-3 py-2.5 text-gray-600">{promo.max_usage > 0 ? Math.max(0, promo.max_usage - (promo.used_count || 0)) : '∞'}</td>
                     <td className="px-3 py-2.5 text-gray-500 max-w-[120px] truncate">
                       {promo.active_days?.split(',').map(d => DAYS.find(day => day.id === d)?.label).join(', ')}
                     </td>
